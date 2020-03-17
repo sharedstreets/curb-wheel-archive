@@ -9,7 +9,7 @@ print("i have started!")
 # sm = gpiozero.DigitalInputDevice(26, pull_up=True)
 # rm = gpiozero.DigitalInputDevice(20, pull_up=True)
 clear = gpiozero.DigitalInputDevice(21, pull_up=True)
-# power = gpiozero.DigitalInputDevice(19, pull_up=True)
+power = gpiozero.DigitalInputDevice(19, pull_up=True)
 
 # Defines Hall Effect sensor pins and calculates distance. The Hall Effect sensors default to high, when magnet passes they drop to low.
 green = gpiozero.DigitalInputDevice(18, pull_up=True)
@@ -35,6 +35,8 @@ def clear_distance():
     global distance_decimetres
     
     if clear.value == 0:
+        distance_decimetres = 0
+    elif power.value == 0:
         distance_decimetres = 0
     print(distance_decimetres/10)
 
