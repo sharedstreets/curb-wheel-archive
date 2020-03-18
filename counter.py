@@ -48,10 +48,8 @@ def clear_distance():
     global units
     global unit_multiplier
 
-    if clear.value == 0:
-        distance_decimetres = 0
-    elif power.value == 0:
-        distance_decimetres = 0
+    distance_decimetres = 0
+    
     print(str(Decimal(distance_decimetres/10*unit_multiplier).quantize(Decimal("1e-1"))) + " " + units + ", " + str(datetime.now(tz=None)))
 
 clear.when_deactivated = clear_distance
