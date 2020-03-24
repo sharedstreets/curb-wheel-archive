@@ -1,0 +1,36 @@
+{
+  "name": "curb-wheel",
+  "version": "1.0.0",
+  "description": "Curb mapping wheel",
+  "bin": "./src/index.js",
+  "scripts": {
+    "start": "node ./src/index.js",
+    "test": "tap -R spec ./test/*.test.js",
+    "lint": "prettier --write **/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sharedstreets/curb-wheel.git"
+  },
+  "author": "Emily Eros, Kevin Webb, Mollie McArdle, Morgan Herlocker",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sharedstreets/curb-wheel/issues"
+  },
+  "homepage": "https://github.com/sharedstreets/curb-wheel#readme",
+  "dependencies": {
+    "@mapbox/graph-normalizer": "^3.1.2",
+    "@mapbox/tile-cover": "^3.0.2",
+    "@mapbox/tilebelt": "^1.0.1",
+    "@turf/turf": "^5.1.6",
+    "express": "^4.17.1",
+    "level": "^6.0.1",
+    "osm-pbf-parser": "^2.3.0",
+    "sharedstreets": "^0.15.0",
+    "through2": "^3.0.1"
+  },
+  "devDependencies": {
+    "prettier": "^2.0.2",
+    "tap": "^14.10.7"
+  }
+}
