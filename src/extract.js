@@ -51,7 +51,9 @@ async function extract(pbf) {
         ways = normalizer.unidirectionalWays(ways);
 
         // TODO: assign sharedstreets refs here
-
+        for (let way of ways) {
+          //console.log(way);
+        }
         //fs.writeFileSync('./lines.json', JSON.stringify(turf.featureCollection(ways)))
 
         graph.ways = ways;
