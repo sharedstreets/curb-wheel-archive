@@ -10,7 +10,7 @@ The measuring wheel works by using a ["rotary encoder"](https://howtomechatronic
 
 <img src="images/wheel_1.JPG" width="600">
 
-2\. Use a Philips-head screwdriver to remove the screws on the handle of the measuring wheel. There are 4 screws on the underside of the handle (2 of them are set deeply). Removing these will reveal the battery compartment. Remove the 2 AAA batteries. Then remove the additional 3 screws that are accessible from the battery compartment:
+2\. Use a Philips-head screwdriver to remove the screws on the handle of the measuring wheel. There are 6 screws on the underside of the handle (2 of them are set deeply). Removing these will reveal the battery compartment. Remove the 2 AAA batteries. Then remove the additional 3 screws that are accessible from the battery compartment:
 
 <img src="images/wheel_2.png" width="600">
 
