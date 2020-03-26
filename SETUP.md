@@ -4,6 +4,8 @@ How to build a curb wheel from scratch. Covers hardware and software.
 
 ## Prep the measuring wheel
 
+The measuring wheel works by using a ["rotary encoder"](https://howtomechatronics.com/tutorials/arduino/rotary-encoder-works-use-arduino/), which is a set of [magnets and sensors](https://i.imgur.com/QDmhP2q.jpg) in its shaft. As the wheel turns, one of the magnets passes a sensor every 0.1 metres rolled, and a signal is sent up to the circuit board. These signals are added (when rolling forwards) and subtracted (when rolling backwards) to keep track of the distance rolled. We will be taking the wheel apart and sending these measurement signals to the Raspberry Pi instead.
+
 1\. Take the measuring wheel out of its packaging and place it on a work surface:
 
 <img src="images/wheel_1.JPG" width="600">
@@ -21,6 +23,7 @@ How to build a curb wheel from scratch. Covers hardware and software.
 <img src="images/wheel_4.JPG" width="600">
 
 The ribbon cable carries signals from the buttons on the handle to the circuit board. We don't need this functionality. Detach the ribbon cable from the board by pulling back gently on the cable.
+
 The JST cable carries measurement signals up from the shaft of the wheel. We will be routing these signals to the Raspberry Pi instead of the circuit board. Carefully remove the JST connector from the circuit board. This can be tricky; it helps to use a tiny screwdriver to push down on the two small tabs that look like indents on the surface of the connector. It may also help to use the screwdriver as a lever to gently force the connector out of its housing. Be very careful not to damage the connector or the wires when you do this.
 
 <img src="images/wheel_5.JPG" width="600">
