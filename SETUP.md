@@ -33,27 +33,29 @@ The wheel should now be in pieces, like so:
 
 ## Assemble the Raspberry Pi
 
-The Raspberry Pi includes the green circuit board itself and breakout pins (in a 2x20 orientation). The "bottom" side of the Pi is flat and has the raspberry logo on it. The "top" side of the Pi has ports and other irregularities coming out of it. The breakout pins have a short side and a long side:
+1\. The Raspberry Pi has a "top" and a "bottom" side. The "bottom" side of the Pi is flat and has the raspberry logo on it. The "top" side of the Pi has ports and other irregularities coming out of it. Place your Pi on a work surface with the top side facing up. Note that there is a 2x20 grid of "breakout holes" on one side of the Pi.
+
+2\. Take the JST cable and very gently remove the female end of the connector piece at the end of the cable:
 
 <img src="images/pi_1.JPG" width="600">
 
-1\. The Pi may come with a heat exchanger (small square with prongs) to help keep the Pi cool. This has a square of sticky adhesive on the back. If you have one of these, remove the adhesive backing and stick this onto the big black square on the top of the Pi. If you don't have a heat exchanger, skip this step.
-2\. Place the Pi on a work surface with the top side facing up. Place the short side of the breakout pins into the 2x20 set of holes on one edge of the Pi. The long side of the breakout pins will be sticking out of the top of the Pi:
+3\. You will be positioning the female end of the JST connector so that its 4 metal pins fit into the breakout pin holes on the Pi. It is very important that you plug the connector into the correct holes. Note the alignment and positioning very carefully in the images below. Locate the correct holes and gently spread the 4 pins on the connector apart so that they will fit into the holes:
 
 <img src="images/pi_2.JPG" width="600">
 
-Flip the Pi and the pins over to the bottom side, keeping everything in place:
+When plugged in, the connector should look like this:
 
 <img src="images/pi_3.JPG" width="600">
 
-3\. Solder the pins onto the bottom side of the board. (It may help to prop the pins in place, or use "helping hands" with alligator clips to hold everything together). Each individual pin needs to have a soldered connection to the gold circle around its hole. Be very careful not to solder two pins to one another or to another gold circle on the board.
+4\. Flip the Pi over so that the bottom side is facing up. Triple-check to ensure you have plugged the connector into the correct holes. Solder the 4 pins from the connector cable to the bottom side of the board. Each individual pin needs to have a soldered connection to the gold circle around its hole. Be very careful not to solder two pins to one another or to another gold circle on the board.
 
 <img src="images/pi_4.JPG" width="600">
 
-4\. If your Pi comes with a protective case, add the case the top and bottom of the Pi, placing the screws through the 4 corner holes to keep it in place.
+5\. Plug the JST cable on the wheel into the JST connector that you just soldered onto the Pi. It should snap into place:
+
+<img src="images/pi_5.JPG" width="600">
+
 
 ## Prepare the Micro SD card
 
 (placeholder for Morgan)
-
-## Final wiring
