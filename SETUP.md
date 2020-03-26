@@ -38,7 +38,7 @@ The wheel should now be in pieces, like so:
 
 1\. The Raspberry Pi has a "top" and a "bottom" side. The "bottom" side of the Pi is flat and has the raspberry logo on it. The "top" side of the Pi has ports and other irregularities coming out of it. Place your Pi on a work surface with the top side facing up. Note that there is a 2x20 grid of "breakout holes" on one side of the Pi.
 
-2\. Take the JST cable and very gently remove the female end of the connector piece at the end of the cable:
+2\. Take the new JST cable (not the one attached to the wheel) and very gently remove the female end of the connector piece at the end of the cable:
 
 <img src="images/pi_1.JPG" width="600">
 
