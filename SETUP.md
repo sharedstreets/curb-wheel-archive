@@ -42,7 +42,7 @@ The wheel should now be in pieces, like so:
 
 <img src="images/pi_1.JPG" width="600">
 
-3\. You will be positioning the female end of the JST connector so that its 4 metal pins fit into the breakout pin holes on the Pi. It is very important that you plug the connector into the correct holes. Note the alignment and positioning very carefully in the images below. Locate the correct holes and gently spread the 4 pins on the connector apart so that they will fit into the holes:
+3\. You will be positioning the female end of the JST connector so that its 4 metal pins fit into the breakout pin holes on the Pi. It is very important that you plug the connector into the correct holes. Note the alignment and positioning very carefully in the images below. Locate the correct holes and gently spread the 4 pins on the connector apart so that they will fit into the holes. This can be done manually, the pins are flexible.:
 
 <img src="images/pi_2.JPG" width="600">
 
