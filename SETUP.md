@@ -2,7 +2,7 @@
 
 How to build a curb wheel from scratch. Covers hardware and software.
 
-## Prep the measuring wheel
+## Prepare the measuring wheel
 
 The measuring wheel works by using a ["rotary encoder"](https://howtomechatronics.com/tutorials/arduino/rotary-encoder-works-use-arduino/), which is a set of [magnets and sensors](https://i.imgur.com/QDmhP2q.jpg) in its shaft. As the wheel turns, one of the magnets passes a sensor every 0.1 metres rolled, and a signal is sent up to the circuit board. These signals are added (when rolling forwards) and subtracted (when rolling backwards) to keep track of the distance rolled. We will be taking the wheel apart and sending these measurement signals to the Raspberry Pi instead.
 
@@ -61,32 +61,12 @@ When plugged in, the connector should look like this:
 
 ## Prepare the Micro SD card
 
-(placeholder for Morgan)
+1. Boot the Pi and connect to your local Wifi router
 
-## Load the map data for the area you are surveying
-
-(placeholder)
-
-
-
------
-
-## run
+2. Open your terminal (Linux of OSX), copy/paste the following command, and press enter:
 
 ```sh
-npm start
+curl https://raw.githubusercontent.com/sharedstreets/curb-wheel/master/setup.sh | sh
 ```
 
-## test
-
-```sh
-npm t
-```
-
-## lint
-
-Checks for syntax errors and automatically formats code.
-
-```sh
-npm run lint
-```
+3. The last step should print out a randomly generated WIFI name (ie: "CURBWHEEL-fYitIGnE") with a randomly generated password. Connect to this access point from your smartphone.
