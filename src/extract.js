@@ -5,11 +5,21 @@ const tilebelt = require("@mapbox/tilebelt");
 const turf = require("@turf/turf");
 const through2 = require("through2");
 const parser = require("osm-pbf-parser");
+const shst = require("sharedstreets");
 const normalizer = require("@mapbox/graph-normalizer");
 
 async function extract(pbf) {
   return new Promise((resolve, reject) => {
     let graph = {};
+    let mapMetadata = {
+      totalX: 0,
+      totalY: 0,
+      count: 0,
+      minX: Infinity,
+      minY: Infinity,
+      maxX: -Infinity,
+      maxY: -Infinity,
+    };
     let ways = [];
     let nodes = new Map();
     const parse = parser();
@@ -38,6 +48,14 @@ async function extract(pbf) {
           for (let ref of way.refs) {
             const node = nodes.get(ref);
             coordinates.push([node.lon, node.lat]);
+
+            mapMetadata.totalX += node.lon;
+            mapMetadata.totalY += node.lat;
+            mapMetadata.count++;
+            if (node.lon < mapMetadata.minX) mapMetadata.minX = node.lon;
+            if (node.lat < mapMetadata.minY) mapMetadata.minY = node.lat;
+            if (node.lon > mapMetadata.maxX) mapMetadata.maxX = node.lon;
+            if (node.lat > mapMetadata.maxY) mapMetadata.maxY = node.lat;
           }
           let properties = way.tags;
           properties.id = way.id;
@@ -48,13 +66,23 @@ async function extract(pbf) {
 
         ways = normalizer.splitWays(ways);
         ways = normalizer.mergeWays(ways);
-        ways = normalizer.unidirectionalWays(ways);
 
-        // TODO: assign sharedstreets refs here
+        for (let way of ways) {
+          let right = shst.forwardReference(way).id;
+          let left = shst.backReference(way).id;
+        }
 
-        //fs.writeFileSync('./lines.json', JSON.stringify(turf.featureCollection(ways)))
-
-        graph.ways = ways;
+        graph.streets = ways;
+        graph.center = [
+          mapMetadata.totalX / mapMetadata.count,
+          mapMetadata.totalY / mapMetadata.count,
+        ];
+        graph.bounds = [
+          mapMetadata.minX,
+          mapMetadata.minY,
+          mapMetadata.maxX,
+          mapMetadata.maxY,
+        ];
 
         return resolve(graph);
       });
