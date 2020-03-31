@@ -27,7 +27,7 @@
     "express-fileupload": "^1.1.6",
     "level": "^6.0.1",
     "osm-pbf-parser": "^2.3.0",
-    "sharedstreets": "^0.15.0",
+    "sharedstreets": "^0.15.1",
     "through2": "^3.0.1"
   },
   "devDependencies": {
