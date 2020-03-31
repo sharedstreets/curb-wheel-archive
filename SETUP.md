@@ -62,3 +62,31 @@ When plugged in, the connector should look like this:
 ## Prepare the Micro SD card
 
 (placeholder for Morgan)
+
+## Load the map data for the area you are surveying
+
+(placeholder)
+
+
+
+-----
+
+## run
+
+```sh
+npm start
+```
+
+## test
+
+```sh
+npm t
+```
+
+## lint
+
+Checks for syntax errors and automatically formats code.
+
+```sh
+npm run lint
+```
