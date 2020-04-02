@@ -25,6 +25,8 @@ GPIO.output(powerPin, GPIO.HIGH)
 # zero counter global
 counter = 0
 
+DEBOUNCE_TIME_MS = 100
+
 # simplifed string values of sensor states "[channel1],[channel2]"
 COUNT_STATE = "1,1"
 FORWARD_STATE = "0,1"
@@ -64,8 +66,8 @@ def stateChange(channel):
 		
 
 # debounced state change events from hall effect sensor input pins 
-GPIO.add_event_detect(channel1, GPIO.RISING, callback=stateChange, bouncetime=100)
-GPIO.add_event_detect(channel2, GPIO.RISING, callback=stateChange, bouncetime=100)
+GPIO.add_event_detect(channel1, GPIO.RISING, callback=stateChange, bouncetime=DEBOUNCE_TIME_MS)
+GPIO.add_event_detect(channel2, GPIO.RISING, callback=stateChange, bouncetime=DEBOUNCE_TIME_MS)
 
 # run code
 while True:
