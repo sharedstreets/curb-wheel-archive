@@ -9,7 +9,7 @@
 - Portable battery pack with USB two USB ports (one for the Pi and one for your phone, if you already have a USB battery pack for your pone, no need to buy another) sources: [PiShop](https://www.pishop.us/product/compact-rechargeable-battery-for-raspberry-pi-20800mah/) | [Amazon](https://www.amazon.com/Portable-Charger-Anker-PowerCore-20100mAh/dp/B00X5RV14Y/ref=sr_1_3?keywords=anker+battery+pack&qid=1585267755&refinements=p_89%3AAnker&rnid=2528832011&sr=8-3) 
 
 ## Optional:
-- [SD card reader](https://www.amazon.com/gp/product/B00OJ5WBUE/) (if you already have a SD card reader built into your laptop, it should work fine)
+- [SD card reader](https://www.amazon.com/gp/product/B00OJ5WBUE/) (if you already have a SD card reader built into your laptop, it should work fine with the SD to MicroSD adapter that comes with most cards)
 
 
 ## Tools:
