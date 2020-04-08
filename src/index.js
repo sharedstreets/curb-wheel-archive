@@ -36,9 +36,7 @@ async function main() {
     app.get("/counter", async (req, res) => {
 
       let counterValue = parseInt((
-        await fs.promises.readFile(
-          path.join(__dirname, "/ram/counter.txt")
-        )
+        await fs.promises.readFile("/ram/counter.txt")
       ).toString());
 
       res.json({ counter: counterValue });
