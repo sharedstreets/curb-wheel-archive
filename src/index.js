@@ -9,7 +9,7 @@ async function main() {
     let app = express();
 
     // constants
-    const PORT = 80;
+    const PORT = 8081;
     const TMP_PBF = "./extract.osm.pbf";
 
     // middleware
@@ -24,7 +24,26 @@ async function main() {
       express.static(path.join(__dirname, "../static/images"))
     );
 
-    app.get("/", (req, res) => res.send("<h1>curb wheel</h1>"));
+    app.get("/", async (req, res) => {
+      let template = (
+        await fs.promises.readFile(
+          path.join(__dirname, "../templates/index.html")
+        )
+      ).toString();
+      res.send(template);
+    });
+
+    app.get("/counter", async (req, res) => {
+
+      let counterValue = parseInt((
+        await fs.promises.readFile(
+          path.join(__dirname, "/ram/counter.txt")
+        )
+      ).toString());
+
+      res.json({ counter: counterValue });
+    });
+
 
     app.get("/overview", async (req, res) => {
       let template = (
