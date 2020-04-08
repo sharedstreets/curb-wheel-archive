@@ -1,1 +1,52 @@
-<h1>new template!!</h1>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hello Bulma!</title>
+    <link rel="stylesheet" href="/static/bulma.min.css">
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        CurbWheel
+      </h1>
+      <p class="subtitle">
+        counter: <strong><span id="counterValue"></span></strong>
+      </p>
+    </div>
+  </section>
+
+  <script> 
+        function loadJSON(path, success, error) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function()
+            {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        if (success)
+                            success(JSON.parse(xhr.responseText));
+                    } else {
+                        if (error)
+                            error(xhr);
+                    }
+                }
+            };
+            xhr.open("GET", path, true);
+            xhr.send();
+        }
+
+        function getCounterValue() {
+            var counterValueSpan = document.getElementById("counterValue");   
+            loadJSON('/counter', 
+                function(data) { counterValueSpan.textContent = (data.counter / 10) + 'm'; },
+                function(xhr) { console.error(xhr); }
+            );
+        }
+        
+        setInterval(getCounterValue, 1000);
+
+    </script> 
+  </body>
+</html>
