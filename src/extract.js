@@ -7,6 +7,7 @@ const through2 = require("through2");
 const parser = require("osm-pbf-parser");
 const shst = require("sharedstreets");
 const normalizer = require("@mapbox/graph-normalizer");
+const Flatbush = require("flatbush");
 
 async function extract(pbf) {
   return new Promise((resolve, reject) => {
@@ -22,6 +23,7 @@ async function extract(pbf) {
     };
     let ways = [];
     let nodes = new Map();
+
     const parse = parser();
 
     fs.createReadStream(pbf)
@@ -61,6 +63,7 @@ async function extract(pbf) {
           properties.id = way.id;
           properties.refs = way.refs;
           let line = turf.lineString(coordinates, properties);
+
           return line;
         });
 
@@ -83,6 +86,15 @@ async function extract(pbf) {
           mapMetadata.maxX,
           mapMetadata.maxY,
         ];
+
+        // build spatial index
+        let index = new Flatbush(graph.streets.length);
+        for (let street of graph.streets) {
+          let bbox = turf.bbox(street);
+          index.add(bbox[0], bbox[1], bbox[2], bbox[3]);
+        }
+        index.finish();
+        graph.index = index;
 
         return resolve(graph);
       });

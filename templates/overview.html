@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>curbwheel</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='static/mapbox.js'></script>
+    <link href='static/mapbox.css' rel='stylesheet' />
+    <link href='static/bulma.min.css' rel='stylesheet' />
+    <style>
+      body { margin:0; padding:0; }
+      #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+  </head>
+  <body>
+    <h1>hello map!</h1>
+    <div id="map">
+    <script>
+      let graph = {{graph}}
+      L.mapbox.accessToken = 'pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ';
+
+      let map = L.mapbox.map('map')
+        .fitBounds([graph.bounds.slice(0,2).reverse(), graph.bounds.slice(2,4).reverse()])
+        //.addLayer(L.mapbox.styleLayer('mapbox://styles/mapbox/streets-v11'))
+        .featureLayer.setGeoJSON({type: 'FeatureCollection', features: graph.streets});
+
+    </script>
+  </body>
+</html>
