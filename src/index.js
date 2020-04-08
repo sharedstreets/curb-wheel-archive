@@ -33,7 +33,6 @@ async function main() {
         )
       ).toString();
 
-      //console.log(fs.readFileSync(path.join(__dirname, '../graph.json')).toString())
       template = template
         .split("{{graph}}")
         .join(
