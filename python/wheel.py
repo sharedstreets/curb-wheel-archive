@@ -32,7 +32,7 @@ BACKWARD_STATE = "1,0"
 
 COUNT_BACKWARDS  = False
 
-COUNTER_OUTPUT_PATH = "/ram/counter.txt"
+COUNTER_OUTPUT_PATH = "ram/counter.txt"
 
 previousState = ""
 
@@ -56,9 +56,6 @@ def stateChange(channel):
                         counter -= 1
 
                 previousState = ""
-                print counter
-                sys.stdout.write("\033[F")
-
                 with open(COUNTER_OUTPUT_PATH, 'w') as fileOut:
                         fileOut.write(str(counter))
 		
@@ -66,6 +63,8 @@ def stateChange(channel):
 # debounced state change events from hall effect sensor input pins 
 GPIO.add_event_detect(channel1, GPIO.RISING, callback=stateChange, bouncetime=100)
 GPIO.add_event_detect(channel2, GPIO.RISING, callback=stateChange, bouncetime=100)
+
+print "starting wheel counter"
 
 # run code
 while True:
