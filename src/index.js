@@ -2,10 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const fileUpload = require("express-fileupload");
-const extract = require("./extract");
+const Graph = require("./graph");
 
 async function main() {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     let app = express();
 
     // constants
@@ -17,6 +17,10 @@ async function main() {
 
     // application state
     app.state = {};
+
+    // debug
+    app.state.graph = new Graph();
+    await app.state.graph.load(path.join(__dirname, "../honolulu.json"));
 
     app.use("/static", express.static(path.join(__dirname, "../static")));
     app.use(
@@ -34,12 +38,23 @@ async function main() {
       ).toString();
 
       template = template
-        .split("{{graph}}")
-        .join(
-          fs.readFileSync(path.join(__dirname, "../graph.json")).toString()
-        );
+        .split("{{bounds}}")
+        .join(JSON.stringify(app.state.graph.bounds));
 
       res.send(template);
+    });
+
+    app.get("/query", async (req, res) => {
+      let streets = await app.state.graph.query([
+        +req.query.minX,
+        +req.query.minY,
+        +req.query.maxX,
+        +req.query.maxY,
+      ]);
+      res.send({
+        type: "FeatureCollection",
+        features: streets,
+      });
     });
 
     app.post("/extract", async (req, res) => {
@@ -55,6 +70,7 @@ async function main() {
         }
 
         // extract pbf and build street database
+        app.state.graph = new Graph();
         app.state.graph = await extract(TMP_PBF);
 
         await fs.unlink(TMP_PBF);
