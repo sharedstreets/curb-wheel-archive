@@ -5,5 +5,6 @@ if test -f "$WHEEL_PID"; then
     pkill -F $WHEEL_PID
 fi
 
+echo "0" > ram/counter.txt
 python python/wheel-simulator.py &
 echo $! > $WHEEL_PID
