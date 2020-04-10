@@ -2,8 +2,12 @@ import sys
 import time
 import RPi.GPIO as GPIO
 
+# disable warnings
+GPIO.setwarnings(False)
+
 # use Pi BCM mode for pin numbers
 GPIO.setmode(GPIO.BCM)
+
 
 # hall effect pins
 channel1 =  19
