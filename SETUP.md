@@ -61,13 +61,18 @@ When plugged in, the connector should look like this:
 
 ## Prepare the Micro SD card
 
-1. Download the [Etcher software app](https://www.balena.io/etcher/) for your computer and install it. You will use this to set up the microSD card.'
+1. Download the <a href="https://www.balena.io/etcher/" target="_blank">Etcher software app</a> for your computer and install it. You will use this to set up the microSD card.'
 
-2. Download the [zip file](https://drive.google.com/file/d/1yRe9xghKHFwLpw2stX3NCof64VD4D993/view?usp=sharing) to install on your microSD. Unzip the file if it does not automatically unzip once downloaded.
+2. Download the <a href="https://drive.google.com/file/d/1yRe9xghKHFwLpw2stX3NCof64VD4D993/view?usp=sharing" target="_blank">zip file</a> to install on your microSD. Unzip the file if it does not automatically unzip once downloaded.
 
-3. Insert your mircoSD into your card reader and open Etcher.  Select the unzipped file as the image. Select your microSD card as the target. <i> It is important to point this at the microSD card as this could rewrite your hard drive if the wrong location is selected. </i> Once this is set up, write the file to the microSD by selecting 'Flash!'
+3. Insert your mircoSD into your card reader and open Etcher.  Select the unzipped file as the image. Select your microSD card as the target. <i> It is important to point this at the microSD card as this could rewrite your hard drive if the wrong location is selected. </i>
+
+<img src="images/etcher_example.png" width="600">
+
+Once this is set up properly, write the file to the microSD by selecting 'Flash!'
 
 4. Eject and remove the microSD card. Insert your microSD card into the reader on your Raspberry Pi.
+<img src="images/insertSD.jpg" width="600">
 
 5. Plug your Pi into a power source (such as a power bank that you would use to recharge your phone, or a charging cable plugged into the wall) using the microUSB port labelled "PWR in". If you're using a power bank, make sure it's turned on. You should then see a green blinking light on your Pi. When the light stops blinking, you're ready to move to the next step.
 
