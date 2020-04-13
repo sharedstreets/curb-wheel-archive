@@ -69,7 +69,7 @@ When plugged in, the connector should look like this:
 
 <img src="images/etcher_example.png" width="600">
 
-Once this is set up properly, write the file to the microSD by selecting 'Flash!'
+Once this is set up properly, write the file to the microSD by selecting 'Flash!'. This step may prompt you to enter a password, this is your computer account password. 
 
 4. Eject and remove the microSD card. Insert your microSD card into the reader on your Raspberry Pi.
 <img src="images/insertSD.jpg" width="600">
