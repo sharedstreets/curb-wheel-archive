@@ -1,6 +1,6 @@
 # Initial set-up
 
-How to build a curb wheel from scratch. Covers hardware and software.
+How to build a CurbWheel from scratch. Covers hardware and software.
 
 ## Prep the measuring wheel
 
