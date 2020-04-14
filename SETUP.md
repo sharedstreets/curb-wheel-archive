@@ -80,7 +80,7 @@ Once this is set up properly, write the file to the microSD by selecting 'Flash!
 
 7. Open your preferred browser and type in the url `raspberrypi.local:8081`. You should see the following screen:
 
-<img src="images/CurbWheelTestScreen.JPG" width="600">
+<img src="images/CurbWheelTestScreen.jpg" width="600">
 
 8. Walk around with your wheel and test out its measuring capabilities.
 
