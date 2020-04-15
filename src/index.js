@@ -20,7 +20,7 @@ async function main() {
 
     // debug
     app.state.graph = new Graph();
-    await app.state.graph.load(path.join(__dirname, "../honolulu.json"));
+    await app.state.graph.load(path.join(__dirname, "../test/fixtures/honolulu.json"));
 
     app.use("/static", express.static(path.join(__dirname, "../static")));
     app.use(
