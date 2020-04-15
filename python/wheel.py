@@ -8,7 +8,6 @@ GPIO.setwarnings(False)
 # use Pi BCM mode for pin numbers
 GPIO.setmode(GPIO.BCM)
 
-
 # hall effect pins
 channel1 =  19
 channel2 =  26
@@ -36,6 +35,7 @@ BACKWARD_STATE = "1,0"
 
 COUNT_BACKWARDS  = False
 
+
 COUNTER_OUTPUT_PATH = "ram/counter.txt"
 
 previousState = ""
@@ -60,6 +60,7 @@ def stateChange(channel):
                         counter -= 1
 
                 previousState = ""
+
                 with open(COUNTER_OUTPUT_PATH, 'w') as fileOut:
                         fileOut.write(str(counter))
 		
