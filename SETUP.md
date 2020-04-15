@@ -2,7 +2,7 @@
 
 How to build a CurbWheel from scratch. Covers hardware and software.
 
-## Prep the measuring wheel
+## Prepare the measuring wheel
 
 The measuring wheel works by using a ["rotary encoder"](https://howtomechatronics.com/tutorials/arduino/rotary-encoder-works-use-arduino/), which is a set of [magnets and sensors](https://i.imgur.com/QDmhP2q.jpg) in its shaft. As the wheel turns, one of the magnets passes a sensor every 0.1 metres rolled, and a signal is sent up to the circuit board. These signals are added (when rolling forwards) and subtracted (when rolling backwards) to keep track of the distance rolled. We will be taking the wheel apart and sending these measurement signals to the Raspberry Pi instead.
 
@@ -69,7 +69,7 @@ When plugged in, the connector should look like this:
 
 <img src="images/etcher_example.png" width="600">
 
-Once this is set up properly, write the file to the microSD by selecting 'Flash!'. This step may prompt you to enter a password, this is your computer account password. 
+Once this is set up properly, write the file to the microSD by selecting 'Flash!'. This step may prompt you to enter a password, this is your computer account password.
 
 4. Eject and remove the microSD card. Insert your microSD card into the reader on your Raspberry Pi.
 <img src="images/insertSD.jpg" width="600">
@@ -83,32 +83,3 @@ Once this is set up properly, write the file to the microSD by selecting 'Flash!
 <img src="images/CurbWheelTestScreen.jpg" width="300">
 
 8. Walk around with your wheel and test out its measuring capabilities.
-
-
-## Load the map data for the area you are surveying
-
-(placeholder)
-
-
-
------
-
-## run
-
-```sh
-npm start
-```
-
-## test
-
-```sh
-npm t
-```
-
-## lint
-
-Checks for syntax errors and automatically formats code.
-
-```sh
-npm run lint
-```
