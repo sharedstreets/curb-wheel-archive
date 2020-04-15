@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>curbwheel</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='static/mapbox-gl.js'></script>
+    <link href='static/mapbox-gl.css' rel='stylesheet' />
+    <link href='static/bulma.min.css' rel='stylesheet' />
+    <style>
+      body { margin:0; padding:0; }
+      #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
+  </head>
+  <body>
+    <h1>Overview</h1>
+    <div id="map">
+    <script>
+      let bounds = {{bounds}}
+
+      mapboxgl.accessToken = 'pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ';
+      var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/dark-v10'
+      });
+
+      map.fitBounds([bounds.slice(0,2), bounds.slice(2,4)])
+
+      map.on('load', () => {
+        map.addSource('streets', {
+          'type': 'geojson',
+          'data': {type: 'FeatureCollection', features: []}
+        });
+        map.addLayer({
+          'id': 'streets',
+          'type': 'line',
+          'source': 'streets',
+          'layout': {
+            'line-cap': 'round',
+            'line-join': 'round'
+          },
+          'paint': {
+            'line-color': '#ed6498',
+            'line-width': 5,
+            'line-opacity': [
+              'interpolate',
+              ['linear', 0.5],
+              ['zoom'],
+              14.5,
+              0.0,
+              17,
+              1.0
+            ]
+          }
+        });
+
+        map.on('click', 'streets', function(e) {
+          if(e.features && e.features.length) {
+            let street = e.features[0];
+
+            let info = ''
+            if (street.properties.name) {
+              info += 'Name:  ' + street.properties.name + '\n'
+            }
+            if (street.properties.highway) {
+              info += 'Class:  ' + street.properties.highway + '\n'
+            }
+            if (street.properties.forward) {
+              info += 'Forward Ref:  ' + street.properties.forward + '\n'
+            }
+            if (street.properties.back) {
+              info += 'Forward Ref:  ' + street.properties.back + '\n'
+            }
+
+            alert(info)
+          }
+        });
+
+        map.on('moveend', e => {
+          let zoom = map.getZoom()
+          if (zoom >= 14) {
+            let viewport = map.getBounds()
+
+            let url = '/query?';
+            url += 'minX=' + viewport._sw.lng
+            url += '&minY=' + viewport._sw.lat
+            url += '&maxX=' + viewport._ne.lng
+            url += '&maxY=' + viewport._ne.lat
+
+            fetch(url)
+            .then((response) => {
+              return response.json();
+            })
+            .then((streets) => {
+              map.getSource('streets').setData(streets);
+            });
+          } else {
+            map.getSource('streets').setData({type: 'FeatureCollection', features: []});
+          }
+        })
+      })
+    </script>
+  </body>
+</html>

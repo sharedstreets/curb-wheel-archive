@@ -4,7 +4,8 @@
   "description": "Curb mapping wheel",
   "bin": "./src/index.js",
   "scripts": {
-    "start": "node ./src/index.js",
+    "start": "sudo sh startup.sh && node ./src/index.js",
+    "simulator": "sh startup-simulator.sh && node ./src/index.js",
     "test": "tap -R spec ./test/*.test.js",
     "lint": "prettier --write **/*.js"
   },
@@ -23,8 +24,10 @@
     "@mapbox/tile-cover": "^3.0.2",
     "@mapbox/tilebelt": "^1.0.1",
     "@turf/turf": "^5.1.6",
+    "bulma": "^0.8.1",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
+    "flatbush": "^3.2.1",
     "level": "^6.0.1",
     "osm-pbf-parser": "^2.3.0",
     "sharedstreets": "^0.15.1",

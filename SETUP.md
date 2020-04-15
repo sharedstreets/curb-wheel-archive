@@ -1,6 +1,6 @@
 # Initial set-up
 
-How to build a curb wheel from scratch. Covers hardware and software.
+How to build a CurbWheel from scratch. Covers hardware and software.
 
 ## Prepare the measuring wheel
 
@@ -61,12 +61,25 @@ When plugged in, the connector should look like this:
 
 ## Prepare the Micro SD card
 
-1. Boot the Pi and connect to your local Wifi router
+1. Download the <a href="https://www.balena.io/etcher/" target="_blank">Etcher software app</a> for your computer and install it. You will use this to set up the microSD card.'
 
-2. Open your terminal (Linux of OSX), copy/paste the following command, and press enter:
+2. Download the <a href="https://drive.google.com/file/d/1yRe9xghKHFwLpw2stX3NCof64VD4D993/view?usp=sharing" target="_blank">zip file</a> to install on your microSD. Unzip the file if it does not automatically unzip once downloaded.
 
-```sh
-curl https://raw.githubusercontent.com/sharedstreets/curb-wheel/master/setup.sh | sh
-```
+3. Insert your mircoSD into your card reader and open Etcher.  Select the unzipped file as the image. Select your microSD card as the target. <i> It is important to point this at the microSD card as this could rewrite your hard drive if the wrong location is selected. </i>
 
-3. The last step should print out a randomly generated WIFI name (ie: "CURBWHEEL-fYitIGnE") with a randomly generated password. Connect to this access point from your smartphone.
+<img src="images/etcher_example.png" width="600">
+
+Once this is set up properly, write the file to the microSD by selecting 'Flash!'. This step may prompt you to enter a password, this is your computer account password.
+
+4. Eject and remove the microSD card. Insert your microSD card into the reader on your Raspberry Pi.
+<img src="images/insertSD.jpg" width="600">
+
+5. Plug your Pi into a power source (such as a power bank that you would use to recharge your phone, or a charging cable plugged into the wall) using the microUSB port labelled "PWR in". If you're using a power bank, make sure it's turned on. You should then see a green blinking light on your Pi. When the light stops blinking, you're ready to move to the next step.
+
+6. Select your Wifi network preferences using the device you would like to track your measurements on. For testing this may be your computer, to use outside, it's likely going to be your phone. Select the WiFi network "CurbWheel-AP". The password is `curbwheel`.
+
+7. Open your preferred browser and type in the url `raspberrypi.local:8081`. You should see the following screen:
+
+<img src="images/CurbWheelTestScreen.jpg" width="300">
+
+8. Walk around with your wheel and test out its measuring capabilities.
