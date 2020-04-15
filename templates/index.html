@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CurbWheel</title>
+    <link rel="stylesheet" href="/static/bulma.min.css">
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        CurbWheel
+      </h1>
+      <p class="subtitle">
+        counter: <strong><span id="counterValue"></span></strong>
+      </p>
+      <div class="buttons">
+        <button id="clearButton" onclick="clearCounter()" class="button is-primary">Clear</button>
+      </div>
+    </div>
+  </section>
+
+  <script> 
+
+        var counterOffset = 0;
+        var currentCounterValue = 0;
+
+        function loadJSON(path, success, error) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function()
+            {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        if (success)
+                            success(JSON.parse(xhr.responseText));
+                    } else {
+                        if (error)
+                            error(xhr);
+                    }
+                }
+            };
+            xhr.open("GET", path, true);
+            xhr.send();
+        }
+
+        function clearCounter() {
+            counterOffset = currentCounterValue;
+        }
+
+        function getCounterValue() {
+            var counterValueSpan = document.getElementById("counterValue");   
+            loadJSON('/counter', 
+                function(data) { currentCounterValue = data.counter; counterValueSpan.textContent = ((currentCounterValue - counterOffset) / 10) + 'm'; },
+                function(xhr) { console.error(xhr); }
+            );
+        }
+        
+        setInterval(getCounterValue, 500);
+
+    </script> 
+  </body>
+</html>

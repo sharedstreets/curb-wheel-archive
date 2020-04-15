@@ -7,6 +7,7 @@ sudo apt upgrade
 # INSTALL NODE & NPM
 sudo apt install nodejs npm
 
+
 # SETUP WIFI ACCESS POINT
 # https://thepi.io/how-to-use-your-raspberry-pi-as-a-wireless-access-point/
 # https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
@@ -24,7 +25,7 @@ echo "interface=wlan0" >> /etc/dnsmasq.conf
 echo "  dhcp-range=192.168.0.11,192.168.0.30,255.255.255.0,24h" >> /etc/dnsmasq.conf
 
 ssid="CURBWHEEL-$(openssl rand -base64 6)"
-password=$(openssl rand -base64 8)
+password=wheelie
 
 echo "interface=wlan0" >> /etc/hostapd/hostapd.conf
 echo "bridge=br0" >> /etc/hostapd/hostapd.conf
