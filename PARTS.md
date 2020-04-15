@@ -7,6 +7,7 @@
 - USB A to micro USB cable (This is a common cable for charging phones and other devices. If you already have one, you can use that; there's no need to buy another) sources: [PiShop](https://www.pishop.us/product/usb-flat-cable-a-microb-orange/) | [Amazon](https://www.amazon.com/Micro-USB-to-Cable/dp/B004GETLY2) 
 - 32GB MicroSD Card + Adapter (Be careful of [counterfeit SD cards](https://www.bunniestudios.com/blog/?page_id=1022)) sources: [PiShop](https://www.pishop.us/product/microsd-card-extreme-pro-32-gb-class-10-blank/) | [Amazon](https://www.amazon.com/gp/product/B06XWN9Q99/) 
 - Portable battery pack with USB two USB ports (one for the Pi and one for your phone, if you already have a USB battery pack for your pone, no need to buy another) sources: [PiShop](https://www.pishop.us/product/compact-rechargeable-battery-for-raspberry-pi-20800mah/) | [Amazon](https://www.amazon.com/Portable-Charger-Anker-PowerCore-20100mAh/dp/B00X5RV14Y/ref=sr_1_3?keywords=anker+battery+pack&qid=1585267755&refinements=p_89%3AAnker&rnid=2528832011&sr=8-3) 
+- [curb-wheel plastic case electronics housing](https://www.thingiverse.com/thing:4286063)
 
 ## Optional:
 - [SD card reader](https://www.amazon.com/gp/product/B00OJ5WBUE/) (if you already have a SD card reader built into your laptop, it should work fine with the SD to MicroSD adapter that comes with most cards)
