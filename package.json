@@ -2,7 +2,7 @@
   "name": "curb-wheel",
   "version": "1.0.0",
   "description": "Curb mapping wheel",
-  "bin": "./src/index.js",
+  "bin": "./src/server.js",
   "scripts": {
     "start": "sudo sh startup.sh && node ./src/index.js",
     "simulator": "sh startup-simulator.sh && node ./src/index.js",
@@ -30,6 +30,7 @@
     "flatbush": "^3.2.1",
     "level": "^6.0.1",
     "osm-pbf-parser": "^2.3.0",
+    "request": "^2.88.2",
     "sharedstreets": "^0.15.1",
     "through2": "^3.0.1"
   },
