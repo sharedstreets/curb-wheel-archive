@@ -4,8 +4,8 @@
   "description": "Curb mapping wheel",
   "bin": "./src/server.js",
   "scripts": {
-    "start": "sudo sh startup.sh && node ./src/index.js",
-    "simulator": "sh startup-simulator.sh && node ./src/index.js",
+    "start": "sudo sh startup.sh && node ./src/server.js",
+    "simulator": "sh startup-simulator.sh && node ./src/server.js",
     "test": "tap -R spec ./test/*.test.js",
     "lint": "prettier --write **/*.js"
   },
