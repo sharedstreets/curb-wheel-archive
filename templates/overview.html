@@ -1,104 +1,67 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html>
   <head>
     <meta charset="utf-8">
-    <title>curbwheel</title>
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CurbWheel</title>
+    <!-- <link rel="stylesheet" href="bulma.min.css"> -->
+    <link rel="stylesheet" href="static/basics.css">
+    <link rel="stylesheet" href="static/style.css">
     <script src='static/mapbox-gl.js'></script>
     <link href='static/mapbox-gl.css' rel='stylesheet' />
-    <link href='static/bulma.min.css' rel='stylesheet' />
-    <style>
-      body { margin:0; padding:0; }
-      #map { position:absolute; top:0; bottom:0; width:100%; }
-    </style>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
   </head>
-  <body>
-    <h1>Overview</h1>
-    <div id="map">
-    <script>
+    <body class='is-mobile'>
+    <section class="" id='topBar'>
+      <span class="icon fl m20" onclick='app.ui.back()'>
+        <i class="fas fa-arrow-left"></i>
+      </span>
+
+      <div class='big' id='title'>Select a Street</div>
+    </section>
+    <div id='modes'>
+      <div id='map' class='mode big'>
+        <script>
       let bounds = {{bounds}}
+        </script>
+      </div>
+      <div id='rolling' class='mode'>
+        <div id='curbEntry'>
+          <div class='entry'>
+            <span>Current block</span>
+            <div class='progressBar'>
+              <div class='bar'></div>
+            </div>
 
-      mapboxgl.accessToken = 'pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ';
-      var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/dark-v10'
-      });
+            <span class='small quiet'>
+              <span id='blockProgress'>0</span>m of ~
+              <span id='curbLength'></span>m
+            </span> 
+          </div>
+        </div>
+        <div class='scroll-drawer'>
+          <input id='uploadImg' class='hidden' type="file" accept="image/*" capture="environment">
 
-      map.fitBounds([bounds.slice(0,2), bounds.slice(2,4)])
+          <div id='zones'></div>
 
-      map.on('load', () => {
-        map.addSource('streets', {
-          'type': 'geojson',
-          'data': {type: 'FeatureCollection', features: []}
-        });
-        map.addLayer({
-          'id': 'streets',
-          'type': 'line',
-          'source': 'streets',
-          'layout': {
-            'line-cap': 'round',
-            'line-join': 'round'
-          },
-          'paint': {
-            'line-color': '#ed6498',
-            'line-width': 5,
-            'line-opacity': [
-              'interpolate',
-              ['linear', 0.5],
-              ['zoom'],
-              14.5,
-              0.0,
-              17,
-              1.0
-            ]
-          }
-        });
+          <div class='text-center mt20 mb200'>
+            <p class='big' onclick='app.ui.mode.set("addZone")'>
+              <span class="icon blue mr10 inlineBlock" style='transform: scale(1.5)'>
+                <i class="fas fa-plus-circle"></i>
+              </span>
+              Add a new curb zone
+            </p>
+          </div>
+        </div>
+        <div id='complete' class='bottomButton' onclick='alert("(This completes the survey, will take user back to map for next survey)")'>Complete</div>
+      </div>
+      <div id='addZone' class='mode'>
+      </div>
+    </div>
+    </body>
+  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src='static/app.js'></script>
+  <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
+  <script src='static/map.js'></script>
 
-        map.on('click', 'streets', function(e) {
-          if(e.features && e.features.length) {
-            let street = e.features[0];
-
-            let info = ''
-            if (street.properties.name) {
-              info += 'Name:  ' + street.properties.name + '\n'
-            }
-            if (street.properties.highway) {
-              info += 'Class:  ' + street.properties.highway + '\n'
-            }
-            if (street.properties.forward) {
-              info += 'Forward Ref:  ' + street.properties.forward + '\n'
-            }
-            if (street.properties.back) {
-              info += 'Forward Ref:  ' + street.properties.back + '\n'
-            }
-
-            alert(info)
-          }
-        });
-
-        map.on('moveend', e => {
-          let zoom = map.getZoom()
-          if (zoom >= 14) {
-            let viewport = map.getBounds()
-
-            let url = '/query?';
-            url += 'minX=' + viewport._sw.lng
-            url += '&minY=' + viewport._sw.lat
-            url += '&maxX=' + viewport._ne.lng
-            url += '&maxY=' + viewport._ne.lat
-
-            fetch(url)
-            .then((response) => {
-              return response.json();
-            })
-            .then((streets) => {
-              map.getSource('streets').setData(streets);
-            });
-          } else {
-            map.getSource('streets').setData({type: 'FeatureCollection', features: []});
-          }
-        })
-      })
-    </script>
-  </body>
 </html>
