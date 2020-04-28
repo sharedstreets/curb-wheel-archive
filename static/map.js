@@ -8,8 +8,7 @@ app.ui.map = new mapboxgl.Map({
 });
 
 app.ui.map
-	.setZoom(16)
-	.setCenter(app.devMode.sampleStreet.geometry.coordinates[0])
+	.fitBounds([bounds.slice(0,2), bounds.slice(2,4)])
 	.on('load', () => {
 
 			app.ui.map
@@ -108,6 +107,7 @@ app.ui.map
 				})
 				.on('moveend', e => {
 					let zoom = app.ui.map.getZoom()
+					
 					if (zoom >= 14) {
 						let viewport = app.ui.map.getBounds()
 
@@ -119,14 +119,15 @@ app.ui.map
 
 						fetch(url)
 							.then((response) => {
-							return response.json();
+								return response.json();
 							})
 							.then((streets) => {
 								app.ui.map.getSource('streets').setData(streets);
 							});
-							} else {
-							map.getSource('streets').setData(app.constants.emptyGeojson);
-					}
+					} 
+					
+					else app.ui.map.getSource('streets').setData(app.constants.emptyGeojson);
+					
 				})
 
 	})
