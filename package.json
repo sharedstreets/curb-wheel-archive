@@ -13,7 +13,8 @@
     "type": "git",
     "url": "git+https://github.com/sharedstreets/curb-wheel.git"
   },
-  "author": "Emily Eros, Kevin Webb, Mollie McArdle, Morgan Herlocker",
+  "author": "Emily Eros",
+  "contributors": ["Emily Eros", "Kevin Webb", "Mollie McArdle", "Morgan Herlocker", "Peter Liu"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sharedstreets/curb-wheel/issues"
