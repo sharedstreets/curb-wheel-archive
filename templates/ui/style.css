@@ -173,6 +173,4 @@ body, html {
 .complete .onlyWhenRunning {
 	display:none !important;
 }
-.mapboxgl-canvas{
-	display: none
-}
+

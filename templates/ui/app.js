@@ -302,7 +302,12 @@ var app = {
 		app.ui.mode.set('rolling')
 	}, 
 
-
+	util: {
+		copy: function(original){
+			return JSON.parse(JSON.stringify(original))
+		}
+	},
+	
 	devMode: {
 
 		init: function(){

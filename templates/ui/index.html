@@ -7,6 +7,8 @@
 		<!-- <link rel="stylesheet" href="bulma.min.css"> -->
 		<link rel="stylesheet" href="basics.css">
 		<link rel="stylesheet" href="style.css">
+		<script src='mapbox-gl.js'></script>
+		<link href='mapbox-gl.css' rel='stylesheet' />
 		<script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 	</head>
   	<body class='is-mobile'>
@@ -15,10 +17,12 @@
 				<i class="fas fa-arrow-left"></i>
 			</span>
 
-			<div class='big' id='title'>Measuring Mariposa Ave</div>
+			<div class='big' id='title'>Select a Street</div>
 		</section>
 		<div id='modes'>
-			<div id='map' class='mode big' onclick='app.ui.mode.set("rolling")'>(map will go here. tap anywhere go to back to surveying screen)</div>
+			<div id='map' class='mode big'>
+			<!-- (map will go here. tap anywhere go to back to surveying screen) -->
+			</div>
 			<div id='rolling' class='mode'>
 				<div id='curbEntry'>
 					<div class='entry'>
@@ -26,9 +30,7 @@
 						<div class='progressBar'>
 							<div class='bar'></div>
 						</div>
-<!-- 							<progress class="progress is-small" value="0" max="100">
-							</progress>
-						</div> -->
+
 						<span class='small quiet'>
 							<span id='blockProgress'>0</span>m of ~
 							<span id='curbLength'></span>m
@@ -57,7 +59,7 @@
   	</body>
 	<script src="https://d3js.org/d3.v4.js"></script>
 	<script src='app.js'></script>
-<!-- 	<script src='mapbox-gl.js'></script>
-	<link href='mapbox-gl.css' rel='stylesheet' /> -->
+	<script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
 	<!-- <script src='map.js'></script> -->
+
 </html>
