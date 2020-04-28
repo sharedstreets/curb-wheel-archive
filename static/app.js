@@ -51,12 +51,19 @@ var app = {
 
 				back: ()=>{
 
-					app.ui.map.getSource('arrows')
-						.setData(app.constants.emptyGeojson);
+					var success = ()=>{
+						app.state.zones = [];
+						app.ui.map.getSource('arrows')
+							.setData(app.constants.emptyGeojson);
+						app.ui.mode.set('selectStreet');					
+					}
+
 					app.ui.confirm(
 						app.constants.prompts.exitSurvey, 
-						app.ui.mode.set('selectStreet')
+						success
 					)
+
+					return true
 				}
 			},
 			addZone: {
@@ -309,7 +316,7 @@ var app = {
 		confirm: function(text, ok, cancel) {
 
 			var confirmed = confirm(text);
-			if (confirmed) ok()
+			if (confirmed === true) ok()
 			else if (cancel) cancel()
 
 		},

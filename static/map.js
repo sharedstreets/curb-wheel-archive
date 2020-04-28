@@ -21,7 +21,8 @@ app.ui.map
 					},
 					'paint':{
 						'line-width':10,
-						'line-opacity':0.2
+						'line-opacity':0.2,
+						'line-color': 'steelblue'
 					}
 				})
 				.addLayer({
@@ -107,7 +108,7 @@ app.ui.map
 				})
 				.on('moveend', e => {
 					let zoom = app.ui.map.getZoom()
-					
+
 					if (zoom >= 14) {
 						let viewport = app.ui.map.getBounds()
 
