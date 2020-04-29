@@ -2,10 +2,10 @@
   "name": "curb-wheel",
   "version": "1.0.0",
   "description": "Curb mapping wheel",
-  "bin": "./src/index.js",
+  "bin": "./src/server.js",
   "scripts": {
-    "start": "sudo sh startup.sh && node ./src/index.js",
-    "simulator": "sh startup-simulator.sh && node ./src/index.js",
+    "start": "sudo sh startup.sh && node ./src/server.js",
+    "simulator": "sh startup-simulator.sh && node ./src/server.js",
     "test": "tap -R spec ./test/*.test.js",
     "lint": "prettier --write **/*.js"
   },
@@ -13,7 +13,8 @@
     "type": "git",
     "url": "git+https://github.com/sharedstreets/curb-wheel.git"
   },
-  "author": "Emily Eros, Kevin Webb, Mollie McArdle, Morgan Herlocker",
+  "author": "Emily Eros",
+  "contributors": ["Emily Eros", "Kevin Webb", "Mollie McArdle", "Morgan Herlocker", "Peter Liu"],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/sharedstreets/curb-wheel/issues"
@@ -30,6 +31,7 @@
     "flatbush": "^3.2.1",
     "level": "^6.0.1",
     "osm-pbf-parser": "^2.3.0",
+    "request": "^2.88.2",
     "sharedstreets": "^0.15.1",
     "through2": "^3.0.1"
   },
