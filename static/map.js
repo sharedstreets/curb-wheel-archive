@@ -71,7 +71,7 @@ app.ui.map
 						var edge = e.features[0].geometry.coordinates;
 						app.state.street = e.features[0].properties;
 						app.ui.map
-							.fitBounds(edge, {padding:60})
+							.fitBounds(turf.bbox(e.features[0]), {padding:60})
 
 						var forward = turf.lineOffset(turf.lineString(edge, {direction:'A', ref: e.features[0].properties.forward}), 10, {units: 'meters'});
 						edge.reverse();

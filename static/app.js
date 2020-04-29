@@ -354,31 +354,17 @@ var app = {
 				app.ui.mode.set('rolling');
 			})
 
+		// app.ui.mode.set(app.state.mode)
+
+		// set upload functionality
 		document.getElementById('uploadImg')
 			.addEventListener('change', app.io.uploadImage, false);
-		app.ui.mode.set(app.state.mode)
 	}, 
 
 	io: {
 
 		uploadImage: (e) => {
-
-			var file = e.target.files[0];
-		    var reader = new FileReader();
-
-			reader.onload = function(theFile) {
-
-				var oReq = new XMLHttpRequest();
-				oReq.open("POST", 'http://localhost:8081/photo');
-				oReq.responseType = 'arraybuffer';
-				oReq.send({files:{image:reader.result}});
-
-			};
-
-			reader.readAsArrayBuffer(file);
-
-
-
+			document.querySelector('#imageSubmit').click();
 		},
 
 		uploadSurvey: () => {
@@ -386,7 +372,7 @@ var app = {
 			var oReq = new XMLHttpRequest();
 			oReq.open("POST", 'http://localhost:8081/survey');
 			oReq.responseType = 'json';
-			oReq.send({foo: 'bar'});
+			oReq.send(app.state.zones);
 
 		}
 	},
