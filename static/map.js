@@ -20,7 +20,7 @@ app.ui.map
 						data: app.constants.emptyGeojson
 					},
 					'paint':{
-						'line-width':10,
+						'line-width': 10,
 						'line-opacity':0.2,
 						'line-color': 'steelblue'
 					}

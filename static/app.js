@@ -2,7 +2,6 @@ var app = {
 
 	state: {
 		street: {
-			name: null,
 			distance: 100
 		},
 
@@ -35,16 +34,25 @@ var app = {
 		modes: {
 			selectStreet: {
 				view:0,
-				title: 'Select a Street'
+				title: 'Select a street',
+				set: ()=>{
+					app.ui.map.getSource('arrows')
+						.setData(app.constants.emptyGeojson);
+				}
 			},
 
 			selectDirection: {
 				view:0,
 				title: 'Select curb side'
 			},
+
 			rolling: {
 				view:1,
 
+				set: ()=>{
+					app.ui.updateZones()
+				},
+				
 				title: ()=>{ 
 					return `Surveying ${app.state.street.name}`
 				},
@@ -53,8 +61,6 @@ var app = {
 
 					var success = ()=>{
 						app.state.zones = [];
-						app.ui.map.getSource('arrows')
-							.setData(app.constants.emptyGeojson);
 						app.ui.mode.set('selectStreet');					
 					}
 
@@ -67,7 +73,7 @@ var app = {
 				}
 			},
 			addZone: {
-				view:2,
+				view: 2,
 				title: 'Select zone type'
 			}
 		},
@@ -181,29 +187,16 @@ var app = {
 
 			// name of zone
 			newZones
+				.attr('id', d=>`entry${d.startTime}`)
 				.append('span')
 				.attr('class', 'zoneName')
 				.text(d=>`${d.type} zone`);
-
-			// ['check', 'camera', 'times']
-			// .forEach(action=>{
-			// 	newZones
-			// 		.append('span')
-			// 		.style('margin-left', '10px')
-			// 		.attr('class', 'small quiet fr')
-			// 		.on('mousedown', (d,i)=>{
-			// 			var id = d.startTime; 
-			// 			d3.selectAll('#zones .entry .columns')
-			// 			.classed('hidden', (d, entryIndex)=>{return d.startTime !== id})
-			// 		})
-			// 		.append('span')
-			// 		.attr('class', `icon fas fa-${action}`)
-			// })
 
 			// gear icon toggle for actions
 			newZones
 				.append('span')
 				.attr('class', 'fr onlyWhenRunning')
+				.attr('href', d=>`#entry${d.startTime}`)
 				.on('mousedown', (d,i)=>{
 					var id = d.startTime; 
 					d3.selectAll('#zones .entry')
@@ -292,6 +285,10 @@ var app = {
 				
 				app.state.mode = mode;
 
+				// apply any custom functions for mode
+				if (app.constants.modes[mode].set) app.constants.modes[mode].set()
+
+				// update title
 				d3.select('#title')
 					.text(app.constants.modes[mode].title)
 			},
@@ -307,7 +304,8 @@ var app = {
 			var newMode = modes[modeIndex];
 
 			// set mode as one previous in list, unless there's a custom back() function
-			var executeCustomFn = app.constants.modes[app.state.mode].back() || app.ui.mode.set(newMode)
+			var customFn = app.constants.modes[app.state.mode].back;
+			var executeCustomFn = customFn ? customFn() : app.ui.mode.set(newMode)
 
 		},
 
@@ -356,8 +354,35 @@ var app = {
 				app.ui.mode.set('rolling');
 			})
 
+		document.getElementById('uploadImg')
+			.addEventListener('change', app.io.handleImage, false);
 		// app.ui.mode.set('rolling')
 	}, 
+
+	io: {
+
+		handleImage: (e)=>{
+
+			var file = e.target.files[0];
+		    var reader = new FileReader();
+
+			// Closure to capture the file information.
+			reader.onload = function(theFile) {
+				console.log(theFile, reader.result)
+				app.io.uploadImage(reader.result)
+			};
+
+			reader.readAsArrayBuffer(file);
+		},
+
+		uploadImage: (buffer)=>{
+
+			var oReq = new XMLHttpRequest();
+			oReq.open("POST", 'http://localhost:8081/photo', true);
+			oReq.send(buffer);
+
+		}
+	},
 
 	util: {
 		copy: function(original){
