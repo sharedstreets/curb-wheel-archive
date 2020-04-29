@@ -355,31 +355,38 @@ var app = {
 			})
 
 		document.getElementById('uploadImg')
-			.addEventListener('change', app.io.handleImage, false);
-		// app.ui.mode.set('rolling')
+			.addEventListener('change', app.io.uploadImage, false);
+		app.ui.mode.set(app.state.mode)
 	}, 
 
 	io: {
 
-		handleImage: (e)=>{
+		uploadImage: (e) => {
 
 			var file = e.target.files[0];
 		    var reader = new FileReader();
 
-			// Closure to capture the file information.
 			reader.onload = function(theFile) {
-				console.log(theFile, reader.result)
-				app.io.uploadImage(reader.result)
+
+				var oReq = new XMLHttpRequest();
+				oReq.open("POST", 'http://localhost:8081/photo');
+				oReq.responseType = 'arraybuffer';
+				oReq.send({files:{image:reader.result}});
+
 			};
 
 			reader.readAsArrayBuffer(file);
+
+
+
 		},
 
-		uploadImage: (buffer)=>{
+		uploadSurvey: () => {
 
 			var oReq = new XMLHttpRequest();
-			oReq.open("POST", 'http://localhost:8081/photo', true);
-			oReq.send(buffer);
+			oReq.open("POST", 'http://localhost:8081/survey');
+			oReq.responseType = 'json';
+			oReq.send({foo: 'bar'});
 
 		}
 	},
