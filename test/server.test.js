@@ -89,6 +89,24 @@ test("server", async (t) => {
   t.equal(upload3.statusCode, 200, "upload 3 returned valid status code 200");
   t.equal(upload4.statusCode, 200, "upload 4 returned valid status code 200");
 
+  let survey = {};
+  let ref = "123";
+  /*let saved = await request.post({
+    url: "http://localhost:8081/surveys/" + ref,
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ok:1})
+  })*/
+
+  //t.equal(saved.statusCode, 200, "survey save returned valid status code 200");
+
+  let surveysResponse = await request.get({
+    url: "http://localhost:8081/surveys/" + ref,
+  });
+
+  //t.equal(surveysResponse.statusCode, 200, "surveys get returned valid status code 200");
+  //console.log(surveysResponse.body)
+
+  // clean up
   server.close();
   rimraf.sync(path.join(__dirname, "../static/images/survey"));
 
