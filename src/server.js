@@ -2,6 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const fileUpload = require("express-fileupload");
+const rimraf = require("rimraf");
+const mkdirp = require("mkdirp");
 const Graph = require("./graph");
 
 async function main() {
@@ -10,7 +12,9 @@ async function main() {
 
     // constants
     const PORT = 8081;
-    const TMP_PBF = "./extract.osm.pbf";
+    const PBF = path.join(__dirname, "../extract.osm.pbf");
+    const MBTILES = path.join(__dirname, "../extract.mbtiles");
+    const IMAGES = path.join(__dirname, "../static/images/survey");
 
     // middleware
     app.use(fileUpload());
@@ -20,13 +24,17 @@ async function main() {
 
     // debug
     app.state.graph = new Graph();
-    await app.state.graph.load(path.join(__dirname, "../test/fixtures/honolulu.json"));
+    await app.state.graph.load(
+      path.join(__dirname, "../test/fixtures/honolulu.json")
+    );
 
+    // setup static file server
     app.use("/static", express.static(path.join(__dirname, "../static")));
     app.use(
       "/static/images",
       express.static(path.join(__dirname, "../static/images"))
     );
+    mkdirp.sync(IMAGES);
 
     app.get("/", async (req, res) => {
       let template = (
@@ -38,16 +46,14 @@ async function main() {
     });
 
     app.get("/counter", async (req, res) => {
-
-      let counterValue = parseInt((
-        await fs.promises.readFile(
-            path.join(__dirname, "../ram/counter.txt")
-        )
-      ).toString());
+      let counterValue = parseInt(
+        (
+          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
+        ).toString()
+      );
 
       res.json({ counter: counterValue });
     });
-
 
     app.get("/overview", async (req, res) => {
       let template = (
@@ -76,26 +82,65 @@ async function main() {
       });
     });
 
-    app.post("/extract", async (req, res) => {
+    app.post("/pbf", async (req, res) => {
       if (!req.files || Object.keys(req.files).length === 0) {
         return res.status(400).send("No pbf file was uploaded.");
       }
 
       let pbf = req.files.pbf;
 
-      pbf.mv(TMP_PBF, async (err) => {
+      pbf.mv(PBF, async (err) => {
         if (err) {
           return res.status(500).send(err);
         }
 
         // extract pbf and build street database
         app.state.graph = new Graph();
-        app.state.graph = await extract(TMP_PBF);
+        app.state.graph = await app.state.graph.extract(PBF);
 
-        await fs.unlink(TMP_PBF);
+        await fs.promises.unlink(PBF);
 
         res.status(200).send("Extract complete.");
       });
+    });
+
+    app.post("/mbtiles", async (req, res) => {
+      if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send("No mbtiles file was uploaded.");
+      }
+
+      let mbtiles = req.files.mbtiles;
+
+      mbtiles.mv(MBTILES, async (err) => {
+        if (err) {
+          return res.status(500).send(err);
+        }
+
+        res.status(200).send("Tiles upload complete.");
+      });
+    });
+
+    app.post("/photo", async (req, res) => {
+      if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send("No image file was uploaded.");
+      }
+
+      let image = req.files.image;
+      let name = uuid() + ".jpg";
+      let imagePath = path.join(IMAGES, "/" + name);
+
+      image.mv(imagePath, async (err) => {
+        if (err) {
+          return res.status(500).send(err);
+        }
+
+        res.status(200).send("/static/images/survey/" + name);
+      });
+    });
+
+    app.post("/survey", async (req, res) => {
+      // todo: save to edge index
+      res.status(200).send("Uploaded survey.");
     });
 
     app.get("/*", async (req, res) => {
@@ -112,6 +157,13 @@ async function main() {
       return resolve(server);
     });
   });
+}
+
+function uuid() {
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }
 
 if (require.main === module) {
