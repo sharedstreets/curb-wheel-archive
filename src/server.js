@@ -52,7 +52,7 @@ async function main() {
         ).toString()
       );
 
-      res.json({ counter: counterValue });
+      res.json({ counter: counterValue, timestamp: Date.now() });
     });
 
     app.get("/overview", async (req, res) => {

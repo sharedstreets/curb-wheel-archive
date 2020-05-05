@@ -106,7 +106,7 @@ var app = {
 			var success = function(){
 				document.querySelector('#uploadImg').click()
 				var photo = {
-					pointId: generatePointId()
+					pointId: generatePointId(),
 					shstReferenceId: [refId],
 					wheelLocation : app.state.currentRollDistance,
 					zoneId: [parentZoneId]
@@ -412,7 +412,7 @@ var app = {
 
 
 			app.init();
-			this.dummyRolling();
+			this.queryRolling();
 
 		},
 
@@ -442,13 +442,11 @@ var app = {
 			}
 		},
 
-		dummyRolling: function(){
+		queryRolling: function(){
 			setInterval(()=>{
-				if (app.devMode.rolling){
-					app.state.currentRollDistance+=Math.random()/2
-					app.ui.roll();
-				}
-			}, 1000)
+				// call server to get current wheel value
+				// GET /counter 
+			}, 100)
 		},		
 	}
 }
