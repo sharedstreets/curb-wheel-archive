@@ -6,7 +6,6 @@ var app = {
 		},
 
 		currentRollDistance: 0,
-		points: [],
 		zones: [],
 		mode: 'rolling'
 	},
@@ -105,17 +104,7 @@ var app = {
 
 			var success = function(){
 				document.querySelector('#uploadImg').click()
-				var photo = {
-					pointId: generatePointId(),
-					shstReferenceId: [refId],
-					wheelLocation : app.state.currentRollDistance,
-					zoneId: [parentZoneId]
-				}
-
-				// add photo to point store
-				app.state.points.push(photo);
 			}
-
 
 			app.ui.confirm(app.constants.prompts.takePhoto, success, null)
 		
@@ -129,15 +118,7 @@ var app = {
 
 				app.state.zones
 					.forEach(d=>{
-						if (d.startTime === startTimeToEnd)  {
-							// add new fields at end of zone
-							d.endTime = Date.now();
-							d.wheelEndLocation = app.state.currentRollDistance,
-							d.surveyedLength = d.wheelEndLocation - d.wheelStartLocation,
-							d.gpsEndLocation = getGPSCoordinate();
-
-							//d.end = app.state.currentRollDistance;
-						}
+						if (d.startTime === startTimeToEnd) d.end = app.state.currentRollDistance
 					})
 
 				app.ui.updateZones();
@@ -150,13 +131,9 @@ var app = {
 		add: function(zoneType){
 
 			var newZone = {
-					zoneId: generateZoneId(),
-					type: zoneType,
-					startTime: Date.now(),
-					shstReferenceId: [refId],
-					shstExpectedLength: [refLength],
-					wheelStartLocation : 0,
-					gpsStartLocation: getGPSCoordinate()
+				type: zoneType,
+				start: app.state.currentRollDistance,
+				startTime: Date.now()
 			}
 
 			app.state.zones.push(newZone);
