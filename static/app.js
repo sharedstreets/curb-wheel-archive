@@ -2,7 +2,7 @@ var app = {
 
 	state: {
 		street: {
-			distance: 100
+			distance: 10
 		},
 		systemRollDistance:0,
 		currentRollDistance: 0,
@@ -148,8 +148,8 @@ var app = {
 		// fires on roll signal from Pi. Updates all active progress bars and status texts
 		roll: function(){
 
-			var current = app.state.currentRollDistance;
-
+			var current = app.state.currentRollDistance - app.state.systemRollDistance;
+			console.log(current)
 
 			//update progress bars that aren't complete yet
 			d3.selectAll('.entry:not(.complete) .bar')
@@ -163,7 +163,7 @@ var app = {
 				.text(d=>`${(current-d.start).toFixed(1)} m long`)
 
 			d3.select('#blockProgress')
-				.text(app.state.currentRollDistance.toFixed(1))
+				.text(current.toFixed(1))
 		},
 
 		// builds progress bar
@@ -202,8 +202,9 @@ var app = {
 					d3.selectAll('#zones .entry')
 					.classed('active', (d, entryIndex)=>{return d.startTime === id})
 				})
-				.append('span')
-				.attr('class', 'icon fas fa-cog')
+				.append('img')
+				.attr('class', 'icon fa-cog')
+				.attr('src', 'static/images/cog.svg')
 
 			// build progress bar
 			app.ui.progressBar.build(newZones)
@@ -396,7 +397,7 @@ var app = {
 
         getWheelTick: () =>{
         	app.io.loadJSON('/counter', (data)=>{
-        		app.state.currentRollDistance = (data.counter - app.state.systemRollDistance) / 10
+        		app.state.currentRollDistance = (data.counter) / 10
         		app.ui.roll()
         	})
         }
