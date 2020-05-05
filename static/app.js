@@ -4,7 +4,7 @@ var app = {
 		street: {
 			distance: 100
 		},
-
+		systemRollDistance:0,
 		currentRollDistance: 0,
 		zones: [],
 		mode: 'rolling'
@@ -354,7 +354,7 @@ var app = {
 				app.ui.mode.set('rolling');
 			})
 
-		// app.ui.mode.set(app.state.mode)
+		app.ui.mode.set(app.state.mode)
 
 		// set upload functionality
 		document.getElementById('uploadImg')
@@ -374,7 +374,32 @@ var app = {
 			oReq.responseType = 'json';
 			oReq.send(app.state.zones);
 
-		}
+		},
+
+		loadJSON: (path, success, error) => {
+			var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function()
+				{
+					if (xhr.readyState === XMLHttpRequest.DONE) {
+						if (xhr.status === 200) {
+							if (success)
+								success(JSON.parse(xhr.responseText));
+								} else {
+									if (error)
+									error(xhr);
+								}
+					}
+				};
+				xhr.open("GET", path, true);
+				xhr.send();
+        },
+
+        getWheelTick: () =>{
+        	app.io.loadJSON('/counter', (data)=>{
+        		app.state.currentRollDistance = (data.counter - app.state.systemRollDistance) / 10
+        		app.ui.roll()
+        	})
+        }
 	},
 
 	util: {
@@ -389,7 +414,8 @@ var app = {
 
 
 			app.init();
-			this.dummyRolling();
+			setInterval(()=>{app.io.getWheelTick()}, 500)
+			// this.dummyRolling();
 
 		},
 
