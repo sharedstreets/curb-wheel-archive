@@ -34,7 +34,7 @@ When setting up a deployment, users will also be prompted to provide configurati
 The graph is a network of all the streets in the area of interest. Each street in the graph has associated [SharedStreets linear referencing](https://sharedstreets.io/how-the-sharedstreets-referencing-system-works/) properties (such as a reference ID and length). The graph is created by the software on the Raspberry Pi, using the OpenStreetMap data included in the deployment.
 
 ### Street / Geometry
-A street is a segment of road, from one intersection to the next, which includes travel in both directions (where applicable). In the SharedStreets linear referencing system, this is referred to a "geometry".
+A street is a segment of road, from one intersection to the next, which includes travel in both directions (where applicable). In the SharedStreets linear referencing system, this is referred to as a "geometry".
 
 Each geometry has a corresponding, unique SharedStreets geometry ID which is determined when the graph is created.
 
