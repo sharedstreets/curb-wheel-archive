@@ -55,10 +55,8 @@ There are two other pieces of information needed to set up the deployment for th
 
 - Session
   - Surveys
-    - Spans / Zones
-      - Location points
-      - Image points
-      - Label / Type / Category
+    - Features (also have called these zones, or spans)
+      - Images
 
 ### Session
 A session begins when a CurbWheel user opens the app and begins to survey streets. The session ends when the app is closed. The session is a collection of surveys, each representing one "curb walk" down the street, in a specific direction.
