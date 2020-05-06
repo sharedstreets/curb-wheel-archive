@@ -90,12 +90,12 @@ test("server", async (t) => {
   t.equal(upload3.statusCode, 200, "upload 3 returned valid status code 200");
   t.equal(upload4.statusCode, 200, "upload 4 returned valid status code 200");
 
-  let survey = {};
+  let survey = { ok: 1 };
   let ref = "123";
   let saved = await request.post({
     url: "http://localhost:8081/surveys/" + ref,
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ok: 1 }),
+    body: JSON.stringify(survey),
   });
 
   t.equal(saved.statusCode, 200, "survey save returned valid status code 200");
@@ -111,7 +111,7 @@ test("server", async (t) => {
   );
   t.equal(
     surveysResponse.body,
-    JSON.stringify([{ ok: 1 }]),
+    JSON.stringify([survey]),
     "surveys matched uploaded data"
   );
 
