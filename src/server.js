@@ -140,17 +140,13 @@ async function main() {
     });
 
     app.get("/surveys/:ref", async (req, res) => {
-      console.log("GET SURVEYS");
       let ref = req.params.ref;
       let surveys = app.state.graph.surveys.get(ref);
       if (!surveys) {
         surveys = [];
       }
 
-      console.log(ref);
-      console.log(surveys);
-
-      res.status(200).send("surveys");
+      res.status(200).send(surveys);
     });
 
     app.post("/surveys/:ref", async (req, res) => {
