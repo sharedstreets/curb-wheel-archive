@@ -143,6 +143,48 @@ async function main() {
       res.status(200).send("Uploaded survey.");
     });
 
+    app.get("/admin", async (req, res) => {
+      let template = (
+        await fs.promises.readFile(
+          path.join(__dirname, "../templates/admin.html")
+        )
+      ).toString();
+      res.send(template);
+    });
+
+    app.post("/admin/update", async (req, res) => {
+      res.status(200).send(wifiSettings);
+    });
+
+    app.get("/admin/wifi", async (req, res) => {
+      const wifiSettings = JSON.parse(
+        fs.readFileSync(path.join(__dirname, "../config/wifi.json"))
+      );
+      // return wifiSettings
+      res.status(200).send(wifiSettings);
+    });
+
+    app.post("/admin/wifi", async (req, res) => {
+      const wifiSettings = JSON.stringify(req.body)
+        
+      // todo validate wifi
+
+      //write wifiSettings to config file
+      fs.writeFileSync(path.join(__dirname, "../config/wifi.json"), JSON.parse(wifiSettings))
+    
+      // return wifiSettings
+      res.status(200).send(wifiSettings);
+    });
+
+    app.get("/admin/version", async (req, res) => {
+      const versionNumber = JSON.parse(
+        fs.readFileSync(path.join(__dirname, "../package.json"))
+      ).version;
+    
+      // return version number
+      res.status(200).send({version: versionNumber});
+    });
+
     app.get("/*", async (req, res) => {
       let template = (
         await fs.promises.readFile(
