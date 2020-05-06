@@ -96,12 +96,10 @@ app.ui.map
             { units: "meters" }
           );
 
-          app.ui.map
-            .getSource("arrows")
-            .setData({
-              type: "FeatureCollection",
-              features: [forward, backward],
-            });
+          app.ui.map.getSource("arrows").setData({
+            type: "FeatureCollection",
+            features: [forward, backward],
+          });
 
           app.ui.mode.set("selectDirection");
         }

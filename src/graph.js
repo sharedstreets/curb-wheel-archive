@@ -126,6 +126,7 @@ Graph.prototype.extract = async function (pbf) {
         for (let way of ways) {
           way.properties.forward = shst.forwardReference(way).id;
           way.properties.back = shst.backReference(way).id;
+          way.properties.distance = turf.length(way, { units: "meters" });
         }
 
         this.streets = ways;
