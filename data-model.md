@@ -28,6 +28,8 @@ These input data can be created through the [HOT Export Tool](https://export.hot
 
 Once the deployment is loaded, software on the Raspberry Pi will process the OpenStreetMap street data to create a graph network of streets which have associated [SharedStreets linear referencing](https://sharedstreets.io/how-the-sharedstreets-referencing-system-works/) properties (such as a reference ID and length).
 
+When setting up a deployment, users will also be prompted to provide configuration properties, discussed below.
+
 ### Graph
 The graph is a network of all the streets in the area of interest. Each street in the graph has associated [SharedStreets linear referencing](https://sharedstreets.io/how-the-sharedstreets-referencing-system-works/) properties (such as a reference ID and length). The graph is created by the software on the Raspberry Pi, using the OpenStreetMap data included in the deployment.
 
