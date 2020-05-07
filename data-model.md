@@ -54,19 +54,10 @@ There are two other pieces of information needed to set up the deployment for th
 
 ## Survey data hierarchy
 
-- Session (not explicitly stored)
-  - Surveys
-    - Features (also have called these zones, or spans)
-      - Images
+- Surveys
+  - Features (also have called these zones, or spans, label)
+    - Points / positions
 
-### Session
-A session begins when a CurbWheel user opens the app and begins to survey streets. The session ends when the app is closed. The session is a collection of surveys, each representing one "curb walk" down the street, in a specific direction.
-
-Each session has:
-- A CurbWheel ID, which is assigned when the CurbWheel is first built and set up
-- A unique session ID, assigned when the app is launched (?)
-
-The session is not an object in the JSON; instead, the session ID and CurbWheel ID are stored as properties on each survey object.
 
 ### Survey
 A survey is made up of a list of features that were captured during one "curb walk" down the street, in a specific direction. In the app, when a user taps on a street on the map and selects which direction they are going, this begins the survey. When a user marks the street as complete and returns to the map view on the app, this ends the survey.
@@ -75,10 +66,9 @@ Each survey has:
 - A survey start time
 - A survey end time
 - A unique survey ID
-- The associated session ID
 - The associated CurbWheel ID
-- A linear reference ID
-- The side of street (left, right, or center; relative to direction of travel)
+- A linear reference ID (which includes the concept of directionality)
+- The side of street (left or right, relative to direction of travel)
 - An expected length (from the linear reference properties)
 - An observed length (from the distance the wheel rolled)
 - A collection of features that were captured during the survey
@@ -88,11 +78,11 @@ Each survey has:
 ```json
 {
   "wheel_id": "wheel-123",
-  "session_id": "123",
   "start_time": 123,
   "end_time": 234,
   "survey_id": 123,
-  "reference_id": 321,
+  "shst_ref_id": 321,
+  "side_of_street": "left",
   "observed_length": "441.6",
   "features": [
     "..."
@@ -100,50 +90,52 @@ Each survey has:
 }
 ```
 
-### Feature
+### Feature [Span or Position]
 A feature is a collection of information about an entity on the street, such as a "No parking" zone, a fire hydrant, a bus stop, or a driveway. A feature may be of type point-along or span-along. The feature categories and their associated geometry types are provided by the user when the deployment is being set up. Default feature categories and types may also be used.
 
 Tapping the button to add a new feature to the survey triggers the creation of a new feature object. Tapping the button to complete the feature or the survey will closes the feature object.
 
 Each feature has:
-- A feature category (type / label ?)
+- A feature label
+- The associated geometry type (span or position)
 - A unique feature ID
 - The associated survey ID
 - A linear reference ID
-- *For span-along features*: A wheel start distance and a wheel end distance (in metres) where the feature was created and then closed
-- *For point-along features*: A wheel distance (in metres) where the feature was created
+- *For span type features*: A wheel start distance and a wheel end distance (in metres) where the feature was created and then closed
+- *For position type features*: A wheel distance (in metres) where the feature was created
 - An adjusted start distance and adjusted end distance (for linestring features) or an adjusted location (for point features). To account for intersection offsets, features are given adjusted distances. These are calculated by taking the observed length of the street and centering it at the midpoint of the expected length. All features captured in a survey are given an adjusted position based on this transformation. This estimates where the features are actually located along the street. (not created on the client side; added by the server later)
 - A collection of images that were captured for the feature
 
 #### Example
+
+(all id's in this data model can be generated on the server, later, rather than the client. we'll use array position to interact with things during surveying. same approach for other properties wherever possible, for consistency)
 
 `span-along` type feature for representing a length of road with a stop and end point.
 
 ```json
 {
   "feature_id": "123",
-  "feature_type": "no parking",
-  "geometry_type": "span-along",
-  "wheel_start_length": 220.5,
-  "wheel_stop_length": 405.7,
-  "images": [
-    "..."
+  "label": "no parking",
+  "wheel_position": [220.5, 405.7],
+  "points": [
+    {
+       "point_id": "sdfsfs",
+       "wheel_position": 220.5
+    },
+    {
+       "point_id": "bsdfs",
+       "image_id": "Fl8HQpU",
+       "url": "https://i.imgur.com/Fl8HQpU.jpg",
+       "wheel_position": 264.8
+    },
+    {
+       "point_id": "wefjl",
+       "wheel_position": 405.7
+    }
   ]
 }
-```
 
-`point-along` type feature for representing a single location on a road.
 
-```json
-{
-  "feature_id": "124",
-  "feature_type": "hydrant",
-  "geometry_type": "point-along",
-  "wheel_length": 44.1,
-  "images": [
-    "..."
-  ]
-}
 ```
 
 ### Image
@@ -158,10 +150,11 @@ When features are active, a user may add one of more photographs of the feature.
 
 ```json
 {
+  "point_id": "bsdfs",
+  "feature_id": "124",
   "image_id": "Fl8HQpU",
   "url": "https://i.imgur.com/Fl8HQpU.jpg",
-  "geometry_type": "point-along",
-  "wheel_length": 264.8
+  "wheel_position": 264.8
 }
 ```
 
