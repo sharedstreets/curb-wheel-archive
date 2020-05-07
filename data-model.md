@@ -83,6 +83,23 @@ Each survey has:
 - An observed length (from the distance the wheel rolled)
 - A collection of features that were captured during the survey
 
+#### Example
+
+```json
+{
+  "wheel_id": "wheel-123",
+  "session_id": "123",
+  "start_time": 123,
+  "end_time": 234,
+  "survey_id": 123,
+  "reference_id": 321,
+  "observed_length": "441.6",
+  "features": [
+    "..."
+  ]
+}
+```
+
 ### Feature
 A feature is a collection of information about an entity on the street, such as a "No parking" zone, a fire hydrant, a bus stop, or a driveway. A feature may be of type point-along or span-along. The feature categories and their associated geometry types are provided by the user when the deployment is being set up. Default feature categories and types may also be used.
 
@@ -98,6 +115,37 @@ Each feature has:
 - An adjusted start distance and adjusted end distance (for linestring features) or an adjusted location (for point features). To account for intersection offsets, features are given adjusted distances. These are calculated by taking the observed length of the street and centering it at the midpoint of the expected length. All features captured in a survey are given an adjusted position based on this transformation. This estimates where the features are actually located along the street. (not created on the client side; added by the server later)
 - A collection of images that were captured for the feature
 
+#### Example
+
+`span-along` type feature for representing a length of road with a stop and end point.
+
+```json
+{
+  "feature_id": "123",
+  "feature_type": "no parking",
+  "geometry_type": "span-along",
+  "wheel_start_length": 220.5,
+  "wheel_stop_length": 405.7,
+  "images": [
+    "..."
+  ]
+}
+```
+
+`point-along` type feature for representing a single location on a road.
+
+```json
+{
+  "feature_id": "124",
+  "feature_type": "hydrant",
+  "geometry_type": "point-along",
+  "wheel_length": 44.1,
+  "images": [
+    "..."
+  ]
+}
+```
+
 ### Image
 When features are active, a user may add one of more photographs of the feature. Each image has:
 - An image URL to link to where the image is stored locally
@@ -105,6 +153,17 @@ When features are active, a user may add one of more photographs of the feature.
 - The associated feature ID
 - A wheel distance (in metres) where the image was captured
 - An adjusted distance (in metres) where the image was captured (see Feature, above, for more information) (not created on the client side; added by the server later)
+
+#### Example
+
+```json
+{
+  "image_id": "Fl8HQpU",
+  "url": "https://i.imgur.com/Fl8HQpU.jpg",
+  "geometry_type": "point-along",
+  "wheel_length": 264.8
+}
+```
 
 ## Data storage and export
 
