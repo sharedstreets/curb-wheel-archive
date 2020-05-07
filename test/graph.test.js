@@ -10,6 +10,7 @@ const writeFileAsync = promisify(fs.writeFile);
 const unlinkAsync = promisify(fs.unlink);
 
 test("graph", async (t) => {
+
   const pbf = path.join(__dirname, "./fixtures/honolulu.osm.pbf");
 
   let graph = new Graph();

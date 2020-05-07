@@ -1,14 +1,22 @@
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
+const bodyParser  = require('body-parser');
 const fileUpload = require("express-fileupload");
 const rimraf = require("rimraf");
 const mkdirp = require("mkdirp");
 const Graph = require("./graph");
 
+var counterOffsets = {};
+var pausedCounters = {};
+
 async function main() {
   return new Promise(async (resolve, reject) => {
     let app = express();
+
+    app.use(bodyParser.urlencoded({
+      extended: true
+    }));
 
     // constants
     const PORT = 8081;
@@ -45,14 +53,131 @@ async function main() {
       res.send(template);
     });
 
-    app.get("/counter", async (req, res) => {
+
+    app.get("/wheel", async (req, res) => {
+
       let counterValue = parseInt(
         (
           await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
         ).toString()
       );
 
-      res.json({ counter: counterValue });
+      res.json({ counter: counterValue, timestamp: Date.now()});
+    });
+
+    // post hook sets wheel internal value for testing
+    app.post("/wheel", async (req, res) => {
+
+      await fs.promises.writeFile(path.join(__dirname, "../ram/counter.txt"), req.body.counter + "");
+
+      let counterValue = parseInt(
+        (
+          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
+        ).toString()
+      );
+
+      res.json({ counter: counterValue, timestamp: Date.now()});
+    });
+
+    app.get("/counter/:counterId?", async (req, res) => {
+
+      let counterId = req.params.counterId ? req.params.counterId : 'default';
+
+      let counterValue = parseInt(
+        (
+          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
+        ).toString()
+      );
+
+      var offsetCounterValue;
+
+      // if paused return last measured value
+      if(pausedCounters[counterId]) {
+        offsetCounterValue = pausedCounters[counterId]; 
+      }
+      else {
+
+        // if counterId undefined set counter to zero -- implicit start/reset
+        if(counterOffsets[counterId] >= 0) {
+          // reutrn counter offset from last start value
+          offsetCounterValue = counterValue - counterOffsets[counterId];
+        }
+        else {
+          offsetCounterValue = counterValue;
+          counterOffsets[counterId] = counterValue;
+          pausedCounters[counterId] = null; 
+        }       
+      }
+
+      res.json({ counter: offsetCounterValue, timestamp: Date.now()});
+    });
+
+    app.post("/counter/:counterId?/pause", async (req, res) => {
+
+      let counterId = req.params.counterId ? eq.params.counterId : 'default';
+
+      let counterValue = parseInt(
+        (
+          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
+        ).toString()
+      );
+
+      // if counterId undefined set counter to zero -- implicit start/reset
+      if(counterOffsets[counterId] == null || counterOffsets[counterId] == undefined) {
+        counterOffsets[counterId] = counterValue;
+      }
+
+      // set paused value to current counter val
+      pausedCounters[counterId] = counterValue;
+
+      // reutrn paused value offset from last start value
+      var offsetCounterValue = pausedCounters[counterId] - counterOffsets[counterId];
+
+      res.json({ counter: offsetCounterValue, timestamp: Date.now()});
+
+    });
+
+    app.post("/counter/:counterId?/resume", async (req, res) => {
+
+      let counterId = req.params.counterId ? eq.params.counterId : 'default';
+
+      let counterValue = parseInt(
+        (
+          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
+        ).toString()
+      );
+      if(counterOffsets[counterId] >= 0 && pausedCounters[counterId] >= 0) {
+        counterOffsets[counterId] = counterOffsets[counterId] + (counterValue - pausedCounters[counterId])
+      } 
+      else {
+        counterOffsets[counterId] = counterValue;
+      }
+
+      pausedCounters[counterId] = null;
+
+      // reutrn counter offset from last start value
+      var offsetCounterValue = counterValue - counterOffsets[counterId];
+
+      res.json({ counter: offsetCounterValue, timestamp: Date.now()});
+    });
+
+    app.post("/counter/:counterId?/reset", async (req, res) => {
+      
+      let counterId = req.params.counterId ? eq.params.counterId : 'default';
+
+      let counterValue = parseInt(
+        (
+          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
+        ).toString()
+      );
+
+      counterOffsets[counterId] = counterValue;
+      pausedCounters[counterId] = null;  
+    
+      // reutrn counter offset from last start value
+      var offsetCounterValue = counterValue  - counterOffsets[counterId];
+
+      res.json({ counter: offsetCounterValue, timestamp: Date.now()});
     });
 
     app.get("/overview", async (req, res) => {
