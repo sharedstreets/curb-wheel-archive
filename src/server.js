@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const fileUpload = require("express-fileupload");
+const bodyParser  = require('body-parser');
 const rimraf = require("rimraf");
 const mkdirp = require("mkdirp");
 const Graph = require("./graph");
@@ -9,6 +10,12 @@ const Graph = require("./graph");
 async function main() {
   return new Promise(async (resolve, reject) => {
     let app = express();
+
+    app.use(bodyParser.urlencoded({
+      extended: true
+    }));
+
+    app.use(bodyParser.json());
 
     // constants
     const PORT = 8081;
@@ -157,9 +164,16 @@ async function main() {
     });
 
     app.get("/admin/wifi", async (req, res) => {
-      const wifiSettings = JSON.parse(
-        fs.readFileSync(path.join(__dirname, "../config/wifi.json"))
-      );
+      var wifiSettings = { mode: "ap", network : "", password : "" };
+      
+      try {
+        wifiSettings = JSON.parse(
+          fs.readFileSync(path.join(__dirname, "../config/wifi.json"))
+        );
+      }
+      catch (e) {
+        console.log(e)
+      }
       // return wifiSettings
       res.status(200).send(wifiSettings);
     });
@@ -170,7 +184,7 @@ async function main() {
       // todo validate wifi
 
       //write wifiSettings to config file
-      fs.writeFileSync(path.join(__dirname, "../config/wifi.json"), JSON.parse(wifiSettings))
+      fs.writeFileSync(path.join(__dirname, "../config/wifi.json"), wifiSettings)
     
       // return wifiSettings
       res.status(200).send(wifiSettings);
