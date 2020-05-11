@@ -115,7 +115,7 @@ async function main() {
 
     app.post("/counter/:counterId?/pause", async (req, res) => {
 
-      let counterId = req.params.counterId ? eq.params.counterId : 'default';
+      let counterId = req.params.counterId ? req.params.counterId : 'default';
 
       let counterValue = parseInt(
         (
@@ -140,7 +140,7 @@ async function main() {
 
     app.post("/counter/:counterId?/resume", async (req, res) => {
 
-      let counterId = req.params.counterId ? eq.params.counterId : 'default';
+      let counterId = req.params.counterId ? req.params.counterId : 'default';
 
       let counterValue = parseInt(
         (
@@ -164,7 +164,7 @@ async function main() {
 
     app.post("/counter/:counterId?/reset", async (req, res) => {
       
-      let counterId = req.params.counterId ? eq.params.counterId : 'default';
+      let counterId = req.params.counterId ? req.params.counterId : 'default';
 
       let counterValue = parseInt(
         (
