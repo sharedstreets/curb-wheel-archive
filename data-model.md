@@ -52,109 +52,91 @@ There are two other pieces of information needed to set up the deployment for th
 - Feature types. Buttons will appear in the app to help categorize the type of features that are being surveyed. These are the "feature types". For example, a user may use categories like "parking zone", "curb paint", "fire hydrant", or "tree bed". Each feature type must have an associated geometry type, either points (named "point-along" since they are points along a linear reference) or lines (named "span-along" since they are spans along a linear reference). For example, a parking zone has a beginning point and an end point, and it is therefore of type "span-along". A fire hydrant is of type "point-along".
 - The intersection offset length. Each street reference has a length, measured from the center of the start intersection to the center of the end intersection. When users roll the CurbWheel down the street, it will count upwards from zero, but they are not beginning from the center of the start intersection - there is an offset between the intersection and the beginning of the curb. We estimate this offset in order to calculate an "expected length" of the survey. When setting up a deployment, users are asked for an average number of lanes. This number is used to calculate an offset that will be applied (symmetrically) to the beginning and end of each street reference in order to determine the expected length. For example, a street reference may have a length of 100 metres. The user has given an offset of 4 travel lanes in each intersection. We estimate that each lane is roughly 3.048 metres (10 feet) wide. This means that we expect the wheel to start rolling when the user is 12.174 metres into the street reference, and to finish rolling when the user is 12.174 metres short of the end of the street reference. We factor in the offset to adjust the expected length to be 75.616 metres instead of 100 metres. Expected lengths are used to help keep track of relative progress when rolling along the street; they are estimates and need not be precise or accurate for every street reference.
 
-## Survey data hierarchy
-
-- Surveys
-  - Features (also have called these zones, or spans, label)
-    - Points / positions
-
 
 ### Survey
-A survey is made up of a list of features that were captured during one "curb walk" down the street, in a specific direction. In the app, when a user taps on a street on the map and selects which direction they are going, this begins the survey. When a user marks the street as complete and returns to the map view on the app, this ends the survey.
 
-Each survey has:
-- A survey start time
-- A survey end time
-- A unique survey ID
-- The associated CurbWheel ID
-- A linear reference ID (which includes the concept of directionality)
-- The side of street (left or right, relative to direction of travel)
-- An expected length (from the linear reference properties)
-- An observed length (from the distance the wheel rolled)
-- A collection of features that were captured during the survey
+A survey is made up of a list of features that were captured during one "curb walk" down the street, in a specific direction. In the app, when a user taps on a street on the map and selects which direction they are going, this begins the survey. When a user marks the street as complete and returns to the map view on the app, this ends the survey. A survey must contain a timestamp in epoch milliseconds, a SharedStreets reference ID, the side of street surveyed ("right" or "left"), a surveyed distance in meters, and a list of surveyed features.
 
 #### Example
 
 ```json
 {
-  "wheel_id": "wheel-123",
-  "start_time": 123,
-  "end_time": 234,
-  "survey_id": 123,
-  "shst_ref_id": 321,
-  "side_of_street": "left",
-  "observed_length": "441.6",
+  "created_at": 1588833685540,
+  "shst_ref_id": "6mjqqv7YNsp4541DmrrRbV",
+  "side_of_street": "right",
+  "surveyed_distance": "441.6",
   "features": [
     "..."
   ]
 }
 ```
 
-### Feature [Span or Position]
-A feature is a collection of information about an entity on the street, such as a "No parking" zone, a fire hydrant, a bus stop, or a driveway. A feature may be of type point-along or span-along. The feature categories and their associated geometry types are provided by the user when the deployment is being set up. Default feature categories and types may also be used.
+### Feature
 
-Tapping the button to add a new feature to the survey triggers the creation of a new feature object. Tapping the button to complete the feature or the survey will closes the feature object.
+A feature is a set of information about an entity on the street, such as a "no parking" zone, a fire hydrant, a bus stop, or a driveway. A feature must contain a valid label, linear geometry, and a list of associated images.
 
-Each feature has:
-- A feature label
-- The associated geometry type (span or position)
-- A unique feature ID
-- The associated survey ID
-- A linear reference ID
-- *For span type features*: A wheel start distance and a wheel end distance (in metres) where the feature was created and then closed
-- *For position type features*: A wheel distance (in metres) where the feature was created
-- An adjusted start distance and adjusted end distance (for linestring features) or an adjusted location (for point features). To account for intersection offsets, features are given adjusted distances. These are calculated by taking the observed length of the street and centering it at the midpoint of the expected length. All features captured in a survey are given an adjusted position based on this transformation. This estimates where the features are actually located along the street. (not created on the client side; added by the server later)
-- A collection of images that were captured for the feature
-
-#### Example
-
-(all id's in this data model can be generated on the server, later, rather than the client. we'll use array position to interact with things during surveying. same approach for other properties wherever possible, for consistency)
-
-`span-along` type feature for representing a length of road with a stop and end point.
+#### Feature<Span>
 
 ```json
 {
-  "feature_id": "123",
   "label": "no parking",
-  "wheel_position": [220.5, 405.7],
-  "points": [
+  "geometry": {
+    "type": "Span",
+    "distances": [220.5, 405.7]
+  },
+  "images": [
     {
-       "point_id": "sdfsfs",
-       "wheel_position": 220.5
-    },
-    {
-       "point_id": "bsdfs",
-       "image_id": "Fl8HQpU",
        "url": "https://i.imgur.com/Fl8HQpU.jpg",
-       "wheel_position": 264.8
+       "geometry":{
+         "type": "Position",
+         "distance": 214.8
+       }
     },
     {
-       "point_id": "wefjl",
-       "wheel_position": 405.7
+       "url": "https://i.imgur.com/dNE2Hlh.jpg",
+       "geometry":{
+         "type": "Position",
+         "distance": 311.4
+       }
+    },
+    {
+       "url": "https://i.imgur.com/Yhb2bJZ.jpg",
+       "geometry":{
+         "type": "Position",
+         "distance": 405.7
+       }
     }
   ]
 }
-
-
 ```
 
-### Image
-When features are active, a user may add one of more photographs of the feature. Each image has:
-- An image URL to link to where the image is stored locally
-- A unique image ID (may be the name of the image)
-- The associated feature ID
-- A wheel distance (in metres) where the image was captured
-- An adjusted distance (in metres) where the image was captured (see Feature, above, for more information) (not created on the client side; added by the server later)
+### Geometry
 
-#### Example
+There are two types of valid linear reference geometry in the CurbWheel data model, `Position` and `Span`. Geometries are similar to GeoJSON, but they represent linear offsets from the beginning of a [LineString](https://tools.ietf.org/html/rfc7946#section-3.1.4).
+
+#### Position
+
+A position is a fixed point along a LineString. It is described as a distance offset from the start of the LineString. `distance` must be a numeric type. The unit is meters.
+
+##### Example
 
 ```json
 {
-  "point_id": "bsdfs",
-  "feature_id": "124",
-  "image_id": "Fl8HQpU",
-  "url": "https://i.imgur.com/Fl8HQpU.jpg",
-  "wheel_position": 264.8
+  "type": "Position",
+  "distance": 264.8
+}
+```
+
+#### Span
+
+A span is a subsection along a LineString. It is described as a pair of distance offsets from the start of the LineString. `distances` must contain exactly 2 elements. The unit is meters.
+
+##### Example
+
+```json
+{
+  "type": "Span",
+  "distances": [264.8, 287.2]
 }
 ```
 
