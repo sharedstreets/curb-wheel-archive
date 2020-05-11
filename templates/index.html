@@ -51,7 +51,7 @@
         function getCounterValue() {
             var counterValueSpan = document.getElementById("counterValue");   
             loadJSON('/counter', 
-                function(data) { currentCounterValue = data.counter; counterValueSpan.textContent = ((currentCounterValue - counterOffset) / 10) + 'm'; },
+                function(data) { currentCounterValue = data.counter; counterValueSpan.textContent = (currentCounterValue - counterOffset) + 'm'; },
                 function(xhr) { console.error(xhr); }
             );
         }

@@ -56,26 +56,19 @@ async function main() {
 
 
     app.get("/wheel", async (req, res) => {
-
-      let counterValue = parseInt(
-        (
-          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
-        ).toString()
-      );
-
+      let counterValue = await getSensorValueInMeters();
       res.json({ counter: counterValue, timestamp: Date.now()});
     });
 
     // post hook sets wheel internal value for testing
     app.post("/wheel", async (req, res) => {
 
-      await fs.promises.writeFile(path.join(__dirname, "../ram/counter.txt"), req.body.counter + "");
+      // convert meters to 0.1m sensor increments
+      const sensorValue = (parseInt(req.body.counter) * 10);
 
-      let counterValue = parseInt(
-        (
-          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
-        ).toString()
-      );
+      await fs.promises.writeFile(path.join(__dirname, "../ram/counter.txt"), sensorValue + "");
+
+      let counterValue = await getSensorValueInMeters();
 
       res.json({ counter: counterValue, timestamp: Date.now()});
     });
@@ -84,11 +77,7 @@ async function main() {
 
       let counterId = req.params.counterId ? req.params.counterId : 'default';
 
-      let counterValue = parseInt(
-        (
-          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
-        ).toString()
-      );
+      let counterValue = await getSensorValueInMeters();
 
       var offsetCounterValue;
 
@@ -117,12 +106,8 @@ async function main() {
 
       let counterId = req.params.counterId ? req.params.counterId : 'default';
 
-      let counterValue = parseInt(
-        (
-          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
-        ).toString()
-      );
-
+      let counterValue = await getSensorValueInMeters();
+      
       // if counterId undefined set counter to zero -- implicit start/reset
       if(counterOffsets[counterId] == null || counterOffsets[counterId] == undefined) {
         counterOffsets[counterId] = counterValue;
@@ -142,11 +127,8 @@ async function main() {
 
       let counterId = req.params.counterId ? req.params.counterId : 'default';
 
-      let counterValue = parseInt(
-        (
-          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
-        ).toString()
-      );
+      let counterValue = await getSensorValueInMeters();
+
       if(counterOffsets[counterId] >= 0 && pausedCounters[counterId] >= 0) {
         counterOffsets[counterId] = counterOffsets[counterId] + (counterValue - pausedCounters[counterId])
       } 
@@ -166,11 +148,7 @@ async function main() {
       
       let counterId = req.params.counterId ? req.params.counterId : 'default';
 
-      let counterValue = parseInt(
-        (
-          await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
-        ).toString()
-      );
+      let counterValue = await getSensorValueInMeters();
 
       counterOffsets[counterId] = counterValue;
       pausedCounters[counterId] = null;  
@@ -301,6 +279,17 @@ async function main() {
       return resolve(server);
     });
   });
+}
+
+async function getSensorValueInMeters() {
+
+  const meters = parseInt(
+    (
+      await fs.promises.readFile(path.join(__dirname, "../ram/counter.txt"))
+    ).toString()
+  )  / 10; // convert to meters based on 0.1m per sensor increment 
+
+  return meters;
 }
 
 function uuid() {
