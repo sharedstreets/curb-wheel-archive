@@ -18,6 +18,7 @@ function Graph() {
   this.bounds = [-Infinity, -Infinity, Infinity, Infinity];
   this.center = [0, 0];
   this.index = {};
+  this.surveys = new Map();
   this.loaded = false;
 }
 
@@ -35,12 +36,16 @@ Graph.prototype.query = async function (bbox) {
 };
 
 Graph.prototype.save = async function (file) {
-  let copy = {
-    streets: this.streets,
-    bounds: this.bounds,
-    center: this.center,
-    index: this.index.toJSON(),
-  };
+  let copy = {};
+  copy.streets = this.streets;
+  copy.bounds = this.bounds;
+  copy.center = this.center;
+  copy.index = this.index.toJSON();
+  copy.surveys = {};
+  for (const [key, value] of this.surveys) {
+    copy.surveys[key] = value;
+  }
+
   await writeFileAsync(file, JSON.stringify(copy));
 };
 
@@ -51,6 +56,10 @@ Graph.prototype.load = async function (file) {
   this.bounds = data.bounds;
   this.center = data.center;
   this.index = new RBush().fromJSON(data.index);
+  this.surveys = new Map();
+  for (const key of Object.keys(data.surveys)) {
+    this.surveys.set(key, data.surveys[key]);
+  }
   this.loaded = true;
 };
 
@@ -117,6 +126,7 @@ Graph.prototype.extract = async function (pbf) {
         for (let way of ways) {
           way.properties.forward = shst.forwardReference(way).id;
           way.properties.back = shst.backReference(way).id;
+          way.properties.distance = turf.length(way, { units: "meters" });
         }
 
         this.streets = ways;
@@ -146,6 +156,7 @@ Graph.prototype.extract = async function (pbf) {
           k++;
         }
         this.index = index;
+        this.surveys = new Map();
 
         return resolve(this);
       });
