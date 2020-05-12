@@ -148,16 +148,23 @@ body, html {
 
 /*gear icon*/
 
+.icon {
+	width: 1em;
+    overflow: visible;
+    vertical-align: -.125em;
+}
 .fa-cog {
 	transform-origin: center;
 	transition:transform 0.25s;
-	opacity:0.5;
+	opacity:0.75;
+	filter:grayscale(1);
 }
 
 .active .fa-cog {
 	transform:rotate(90deg);
 	color:steelblue;
 	opacity:1;
+	filter:grayscale(0);
 }
 
 

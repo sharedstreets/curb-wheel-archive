@@ -123,4 +123,5 @@ body {
 .col6{
 	width:50%;
 	flex:none;
+	float:left;
 }
