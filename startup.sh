@@ -14,6 +14,3 @@ echo $! > $WHEEL_PID
 
 sudo modprobe ledtrig_heartbeat
 sudo su root -c 'echo heartbeat >/sys/class/leds/led0/trigger'
-
-# backup AP version of /etc/dhcpcd.conf for config switching
-sudo cp /etc/dhcpcd.conf /etc/raspap/backups/dhcpcd.conf.ap
