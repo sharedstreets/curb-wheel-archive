@@ -7,7 +7,7 @@ var app = {
 		systemRollDistance:0,
 		currentRollDistance: 0,
 		zones: [],
-		mode: 'rolling'
+		mode: 'selectStreet'
 	},
 
 	constants: {
@@ -36,8 +36,12 @@ var app = {
 				view:0,
 				title: 'Select a street',
 				set: ()=>{
+
+					//conditional on whether the map has instantiated
+					if (app.ui.map) {
 					app.ui.map.getSource('arrows')
 						.setData(app.constants.emptyGeojson);
+					}
 				}
 			},
 
