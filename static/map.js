@@ -3,7 +3,7 @@ mapboxgl.accessToken = 'pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.Fu
 
 app.ui.map = new mapboxgl.Map({
 	container: 'map',
-	style: 'mapbox://styles/mapbox/light-v10',
+	style: "http://10.3.141.1:8080/styles/basic-preview/style.json",
 	hash: true
 });
 
@@ -34,6 +34,7 @@ app.ui.map
 					},
 					'layout': {
 						'text-keep-upright': false,
+						"text-font" : ["Noto Sans Regular"],
 						'text-field': '{direction} → ',
 						'symbol-placement': 'line',
 						'symbol-spacing':{
