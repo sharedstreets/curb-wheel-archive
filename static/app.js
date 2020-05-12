@@ -1,5 +1,5 @@
 var app = {
-
+  
 	state: {
 		street: {
 			distance: 10
@@ -459,10 +459,4 @@ var app = {
 
 
 
-
 app.devMode.init();
-
-
-
-
-

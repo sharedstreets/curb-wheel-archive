@@ -1,5 +1,5 @@
-
-mapboxgl.accessToken = 'pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ';
+mapboxgl.accessToken =
+  "pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ";
 
 app.ui.map = new mapboxgl.Map({
 	container: 'map',
@@ -133,6 +133,7 @@ app.ui.map
 				})
 
 	})
+
 
 // app.ui.map.showCollisionBoxes = true
 // app.ui.map.showTileBoundaries = true

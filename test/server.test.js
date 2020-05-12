@@ -7,6 +7,7 @@ const rimraf = require("rimraf");
 const app = require("../src/server");
 
 request.post = util.promisify(request.post);
+request.get = util.promisify(request.get);
 
 test("server", async (t) => {
   let server = await app();
@@ -89,6 +90,32 @@ test("server", async (t) => {
   t.equal(upload3.statusCode, 200, "upload 3 returned valid status code 200");
   t.equal(upload4.statusCode, 200, "upload 4 returned valid status code 200");
 
+  let survey = { ok: 1 };
+  let ref = "123";
+  let saved = await request.post({
+    url: "http://localhost:8081/surveys/" + ref,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(survey),
+  });
+
+  t.equal(saved.statusCode, 200, "survey save returned valid status code 200");
+
+  let surveysResponse = await request.get(
+    "http://localhost:8081/surveys/" + ref
+  );
+
+  t.equal(
+    surveysResponse.statusCode,
+    200,
+    "surveys get returned valid status code 200"
+  );
+  t.equal(
+    surveysResponse.body,
+    JSON.stringify([survey]),
+    "surveys matched uploaded data"
+  );
+
+  // clean up
   server.close();
   rimraf.sync(path.join(__dirname, "../static/images/survey"));
 
