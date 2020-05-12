@@ -4,6 +4,7 @@ var app = {
 		street: {
 			distance: 10
 		},
+		systemRollOffset: 0,
 		systemRollDistance:0,
 		currentRollDistance: 0,
 		zones: [],
@@ -28,7 +29,8 @@ var app = {
 			exitSurvey: 'This abandons the current survey. Are you sure?',
 			deleteZone: 'This will delete the zone. Are you sure?', 
 			takePhoto: 'Set the wheel down so that it does not fall over. Feel free get in a good position to get the zone in the frame.',
-			finishZone: "This marks the end of the zone. Once complete, you won't be able to make further changes to this regulation."
+			finishZone: "This marks the end of the zone. Once complete, you won't be able to make further changes to this regulation.",
+			completeSurvey: "This will conclude the survey. Once finished, you won't be able to make further changes."
 		},
 
 		modes: {
@@ -85,6 +87,38 @@ var app = {
 		emptyGeojson: {type:'FeatureCollection', features:[]}
 	},
 
+
+	survey: {
+		init: ()=>{
+			
+			app.state.systemRollOffset = app.state.systemRollDistance;
+			app.state.zones = [];
+			app.ui.updateZones();
+
+			//populate street length
+			d3.select('#curbLength')
+				.text(Math.round(app.state.street.distance))
+
+			d3.select('#curbEntry .progressBar')
+				.attr('max', app.state.street.distance)
+		},
+
+		complete: () => {
+
+			//TODO Survey validation
+
+
+			var success = function(){
+
+				app.io.uploadSurvey();
+
+				app.ui.mode.set('selectStreet');
+			}
+
+			app.ui.confirm(app.constants.prompts.completeSurvey, success, null)
+
+		}
+	},
 	// functionality to add/delete/modify zones
 
 	zone: {
@@ -152,8 +186,7 @@ var app = {
 		// fires on roll signal from Pi. Updates all active progress bars and status texts
 		roll: function(){
 
-			var current = app.state.currentRollDistance - app.state.systemRollDistance;
-			console.log(current)
+			var current = app.state.currentRollDistance =  app.state.systemRollDistance - app.state.systemRollOffset;
 
 			//update progress bars that aren't complete yet
 			d3.selectAll('.entry:not(.complete) .bar')
@@ -332,16 +365,10 @@ var app = {
 		}
 	},
 
-	// initializes UI: populates curb attributes, builds modals
+	// initializes app UI: populates curb attributes, builds modals
 
 	init: function() {
-
-		//populate street length
-		d3.select('#curbLength')
-			.text(Math.round(app.state.street.distance))
-
-		d3.select('#curbEntry .progressBar')
-			.attr('max', app.state.street.distance)
+		console.log(Math.round(app.state.street.distance))
 
 		// build Add Zone modal
 		d3.select('#addZone')
@@ -401,7 +428,7 @@ var app = {
 
         getWheelTick: () =>{
         	app.io.loadJSON('/counter', (data)=>{
-        		app.state.currentRollDistance = (data.counter) / 10
+        		app.state.systemRollDistance = (data.counter) / 10
         		app.ui.roll()
         	})
         }

@@ -8,12 +8,13 @@
     <link rel="stylesheet" href="static/basics.css">
     <link rel="stylesheet" href="static/style.css">
     <script src='static/mapbox-gl.js'></script>
+
     <link href='static/mapbox-gl.css' rel='stylesheet' />
   </head>
     <body class='is-mobile'>
     <section class="" id='topBar'>
       <span class="icon fl m20" onclick='app.ui.back()'>
-        <i class="fas fa-arrow-left"></i>
+        <img src='static/images/back.svg' class='icon' style='fill:white'/>
       </span>
 
       <div class='big' id='title'>Select a Street</div>
@@ -54,8 +55,8 @@
           </div>
         </div>
         <div class='bottomButton'>
-          <div id='reset' class=' col6' onclick='app.state.systemRollDistance = app.state.currentRollDistance; app.ui.roll()'>Reset</div>
-          <div id='complete' class=' col6' onclick='alert("(This completes the survey, will take user back to map for next survey)"); app.io.uploadSurvey()'>Complete</div>
+          <div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
+          <div id='complete' class=' col6' onclick='app.survey.complete()'>Complete</div>
         </div>
       </div>
       <div id='addZone' class='mode'>

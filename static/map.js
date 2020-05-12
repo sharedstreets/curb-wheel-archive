@@ -34,7 +34,7 @@ app.ui.map
 					'layout': {
 						'text-keep-upright': false,
 						"text-font" : ["Noto Sans Regular"],
-						'text-field': '{direction} → ',
+						'text-field': '{direction} > ',
 						'symbol-placement': 'line',
 						'symbol-spacing':{
 							stops:[[16,20],[22,80]]
@@ -70,6 +70,7 @@ app.ui.map
 
 						var edge = e.features[0].geometry.coordinates;
 						app.state.street = e.features[0].properties;
+
 						app.ui.map
 							.fitBounds(turf.bbox(e.features[0]), {padding:60})
 
@@ -90,16 +91,18 @@ app.ui.map
 
 						var ref = e.features[0].properties.ref;
 
+						// sets the street direction and initializes the survey
+						var success = () =>{
+							app.state.street.ref = ref;
+
+							app.ui.mode.set('rolling');
+							app.devMode.rolling = true;
+
+							app.survey.init();
+						}
 						app.ui.confirm(
 							app.constants.prompts.beginSurvey, 
-							()=>{
-								app.state.street.ref = ref;
-								app.state.street.distance = 122;
-								app.state.currentRollDistance = 0;
-
-								app.ui.mode.set('rolling');
-								app.devMode.rolling= true;
-							}
+							success
 						)
 
 
