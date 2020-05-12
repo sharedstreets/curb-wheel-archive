@@ -5,6 +5,7 @@ const fileUpload = require("express-fileupload");
 const bodyParser  = require('body-parser');
 const rimraf = require("rimraf");
 const mkdirp = require("mkdirp");
+const child_process = require("child_process");
 const Graph = require("./graph");
 
 async function main() {
@@ -185,7 +186,18 @@ async function main() {
 
       //write wifiSettings to config file
       fs.writeFileSync(path.join(__dirname, "../config/wifi.json"), wifiSettings)
+
+      var wpaConfTemplate = fs.readFileSync(path.join(__dirname, "../config/wpa_supplicant.conf.template"),  'utf8')
     
+      var wpaConf = wpaConfTemplate.replace("[NAME OF WIFI NETWORK]", req.body.network)
+                        .replace("[WIFI NETWORK PASSWORD]", req.body.password);
+
+      fs.writeFileSync(path.join(__dirname, "../config/wpa_supplicant.conf"), wpaConf);
+
+      if(req.body.mode === "ap")
+        child_process.execSync("sh switch-to-ap.sh", {cwd:'/home/pi/curb-wheel/'});
+      else if(req.body.mode === "wifi")
+        child_process.execSync("sh switch-to-wifi.sh", {cwd:'/home/pi/curb-wheel/'})
       // return wifiSettings
       res.status(200).send(wifiSettings);
     });
