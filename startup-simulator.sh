@@ -6,7 +6,7 @@ if test -f "$TILESERVER_PID"; then
 fi
 
 echo "run tileserver"
-tileserver-gl-light test/fixtures/honolulu.mbtiles &
+tileserver-gl-light ./extract.mbtiles &
 echo $! > $TILESERVER_PID
 
 

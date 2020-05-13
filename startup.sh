@@ -12,7 +12,14 @@ echo "0" > ram/counter.txt
 python python/wheel.py &
 echo $! > $WHEEL_PID
 
-tileserver-gl-light tileserver/2017-07-03_us_hawaii.mbtiles &
+TILESERVER_PID=./tileserver.pid
+if test -f "$TILESERVER_PID"; then
+    pkill -F $TILESERVER_PID
+fi
+
+echo "run tileserver"
+tileserver-gl-light ./extract.mbtiles &
+echo $! > $TILESERVER_PID
 
 sudo modprobe ledtrig_heartbeat
 sudo su root -c 'echo heartbeat >/sys/class/leds/led0/trigger'
