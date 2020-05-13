@@ -35,8 +35,14 @@ var app = {
 		},
 
 		errors: {
-			unclosedZones: (num) =>{return `There ${num>1 ? 'are '+ num + 'zones' : 'is 1 zone'} still open. Please end those before completing the survey.`}
-		}
+			incompleteZones: (num) =>{return `There ${num>1 ? 'are '+ num + 'zones' : 'is one zone'} still unended. Please close those before completing the survey.`},
+			curbLengthDeviation: (ratio) =>{ 
+				var script = `The surveyed length is significantly ${ratio>1 ? 'longer' : 'shorter'} than expected. Tap Cancel to return to survey, or OK to proceed anyway.`
+				var keepDubiousSurvey = confirm(script) === true;
+				if (keepDubiousSurvey) app.survey.complete(true)
+			}
+		},
+
 		modes: {
 			selectStreet: {
 				view:0,
@@ -113,14 +119,23 @@ var app = {
 		validate: () =>{
 
 			var survey = app.state.zones;
+			var incompleteZones = survey.filter(d=>!d.end).length;
+			var surveyedLengthRatio = app.state.currentRollDistance / app.state.street.distance;
+			// check for unfinished zones
+			if (incompleteZones>0) alert(app.constants.errors.incompleteZones(incompleteZones))
+			
+			//check for significant deviations in surveyed curb length. user can restart survey or ignore 
+			else if (surveyedLengthRatio < 0.8 || surveyedLengthRatio > 1.1) {
+				app.constants.errors.curbLengthDeviation(surveyedLengthRatio);
+			}
 
-
+			else app.survey.complete()
 		},
 
-		complete: () => {
+
+		complete: (skipConfirmation) => {
 
 			//TODO Survey validation
-
 
 			var success = function(){
 
@@ -129,7 +144,10 @@ var app = {
 				app.ui.mode.set('selectStreet');
 			}
 
-			app.ui.confirm(app.constants.prompts.completeSurvey, success, null)
+			if (skipConfirmation) success()
+			else app.ui.confirm(app.constants.prompts.completeSurvey, success, null)
+
+		
 
 		}
 	},
@@ -376,12 +394,16 @@ var app = {
 				// some users disable dialogs in browser, which we will detect as an immediate programmatic response to the dialog
 				var promptTime = Date.now();
 				var confirmed = confirm(text);
-				var responseTime = Date.now();
-				var browserDialogsDisabled = responseTime - promptTime < 20;
 
+				console.log('mark', responseTime)
 				// if user confirms or had dialogs disabled, proceed to "ok" state
-				if (browserDialogsDisabled || confirmed === true) ok()
-				else if (cancel) cancel()
+				if (confirmed === true) ok()
+				else if (cancel) {
+					var responseTime = Date.now();
+					var browserDialogsDisabled = responseTime - promptTime < 20;
+					if (browserDialogsDisabled) ok()
+					else cancel()
+				}
 			}
 
 
