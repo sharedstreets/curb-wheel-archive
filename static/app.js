@@ -34,6 +34,9 @@ var app = {
 			completeSurvey: "This will conclude the survey. Once finished, you won't be able to make further changes."
 		},
 
+		errors: {
+			unclosedZones: (num) =>{return `There ${num>1 ? 'are '+ num + 'zones' : 'is 1 zone'} still open. Please end those before completing the survey.`}
+		}
 		modes: {
 			selectStreet: {
 				view:0,
@@ -90,6 +93,8 @@ var app = {
 
 
 	survey: {
+
+		// sets up parameters of the selected street, preparing for survey
 		init: ()=>{
 			
 			app.state.systemRollOffset = app.state.systemRollDistance;
@@ -102,6 +107,14 @@ var app = {
 
 			d3.select('#curbEntry .progressBar')
 				.attr('max', app.state.street.distance)
+		},
+
+		// checks current survey before submission
+		validate: () =>{
+
+			var survey = app.state.zones;
+
+
 		},
 
 		complete: () => {
