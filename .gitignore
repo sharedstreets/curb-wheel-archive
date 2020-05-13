@@ -103,9 +103,10 @@ dist
 # TernJS port file
 .tern-port
 
-# DS Store 
+# DS Store
 .DS_Store
 
 # wheel local files
 ram/
 wheel.pid
+static/images/survey/

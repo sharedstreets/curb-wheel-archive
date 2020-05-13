@@ -14,11 +14,10 @@ async function main() {
 
     app.use(fileUpload());
 
-    // app.use(bodyParser.urlencoded({
-    //   extended: true
-    // }));
-
-    // app.use(bodyParser.json());
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({
+      extended: true
+    }));
 
     // constants
     const PORT = 8081;
@@ -152,7 +151,6 @@ async function main() {
       if (!surveys) {
         surveys = [];
       }
-
       surveys.push(req.body);
       app.state.graph.surveys.set(ref, surveys);
 

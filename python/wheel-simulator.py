@@ -11,10 +11,10 @@ def incrementCounter():
         counter += 1
         with open(COUNTER_OUTPUT_PATH, 'w') as fileOut:
                 fileOut.write(str(counter))
-                
+
 print "starting wheel counter simulator"
 
 # run code
 while True:
-	time.sleep(5)
+	time.sleep(1)
         incrementCounter()

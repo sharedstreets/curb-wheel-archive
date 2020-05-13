@@ -339,8 +339,6 @@ var app = {
   // initializes app UI: populates curb attributes, builds modals
 
   init: function () {
-    console.log(Math.round(app.state.street.distance));
-
     // build Add Zone modal
     d3.select("#addZone")
       .selectAll(".zoneType")
@@ -370,10 +368,37 @@ var app = {
     },
 
     uploadSurvey: () => {
-      var oReq = new XMLHttpRequest();
-      oReq.open("POST", "http://127.0.0.1:8081/survey");
-      oReq.responseType = "json";
-      oReq.send(app.state.zones);
+      let survey = {
+        "created_at": Date.now(),
+        "shst_ref_id": app.state.street.ref,
+        "side_of_street": "right",
+        "surveyed_distance": app.state.currentRollDistance,
+        "features": []
+      };
+
+      for (let zone of app.state.zones) {
+        console.log(zone)
+        let feature = {
+          label: zone.type,
+          geometry: {
+            type: "Span",
+            distances: [zone.start, zone.end]
+          },
+          images: []
+        };
+        survey.features.push(feature);
+      }
+
+      var xhr = new XMLHttpRequest();
+      var url = "/surveys/" + app.state.street.ref;
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+              // uploaded survey
+          }
+      };
+      xhr.send(JSON.stringify(survey));
     },
 
     loadJSON: (path, success, error) => {
@@ -393,7 +418,7 @@ var app = {
 
     getWheelTick: () => {
       app.io.loadJSON("/counter", (data) => {
-        app.state.systemRollDistance = data.counter / 10;
+        app.state.systemRollDistance = data.counter / 2;
         app.ui.roll();
       });
     },
