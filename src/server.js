@@ -43,6 +43,11 @@ async function main() {
           path.join(__dirname, "../templates/index.html")
         )
       ).toString();
+
+      template = template
+        .split("{{bounds}}")
+        .join(JSON.stringify(app.state.graph.bounds));
+
       res.send(template);
     });
 
@@ -54,20 +59,6 @@ async function main() {
       );
 
       res.json({ counter: counterValue });
-    });
-
-    app.get("/overview", async (req, res) => {
-      let template = (
-        await fs.promises.readFile(
-          path.join(__dirname, "../templates/overview.html")
-        )
-      ).toString();
-
-      template = template
-        .split("{{bounds}}")
-        .join(JSON.stringify(app.state.graph.bounds));
-
-      res.send(template);
     });
 
     app.get("/query", async (req, res) => {

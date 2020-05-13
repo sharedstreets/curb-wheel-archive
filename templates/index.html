@@ -12,6 +12,9 @@
     <link href='static/mapbox-gl.css' rel='stylesheet' />
   </head>
     <body class='is-mobile'>
+    <script>
+      bounds = {{bounds}}
+    </script>
     <section class="" id='topBar'>
       <span class="icon fl m20" onclick='app.ui.back()'>
         <img src='static/images/back.svg' class='icon' style='fill:white'/>
@@ -33,7 +36,7 @@
             <span class='small quiet'>
               <span id='blockProgress'>0</span>m of ~
               <span id='curbLength'></span>m
-            </span> 
+            </span>
           </div>
         </div>
         <div class='scroll-drawer'>

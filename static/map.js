@@ -8,14 +8,15 @@ app.ui.map = new mapboxgl.Map({
 });
 
 app.ui.map
+  .fitBounds([bounds.slice(0,2), bounds.slice(2,4)])
 	.on('load', () => {
 
 			app.ui.map
 				.addLayer({
-					'id': 'streets', 
-					'type':'line', 
+					'id': 'streets',
+					'type':'line',
 					'source':{
-						type: 'geojson', 
+						type: 'geojson',
 						data: app.constants.emptyGeojson
 					},
 					'paint':{
@@ -25,10 +26,10 @@ app.ui.map
 					}
 				})
 				.addLayer({
-					'id': 'arrows', 
-					'type':'symbol', 
+					'id': 'arrows',
+					'type':'symbol',
 					'source':{
-						type: 'geojson', 
+						type: 'geojson',
 						data: app.constants.emptyGeojson
 					},
 					'layout': {
@@ -54,15 +55,15 @@ app.ui.map
 					}
 				})
 				.addLayer({
-					'id': 'curbs', 
-					'type':'line', 
+					'id': 'curbs',
+					'type':'line',
 					'source':{
-						type: 'geojson', 
+						type: 'geojson',
 						data: {type:'FeatureCollection', features:[]}
 					},
 					'paint':{
 						'line-width': 3
-					}					
+					}
 				})
 				.on('click', 'streets', (e)=>{
 
@@ -77,7 +78,7 @@ app.ui.map
 						var forward = turf.lineOffset(turf.lineString(edge, {direction:'A', ref: e.features[0].properties.forward}), 10, {units: 'meters'});
 						edge.reverse();
 						var backward = turf.lineOffset(turf.lineString(edge, {direction:'B', ref: e.features[0].properties.back}), 10, {units: 'meters'});
-						
+
 						app.ui.map.getSource('arrows')
 							.setData({type:'FeatureCollection', features:[forward, backward]})
 
@@ -101,7 +102,7 @@ app.ui.map
 							app.survey.init();
 						}
 						app.ui.confirm(
-							app.constants.prompts.beginSurvey, 
+							app.constants.prompts.beginSurvey,
 							success
 						)
 
@@ -128,10 +129,10 @@ app.ui.map
 							.then((streets) => {
 								app.ui.map.getSource('streets').setData(streets);
 							});
-					} 
-					
+					}
+
 					else app.ui.map.getSource('streets').setData(app.constants.emptyGeojson);
-					
+
 				})
 
 	})
