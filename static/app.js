@@ -371,7 +371,7 @@ var app = {
 
     uploadSurvey: () => {
       var oReq = new XMLHttpRequest();
-      oReq.open("POST", "http://0.0.0.0:8081/survey");
+      oReq.open("POST", "http://127.0.0.1:8081/survey");
       oReq.responseType = "json";
       oReq.send(app.state.zones);
     },

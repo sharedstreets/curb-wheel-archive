@@ -12,7 +12,7 @@ async function main() {
   return new Promise(async (resolve, reject) => {
     let app = express();
 
-    app.use(fileUpload());  
+    app.use(fileUpload());
 
     // app.use(bodyParser.urlencoded({
     //   extended: true
@@ -174,7 +174,7 @@ async function main() {
 
     app.get("/admin/wifi", async (req, res) => {
       var wifiSettings = { mode: "ap", network : "", password : "" };
-      
+
       try {
         wifiSettings = JSON.parse(
           fs.readFileSync(path.join(__dirname, "../config/wifi.json"))
@@ -189,14 +189,14 @@ async function main() {
 
     app.post("/admin/wifi", async (req, res) => {
       const wifiSettings = JSON.stringify(req.body)
-        
+
       // todo validate wifi
 
       //write wifiSettings to config file
       fs.writeFileSync(path.join(__dirname, "../config/wifi.json"), wifiSettings)
 
       var wpaConfTemplate = fs.readFileSync(path.join(__dirname, "../config/wpa_supplicant.conf.template"),  'utf8')
-    
+
       var wpaConf = wpaConfTemplate.replace("[NAME OF WIFI NETWORK]", req.body.network)
                         .replace("[WIFI NETWORK PASSWORD]", req.body.password);
 
@@ -214,7 +214,7 @@ async function main() {
       const versionNumber = JSON.parse(
         fs.readFileSync(path.join(__dirname, "../package.json"))
       ).version;
-    
+
       // return version number
       res.status(200).send({version: versionNumber});
     });
@@ -230,7 +230,7 @@ async function main() {
     });
 
     let server = app.listen(PORT, () => {
-      console.log("listening on: 0.0.0.0:" + PORT);
+      console.log("listening on: 127.0.0.1:" + PORT);
       return resolve(server);
     });
   });
