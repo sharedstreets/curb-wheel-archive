@@ -12,20 +12,19 @@ async function main() {
   return new Promise(async (resolve, reject) => {
     let app = express();
 
-    app.use(bodyParser.urlencoded({
-      extended: true
-    }));
+    app.use(fileUpload());  
 
-    app.use(bodyParser.json());
+    // app.use(bodyParser.urlencoded({
+    //   extended: true
+    // }));
+
+    // app.use(bodyParser.json());
 
     // constants
     const PORT = 8081;
     const PBF = path.join(__dirname, "../extract.osm.pbf");
     const MBTILES = path.join(__dirname, "../extract.mbtiles");
     const IMAGES = path.join(__dirname, "../static/images/survey");
-
-    // middleware
-    app.use(fileUpload());
 
     // application state
     app.state = {};
