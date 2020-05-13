@@ -2,13 +2,14 @@ var app = {
   
 	state: {
 		street: {
-			distance: 10
+			distance: 0
 		},
 		systemRollOffset: 0,
 		systemRollDistance:0,
 		currentRollDistance: 0,
 		zones: [],
-		mode: 'selectStreet'
+		mode: 'selectStreet',
+		promptsUsed: {}
 	},
 
 	constants: {
