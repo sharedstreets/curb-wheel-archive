@@ -4,12 +4,12 @@ var app = {
 		street: {
 			distance: 0
 		},
-		systemRollOffset: 0,
-		systemRollDistance:0,
-		currentRollDistance: 0,
+		systemRollOffset: 0,	// offset to subtract from reported distance
+		systemRollDistance:0,	// rolled distance as reported by Pi
+		currentRollDistance: 0,	// computed roll from distance and offset
 		zones: [],
 		mode: 'selectStreet',
-		promptsUsed: {}
+		promptsUsed: []			// tracks prompts that have been displayed to avoid second display
 	},
 
 	constants: {
@@ -352,9 +352,25 @@ var app = {
 
 		confirm: function(text, ok, cancel) {
 
-			var confirmed = confirm(text);
-			if (confirmed === true) ok()
-			else if (cancel) cancel()
+			// if confirm prompt has already been used, go directly to "ok" state
+			if (app.state.promptsUsed.includes(text)) ok()
+
+			// otherwise, log it and bring up dialog
+			else {
+
+				app.state.promptsUsed.push(text);
+
+				// some users disable dialogs in browser, which we will detect as an immediate programmatic response to the dialog
+				var promptTime = Date.now();
+				var confirmed = confirm(text);
+				var responseTime = Date.now();
+				var browserDialogsDisabled = responseTime - promptTime < 20;
+
+				// if user confirms or had dialogs disabled, proceed to "ok" state
+				if (browserDialogsDisabled || confirmed === true) ok()
+				else if (cancel) cancel()
+			}
+
 
 		},
 
