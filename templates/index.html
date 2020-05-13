@@ -12,6 +12,9 @@
     <link href='static/mapbox-gl.css' rel='stylesheet' />
   </head>
     <body class='is-mobile'>
+    <script>
+      bounds = {{bounds}}
+    </script>
     <section class="" id='topBar'>
       <span class="icon fl m20" onclick='app.ui.back()'>
         <img src='static/images/back.svg' class='icon' style='fill:white'/>
@@ -33,11 +36,11 @@
             <span class='small quiet'>
               <span id='blockProgress'>0</span>m of ~
               <span id='curbLength'></span>m
-            </span> 
+            </span>
           </div>
         </div>
         <div class='scroll-drawer'>
-          <form ref='uploadForm' id='uploadForm' class='hidden' action='http://localhost:8081/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
+          <form ref='uploadForm' id='uploadForm' class='hidden' action='http://127.0.0.1:8081/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
             <input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
             <input type='submit' id ='imageSubmit' value='Upload!' />
           </form>

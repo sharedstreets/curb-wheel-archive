@@ -20,7 +20,7 @@ test("server", async (t) => {
 
   let res = await request
     .post({
-      url: "http://localhost:8081/pbf",
+      url: "http://127.0.0.1:8081/pbf",
       formData: {
         pbf: pbf,
       },
@@ -46,7 +46,7 @@ test("server", async (t) => {
 
   let upload1 = await request
     .post({
-      url: "http://localhost:8081/photo",
+      url: "http://127.0.0.1:8081/photo",
       formData: {
         image: image1,
       },
@@ -56,7 +56,7 @@ test("server", async (t) => {
     });
   let upload2 = await request
     .post({
-      url: "http://localhost:8081/photo",
+      url: "http://127.0.0.1:8081/photo",
       formData: {
         image: image2,
       },
@@ -66,7 +66,7 @@ test("server", async (t) => {
     });
   let upload3 = await request
     .post({
-      url: "http://localhost:8081/photo",
+      url: "http://127.0.0.1:8081/photo",
       formData: {
         image: image3,
       },
@@ -76,7 +76,7 @@ test("server", async (t) => {
     });
   let upload4 = await request
     .post({
-      url: "http://localhost:8081/photo",
+      url: "http://127.0.0.1:8081/photo",
       formData: {
         image: image4,
       },
@@ -93,16 +93,14 @@ test("server", async (t) => {
   let survey = { ok: 1 };
   let ref = "123";
   let saved = await request.post({
-    url: "http://localhost:8081/surveys/" + ref,
+    url: "http://127.0.0.1:8081/surveys/" + ref,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(survey),
   });
 
   t.equal(saved.statusCode, 200, "survey save returned valid status code 200");
 
-  let surveysResponse = await request.get(
-    "http://localhost:8081/surveys/" + ref
-  );
+  let surveysResponse = await request.get("http://127.0.0.1:8081/surveys/" + ref);
 
   t.equal(
     surveysResponse.statusCode,
