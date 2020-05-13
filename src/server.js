@@ -173,6 +173,7 @@ async function main() {
     });
 
     let server = app.listen(PORT, () => {
+      console.log("listening on: localhost:" + PORT)
       return resolve(server);
     });
   });
