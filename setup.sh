@@ -7,8 +7,9 @@ sudo apt upgrade
 # INSTALL NODE & NPM
 sudo apt install nodejs npm
 
-# SETUP AP MODE (production deployment)
+# SETUP AP MODE (default production deployment)
 sh setup-ap.sh
 
 # SETUP LOCAL WIFI MODE (development deployment)
 # sh setup-wifi.sh
+

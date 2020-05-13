@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CurbWheel Admin</title>
+    <link rel="stylesheet" href="/static/bulma.min.css">
+  </head>
+  <body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        CurbWheel Admin
+      </h1>
+      <p class="subtitle">
+        Current version: <strong><span id="currentVersion"></span></strong>
+        <div class="buttons">
+            <input type="file" id="zipFile" label="select zip of cubwheel distribution"/>
+            <button id="clearButton" onclick="" class="button is-primary" disabled>Upload code</button>
+        </div>
+      </p>
+
+      <p class="subtitle">
+        Current OSM file: <strong><span id="currentMap"></span></strong>
+        <div class="buttons">
+            <input type="file" id="pbfFile" label="select OSM pbf file"/>
+            <button id="clearButton" onclick="uploadPbf()" class="button is-primary">Upload OSM</button>
+        </div>
+      </p>
+
+      <p class="subtitle">
+        Current MBTiles file: <strong><span id="currentMap"></span></strong>
+        <div class="buttons">
+            <input type="file" id="mbtilesFile" label="select mbtiles file"/>
+            <button id="clearButton" onclick="uploadMbtiles()" class="button is-primary">Upload MBtiles</button>
+        </div>
+      </p>
+
+
+      <p class="subtitle">
+        <div class="control">
+            <label class="radio">
+              <input type="radio" name="mode" value="wifi">
+              Use Local Network
+            </label>
+            <label class="radio">
+              <input type="radio" name="mode" value="ap">
+              Run Access Point
+            </label>
+          </div>
+        <input class="input" id="networkField" placeholder="Wifi network">
+        <input class="input" id="passwordField" placeholder="Wifi password">
+      </p>
+      <div class="buttons">
+        <button id="clearButton" onclick="updateNetwork()" class="button is-primary">Update Network</button>
+      </div>
+    </div>
+  </section>
+
+  <script> 
+
+    function loadJSON(path, success, error) {
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function()
+        {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    if (success)
+                        success(JSON.parse(xhr.responseText));
+                } else {
+                    if (error)
+                        error(xhr);
+                }
+            }
+        };
+        xhr.open("GET", path, true);
+        xhr.send();
+    }
+
+    function postJSON(path, data, success, error) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', path, true);
+        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+        // send the collected data as JSON
+        xhr.send(JSON.stringify(data));
+
+        xhr.onloadend = function () {
+            if (xhr.status === 200) {
+                    if (success)
+                        success(xhr.responseText);
+                } else {
+                    if (error)
+                        error(xhr);
+                }
+        };
+    }
+
+    function uploadFile(file, filenameField, url) {
+      const xhr = new XMLHttpRequest();
+
+      /* Create a FormData instance */
+      var formData = new FormData();
+      /* Add the file */ 
+      formData.append(filenameField, file);
+      xhr.open("POST", url, true);
+      xhr.send(formData);
+    }
+
+    function uploadPbf() {
+        var pbfFile = document.getElementById("pbfFile").files[0];   
+        uploadFile(pbfFile, "pbf", "/pbf")
+    }
+
+    function uploadMbtiles() {
+        var mbtilesFile = document.getElementById("mbtilesFile");   
+        uploadFile(mbtilesFile, "mbtiles", "/mbtiles")
+    }
+
+    // function uploadZip() {
+    //     var mbtilesFile = document.getElementById("zipFile");   
+    //     uploadFile(mbtilesFile, "zip", "/upgrade")
+    // }
+
+    function getCurrentVersion() {
+        var currentVersionSpan = document.getElementById("currentVersion");   
+        loadJSON('/admin/version', 
+            function(data) { currentVersionSpan.textContent = data.version },
+            function(xhr) { console.error(xhr); }
+        );
+    }
+
+    function getCurrentNetwork() {
+        var networkField = document.getElementById("networkField");   
+        var passwordField = document.getElementById("passwordField");   
+        loadJSON('/admin/wifi', 
+            function(data) {
+                networkField.value = data.network; 
+                passwordField.value = data.password; 
+                setCurrentMode(data.mode); },
+            function(xhr) { console.error(xhr); }
+        );
+    }
+
+    function getCurrentMode() {
+        var radios = document.getElementsByName('mode');
+
+        for (var i = 0, length = radios.length; i < length; i++) {
+            if (radios[i].checked) {
+                // do whatever you want with the checked radio
+                return radios[i].value;
+
+                // only one radio can be logically checked, don't check the rest
+                break;
+            }
+        }
+    }
+
+    function setCurrentMode(modeValue) {
+        var radios = document.getElementsByName('mode');
+
+        for (var i = 0, length = radios.length; i < length; i++) {
+            if (radios[i].value === modeValue) {
+                // do whatever you want with the checked radio
+                radios[i].checked = true;
+
+                // only one radio can be logically checked, don't check the rest
+                break;
+            }
+        }
+    }
+
+    function updateNetwork() {
+        var networkField = document.getElementById("networkField");   
+        var passwordField = document.getElementById("passwordField"); 
+        var modeValue = getCurrentMode();
+        var data = {
+            network : networkField.value,
+            password : passwordField.value,
+            mode : modeValue
+        }
+     
+        postJSON('/admin/wifi', data, function(data) {  }, function(xhr) { console.error(xhr); });
+    }
+    
+    getCurrentVersion();
+    getCurrentNetwork();
+
+</script> 
+
+  </body>
+</html>
