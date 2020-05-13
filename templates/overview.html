@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="static/style.css">
     <script src='static/mapbox-gl.js'></script>
     <link href='static/mapbox-gl.css' rel='stylesheet' />
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <!-- <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script> -->
   </head>
     <body class='is-mobile'>
     <section class="" id='topBar'>
@@ -57,15 +57,18 @@
             </p>
           </div>
         </div>
-        <div id='complete' class='bottomButton' onclick='alert("(This completes the survey, will take user back to map for next survey)"); app.io.uploadSurvey()'>Complete</div>
+        <div class='bottomButton'>
+          <div id='reset' class=' col6' onclick='app.state.systemRollDistance = app.state.currentRollDistance; app.ui.roll()'>Reset</div>
+          <div id='complete' class=' col6' onclick='alert("(This completes the survey, will take user back to map for next survey)"); app.io.uploadSurvey()'>Complete</div>
+        </div>
       </div>
       <div id='addZone' class='mode'>
       </div>
     </div>
     </body>
-  <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="static/d3.v4.min.js"></script>
   <script src='static/app.js'></script>
-  <script src='https://unpkg.com/@turf/turf/turf.min.js'></script>
+  <script src='static/turf.min.js'></script>
   <script src='static/map.js'></script>
 
 </html>

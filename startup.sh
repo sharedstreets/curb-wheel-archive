@@ -12,5 +12,7 @@ echo "0" > ram/counter.txt
 python python/wheel.py &
 echo $! > $WHEEL_PID
 
+tileserver-gl-light tileserver/2017-07-03_us_hawaii.mbtiles &
+
 sudo modprobe ledtrig_heartbeat
 sudo su root -c 'echo heartbeat >/sys/class/leds/led0/trigger'

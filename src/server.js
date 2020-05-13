@@ -145,8 +145,26 @@ async function main() {
       });
     });
 
-    app.post("/survey", async (req, res) => {
-      // todo: save to edge index
+    app.get("/surveys/:ref", async (req, res) => {
+      let ref = req.params.ref;
+      let surveys = app.state.graph.surveys.get(ref);
+      if (!surveys) {
+        surveys = [];
+      }
+
+      res.status(200).send(surveys);
+    });
+
+    app.post("/surveys/:ref", async (req, res) => {
+      let ref = req.params.ref;
+      let surveys = app.state.graph.surveys.get(ref);
+      if (!surveys) {
+        surveys = [];
+      }
+
+      surveys.push(req.body);
+      app.state.graph.surveys.set(ref, surveys);
+
       res.status(200).send("Uploaded survey.");
     });
 
@@ -221,6 +239,7 @@ async function main() {
     });
 
     let server = app.listen(PORT, () => {
+      console.log("listening on: localhost:" + PORT)
       return resolve(server);
     });
   });

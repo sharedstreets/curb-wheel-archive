@@ -1,13 +1,14 @@
 var app = {
-
+  
 	state: {
 		street: {
-			distance: 100
+			distance: 10
 		},
-
+		systemRollOffset: 0,
+		systemRollDistance:0,
 		currentRollDistance: 0,
 		zones: [],
-		mode: 'rolling'
+		mode: 'selectStreet'
 	},
 
 	constants: {
@@ -28,7 +29,8 @@ var app = {
 			exitSurvey: 'This abandons the current survey. Are you sure?',
 			deleteZone: 'This will delete the zone. Are you sure?', 
 			takePhoto: 'Set the wheel down so that it does not fall over. Feel free get in a good position to get the zone in the frame.',
-			finishZone: "This marks the end of the zone. Once complete, you won't be able to make further changes to this regulation."
+			finishZone: "This marks the end of the zone. Once complete, you won't be able to make further changes to this regulation.",
+			completeSurvey: "This will conclude the survey. Once finished, you won't be able to make further changes."
 		},
 
 		modes: {
@@ -36,8 +38,12 @@ var app = {
 				view:0,
 				title: 'Select a street',
 				set: ()=>{
+
+					//conditional on whether the map has instantiated
+					if (app.ui.map) {
 					app.ui.map.getSource('arrows')
 						.setData(app.constants.emptyGeojson);
+					}
 				}
 			},
 
@@ -81,6 +87,38 @@ var app = {
 		emptyGeojson: {type:'FeatureCollection', features:[]}
 	},
 
+
+	survey: {
+		init: ()=>{
+			
+			app.state.systemRollOffset = app.state.systemRollDistance;
+			app.state.zones = [];
+			app.ui.updateZones();
+
+			//populate street length
+			d3.select('#curbLength')
+				.text(Math.round(app.state.street.distance))
+
+			d3.select('#curbEntry .progressBar')
+				.attr('max', app.state.street.distance)
+		},
+
+		complete: () => {
+
+			//TODO Survey validation
+
+
+			var success = function(){
+
+				app.io.uploadSurvey();
+
+				app.ui.mode.set('selectStreet');
+			}
+
+			app.ui.confirm(app.constants.prompts.completeSurvey, success, null)
+
+		}
+	},
 	// functionality to add/delete/modify zones
 
 	zone: {
@@ -148,8 +186,7 @@ var app = {
 		// fires on roll signal from Pi. Updates all active progress bars and status texts
 		roll: function(){
 
-			var current = app.state.currentRollDistance;
-
+			var current = app.state.currentRollDistance =  app.state.systemRollDistance - app.state.systemRollOffset;
 
 			//update progress bars that aren't complete yet
 			d3.selectAll('.entry:not(.complete) .bar')
@@ -163,7 +200,7 @@ var app = {
 				.text(d=>`${(current-d.start).toFixed(1)} m long`)
 
 			d3.select('#blockProgress')
-				.text(app.state.currentRollDistance.toFixed(1))
+				.text(current.toFixed(1))
 		},
 
 		// builds progress bar
@@ -202,8 +239,9 @@ var app = {
 					d3.selectAll('#zones .entry')
 					.classed('active', (d, entryIndex)=>{return d.startTime === id})
 				})
-				.append('span')
-				.attr('class', 'icon fas fa-cog')
+				.append('img')
+				.attr('class', 'icon fa-cog')
+				.attr('src', 'static/images/cog.svg')
 
 			// build progress bar
 			app.ui.progressBar.build(newZones)
@@ -327,16 +365,10 @@ var app = {
 		}
 	},
 
-	// initializes UI: populates curb attributes, builds modals
+	// initializes app UI: populates curb attributes, builds modals
 
 	init: function() {
-
-		//populate street length
-		d3.select('#curbLength')
-			.text(Math.round(app.state.street.distance))
-
-		d3.select('#curbEntry .progressBar')
-			.attr('max', app.state.street.distance)
+		console.log(Math.round(app.state.street.distance))
 
 		// build Add Zone modal
 		d3.select('#addZone')
@@ -354,7 +386,7 @@ var app = {
 				app.ui.mode.set('rolling');
 			})
 
-		// app.ui.mode.set(app.state.mode)
+		app.ui.mode.set(app.state.mode)
 
 		// set upload functionality
 		document.getElementById('uploadImg')
@@ -374,7 +406,32 @@ var app = {
 			oReq.responseType = 'json';
 			oReq.send(app.state.zones);
 
-		}
+		},
+
+		loadJSON: (path, success, error) => {
+			var xhr = new XMLHttpRequest();
+				xhr.onreadystatechange = function()
+				{
+					if (xhr.readyState === XMLHttpRequest.DONE) {
+						if (xhr.status === 200) {
+							if (success)
+								success(JSON.parse(xhr.responseText));
+								} else {
+									if (error)
+									error(xhr);
+								}
+					}
+				};
+				xhr.open("GET", path, true);
+				xhr.send();
+        },
+
+        getWheelTick: () =>{
+        	app.io.loadJSON('/counter', (data)=>{
+        		app.state.systemRollDistance = (data.counter) / 10
+        		app.ui.roll()
+        	})
+        }
 	},
 
 	util: {
@@ -389,7 +446,8 @@ var app = {
 
 
 			app.init();
-			this.dummyRolling();
+			setInterval(()=>{app.io.getWheelTick()}, 500)
+			// this.dummyRolling();
 
 		},
 
@@ -432,10 +490,4 @@ var app = {
 
 
 
-
 app.devMode.init();
-
-
-
-
-
