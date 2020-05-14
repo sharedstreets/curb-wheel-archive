@@ -420,7 +420,8 @@ var app = {
 	// initializes app UI: populates curb attributes, builds modals
 
 	init: function() {
-		console.log(Math.round(app.state.street.distance))
+
+		setInterval(()=>{app.io.getWheelTick()}, 500)
 
 		// build Add Zone modal
 		d3.select('#addZone')
@@ -498,8 +499,6 @@ var app = {
 
 
 			app.init();
-			setInterval(()=>{app.io.getWheelTick()}, 500)
-			// this.dummyRolling();
 
 		},
 
@@ -527,16 +526,7 @@ var app = {
 				"forward": "578194fd94f8b5d1e4716e64bdf23589",
 				"back": "cdb125fdef759ab8edb68c13f7a393c4"
 			}
-		},
-
-		dummyRolling: function(){
-			setInterval(()=>{
-				if (app.devMode.rolling){
-					app.state.currentRollDistance+=Math.random()/2
-					app.ui.roll();
-				}
-			}, 1000)
-		},		
+		}	
 	}
 }
 
