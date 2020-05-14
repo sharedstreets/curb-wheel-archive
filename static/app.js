@@ -369,22 +369,22 @@ var app = {
 
     uploadSurvey: () => {
       let survey = {
-        "created_at": Date.now(),
-        "shst_ref_id": app.state.street.ref,
-        "side_of_street": "right",
-        "surveyed_distance": app.state.currentRollDistance,
-        "features": []
+        created_at: Date.now(),
+        shst_ref_id: app.state.street.ref,
+        side_of_street: "right",
+        surveyed_distance: app.state.currentRollDistance,
+        features: [],
       };
 
       for (let zone of app.state.zones) {
-        console.log(zone)
+        console.log(zone);
         let feature = {
           label: zone.type,
           geometry: {
             type: "Span",
-            distances: [zone.start, zone.end]
+            distances: [zone.start, zone.end],
           },
-          images: []
+          images: [],
         };
         survey.features.push(feature);
       }
@@ -394,9 +394,9 @@ var app = {
       xhr.open("POST", url, true);
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-              // uploaded survey
-          }
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          // uploaded survey
+        }
       };
       xhr.send(JSON.stringify(survey));
     },
