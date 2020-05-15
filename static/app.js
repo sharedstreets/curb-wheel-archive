@@ -14,16 +14,25 @@ var app = {
 
 	constants: {
 
-		zoneTypes: [
-			'Parking',
-			'No Parking', 
-			'Stopping',
-			'No Stopping', 
-			'Loading', 
-			'Standing', 
-			'No Standing', 
-			'Travel Lane',
-		],
+		pollingInterval: 500,
+		
+		curbFeatures: {
+			span: [
+				'Parking',
+				'No Parking', 
+				'No Stopping', 
+				'Loading', 
+				'Curb cut',
+				'Paint', 
+				'Misc. Zone'
+			],
+
+			position: [
+				'Payment device',
+				'Fire hydrant',
+				'Misc. Point'
+			]
+		},
 
 		prompts: {
 			beginSurvey: "Head toward the starting edge of the curb. When you're ready, press OK to start surveying",
@@ -90,7 +99,7 @@ var app = {
 			},
 			addZone: {
 				view: 2,
-				title: 'Select zone type'
+				title: 'Select feature type'
 			}
 		},
 
@@ -134,8 +143,6 @@ var app = {
 
 
 		complete: (skipConfirmation) => {
-
-			//TODO Survey validation
 
 			var success = function(){
 
@@ -192,20 +199,23 @@ var app = {
 					})
 
 				app.ui.updateZones();
+				app.ui.reset();
 			}
 
 			app.ui.confirm(app.constants.prompts.finishZone, success, null)
 
 		},
 
-		add: function(zoneType){
+		add: function(feature){
 
 			var newZone = {
-				type: zoneType,
+				name: feature.name,
+				type: feature.type,
 				start: app.state.currentRollDistance,
 				startTime: Date.now()
 			}
 
+			if (feature.type === 'position') newZone.end = newZone.start
 			app.state.zones.push(newZone);
 
 		}
@@ -221,7 +231,7 @@ var app = {
 			var current = app.state.currentRollDistance =  app.state.systemRollDistance - app.state.systemRollOffset;
 
 			//update progress bars that aren't complete yet
-			d3.selectAll('.entry:not(.complete) .bar')
+			d3.selectAll('.entry:not(.complete) .span')
 				.style('transform', (d)=>{
 					//conditional start to account for main progress bar
 					var startingMark = d ? d.start : 0;
@@ -242,9 +252,9 @@ var app = {
 
 				parent
 					.append('div')
-					.attr('class', 'progressBar')
+					.attr('class', d=>`progressBar`)
 					.append('div')
-					.attr('class', 'bar')
+					.attr('class', d=>d.type)
 					.style('margin-left', d=>`${100*d.start/app.state.street.distance}%`)
 			}
 
@@ -259,12 +269,12 @@ var app = {
 				.attr('id', d=>`entry${d.startTime}`)
 				.append('span')
 				.attr('class', 'zoneName')
-				.text(d=>`${d.type} zone`);
+				.text(d=>`${d.name}`);
 
 			// gear icon toggle for actions
 			newZones
 				.append('span')
-				.attr('class', 'fr onlyWhenRunning')
+				.attr('class', 'fr')
 				.attr('href', d=>`#entry${d.startTime}`)
 				.on('mousedown', (d,i)=>{
 					var id = d.startTime; 
@@ -299,7 +309,7 @@ var app = {
 			newZones
 			var zoneActions = newZones
 				.append('div')
-				.attr('class', 'mt50 mb50 small onlyWhenRunning zoneActions blue');
+				.attr('class', 'mt50 mb50 small zoneActions blue');
 
 			Object.keys(app.zone)
 			.forEach(action=>{
@@ -334,6 +344,8 @@ var app = {
 			zones
 				.classed('complete', d=>d.end)
 
+			d3.selectAll('.complete .zoneAction')
+				.attr('class', 'zoneAction col6')
 			// add new zones
 			var newZones = zones
 				.enter()
@@ -421,23 +433,34 @@ var app = {
 
 	init: function() {
 
-		setInterval(()=>{app.io.getWheelTick()}, 500)
+		// poll Pi 
+		setInterval(()=>{app.io.getWheelTick()}, app.constants.pollingInterval)
 
-		// build Add Zone modal
-		d3.select('#addZone')
-			.selectAll('.zoneType')
-			.data(app.constants.zoneTypes)
-			.enter()
-			.append('div')
-			.attr('class', 'zoneType')
-			.text(d=>d)
-			.on('mousedown',(d)=>{
+		// build Add Feature modal
 
-				// add new zone to state, return to rolling mode, update ui
-				app.zone.add(d);
-				app.ui.updateZones();
-				app.ui.mode.set('rolling');
-			})
+		Object.keys(app.constants.curbFeatures)
+		.forEach((type)=>{
+			d3.select(`#addZone`)
+				.append('div')
+				.attr('id', type)
+				.selectAll('.zoneType')
+				.data(app.constants.curbFeatures[type])
+				.enter()
+				.append('div')
+				.attr('class', 'zoneType')
+				.text(d=>d)
+				.on('mousedown',(d)=>{
+					d = {
+						name:d,
+						type: type
+					}
+					// add new zone to state, return to rolling mode, update ui
+					app.zone.add(d);
+					app.ui.updateZones();
+					app.ui.mode.set('rolling');
+				})
+
+		})
 
 		app.ui.mode.set(app.state.mode)
 
