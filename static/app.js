@@ -39,7 +39,7 @@ var app = {
 			exitSurvey: 'This abandons the current survey. Are you sure?',
 			deleteZone: 'This will delete the zone. Are you sure?', 
 			takePhoto: 'Set the wheel down so that it does not fall over. Feel free get in a good position to get the zone in the frame.',
-			finishZone: "This marks the end of the zone. Once complete, you won't be able to make further changes to this regulation.",
+			finishZone: "This marks the end of the zone. Once complete, you won't be able to extend it any longer.",
 			completeSurvey: "This will conclude the survey. Once finished, you won't be able to make further changes."
 		},
 
@@ -72,6 +72,7 @@ var app = {
 			},
 
 			rolling: {
+
 				view:1,
 
 				set: ()=>{
@@ -296,13 +297,13 @@ var app = {
 			barCaption
 				.append('span')
 				.attr('class', 'fl')
-				.attr('id', 'zoneLength')
-				.text(d=>`0 m long`)
+				.text(d=>`${d.type === 'position' ? 'At' : 'From'} the ${d.start.toFixed(1)}m-mark`)
 
 			barCaption
 				.append('span')
 				.attr('class', 'fr')
-				.text(d=>`From ${d.start.toFixed(0)}m-mark`)
+				.attr('id', 'zoneLength')
+				.text(d=> d.type === 'position' ? '': `0 m long`)
 
 			// build zone action buttons
 
