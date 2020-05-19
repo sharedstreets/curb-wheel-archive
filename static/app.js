@@ -74,13 +74,10 @@ var app = {
 			rolling: {
 
 				view:1,
+				title: 'Curb Survey',
 
 				set: ()=>{
 					app.ui.updateZones()
-				},
-				
-				title: ()=>{ 
-					return `Surveying ${app.state.street.name}`
 				},
 
 				back: ()=>{
@@ -123,6 +120,9 @@ var app = {
 
 			d3.select('#curbEntry .progressBar')
 				.attr('max', app.state.street.distance)
+
+			d3.select('#streetName')
+				.text(app.state.street.name)
 		},
 
 		// checks current survey before submission
