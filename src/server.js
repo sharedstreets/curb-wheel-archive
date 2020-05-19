@@ -148,40 +148,47 @@ async function main() {
       let spans = [];
       let positions = [];
 
-      for (let item of app.state.graph.surveys) {
-        let ref = item[0];
-        let surveys = item[1];
-        // todo: get geometry
+      for (let [ref, surveys] of app.state.graph.surveys) {
+        if (!app.state.graph.refs.has(ref)) {
+          throw new Error("Surveyed street ref not found: ", ref);
+        }
+        let street = app.state.graph.streets[app.state.graph.refs.get(ref)];
         for (let feature of surveys.features) {
-          // todo: interpolate coordinates
-          //  1. let centered =
-          //    [
-          //      turf.along(street, ((streetDistance - surveyDistance) / 2), {units, 'meters'}),
-          //      turf.along(street, (streetDistance - ((streetDistance - surveyDistance) / 2)), {units, 'meters'})
-          //    ]
-          //  2. let start = turf.along(centered, feature.geometry.distances[0])
-          //  3. let end = turf.along(centered, feature.geometry.distances[1])
-          //  4. span.geometry.coordinates = [start, end]
+          let centered = [
+            turf.along(
+              street,
+              (street.properties.distance - survey.surveyed_distance) / 2,
+              { units: "meters" }
+            ).geometry.coordinates,
+            turf.along(
+              street,
+              street.properties.distance -
+                (street.properties.distance - survey.surveyed_distance) / 2,
+              { units: "meters" }
+            ).geometry.coordinates,
+          ];
+          let start = turf.along(centered, feature.geometry.distances[0]);
+          let end = turf.along(centered, feature.geometry.distances[1]);
+
           let span = {
             type: "Feature",
             geometry: {
               type: "LineString",
-              coordinates: [],
+              coordinates: [start, end],
             },
             properties: {
               created_at: survey.created_at,
               cwheelid: "", // todo: figure out where to find this
               shst_ref_id: survey.ref,
               ref_side: survey.side_of_road,
-              ref_len: 461.6,
+              ref_len: street.properties.distance,
               srv_dist: survey.surveyed_distance,
               srv_id: survey.id,
               feat_id: feature.id,
               label: feature.label,
               dst_st: feature.geometry.distances[0],
               dst_end: feature.geometry.distances[1],
-              pos_ids: "123,234,456",
-              images: "123,234,456",
+              images: JSON.stringify(feature.images),
             },
           };
         }
