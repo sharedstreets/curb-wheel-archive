@@ -15,6 +15,7 @@ const writeFileAsync = promisify(fs.writeFile);
 
 function Graph() {
   this.streets = [];
+  this.refs = new Map();
   this.bounds = [-Infinity, -Infinity, Infinity, Infinity];
   this.center = [0, 0];
   this.index = {};
@@ -38,6 +39,10 @@ Graph.prototype.query = async function (bbox) {
 Graph.prototype.save = async function (file) {
   let copy = {};
   copy.streets = this.streets;
+  copy.refs = {};
+  for (const [key, value] of this.refs) {
+    copy.refs[key] = value;
+  }
   copy.bounds = this.bounds;
   copy.center = this.center;
   copy.index = this.index.toJSON();
@@ -53,6 +58,10 @@ Graph.prototype.load = async function (file) {
   let raw = (await readFileAsync(file)).toString();
   let data = JSON.parse(raw);
   this.streets = data.streets;
+  this.refs = new Map();
+  for (const key of Object.keys(data.refs)) {
+    this.refs.set(key, data.refs[key]);
+  }
   this.bounds = data.bounds;
   this.center = data.center;
   this.index = new RBush().fromJSON(data.index);
@@ -123,10 +132,16 @@ Graph.prototype.extract = async function (pbf) {
         ways = normalizer.splitWays(ways);
         ways = normalizer.mergeWays(ways);
 
+        this.refs = new Map();
+        let i = 0;
         for (let way of ways) {
           way.properties.forward = shst.forwardReference(way).id;
           way.properties.back = shst.backReference(way).id;
           way.properties.distance = turf.length(way, { units: "meters" });
+
+          this.refs.set(way.properties.forward, i);
+          this.refs.set(way.properties.back, i);
+          i++;
         }
 
         this.streets = ways;

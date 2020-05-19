@@ -18,6 +18,14 @@ test("graph", async (t) => {
 
   t.equal(graph.streets.length, 41238, "found correct number of streets");
 
+  t.equal(graph.refs.size, 82435, "found correct number of refs");
+  let ref = "021d9d867cee1714882108b20dfdab80";
+  t.true(graph.refs.has(ref), "graph has expected ref in lookup");
+  let id = graph.refs.get(ref);
+  t.equal(id, 10, "stored refs link to street indexes");
+  let street = graph.streets[id];
+  t.equal(street.properties.forward, ref, "street has expected forward ref");
+
   t.equal(
     JSON.stringify(graph.center),
     JSON.stringify([-157.92574368339038, 21.392388274836083]),

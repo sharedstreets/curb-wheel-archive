@@ -30,7 +30,7 @@ async function main() {
     // constants
     const PORT = 8081;
     const PBF = path.join(__dirname, "../extract.osm.pbf");
-    const GRAPH = path.join(__dirname, "../graph.json")
+    const GRAPH = path.join(__dirname, "../graph.json");
     const MBTILES = path.join(__dirname, "../extract.mbtiles");
     const IMAGES = path.join(__dirname, "../static/images/survey");
 
@@ -149,6 +149,8 @@ async function main() {
       let positions = [];
 
       for (let item of app.state.graph.surveys) {
+        let ref = item[0];
+        let surveys = item[1];
         // todo: get geometry
         for (let feature of surveys.features) {
           // todo: interpolate coordinates
@@ -233,7 +235,7 @@ async function main() {
           fs.readFileSync(path.join(__dirname, "../config/wifi.json"))
         );
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
       // return wifiSettings
       res.status(200).send(wifiSettings);
