@@ -30,6 +30,7 @@ async function main() {
     // constants
     const PORT = 8081;
     const PBF = path.join(__dirname, "../extract.osm.pbf");
+    const GRAPH = path.join(__dirname, "../graph.json")
     const MBTILES = path.join(__dirname, "../extract.mbtiles");
     const IMAGES = path.join(__dirname, "../static/images/survey");
 
@@ -205,6 +206,8 @@ async function main() {
       }
       surveys.push(req.body);
       app.state.graph.surveys.set(ref, surveys);
+
+      await app.state.graph.save(GRAPH);
 
       res.status(200).send("Uploaded survey.");
     });
