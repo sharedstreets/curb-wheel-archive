@@ -31,6 +31,7 @@
     "@mapbox/tile-cover": "^3.0.2",
     "@mapbox/tilebelt": "^1.0.1",
     "@turf/turf": "^5.1.6",
+    "archiver": "^4.0.1",
     "bulma": "^0.8.1",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
