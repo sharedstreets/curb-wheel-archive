@@ -347,12 +347,12 @@ var app = {
 
 			d3.selectAll('.complete .zoneAction')
 				.attr('class', 'zoneAction col6')
+
 			// add new zones
 			var newZones = zones
 				.enter()
 				.append('div')
 				.attr('class', 'entry');
-
 
 			app.ui.buildZoneEntry(newZones)
 		},
@@ -360,6 +360,7 @@ var app = {
 		// sets the current mode of the app, and updates title
 
 		mode:  {
+
 			set: function(mode) {
 
 				app.ui.reset();
@@ -478,11 +479,39 @@ var app = {
 
 		uploadSurvey: () => {
 
-			var oReq = new XMLHttpRequest();
-			oReq.open("POST", 'http://localhost:8081/survey');
-			oReq.responseType = 'json';
-			oReq.send(app.state.zones);
+			let survey = {
+				"created_at": Date.now(),
+				"shst_ref_id": app.state.street.ref,
+				"side_of_street": "right",
+				"surveyed_distance": app.state.currentRollDistance,
+				"features": []
+			};
 
+			for (let zone of app.state.zones) {
+
+				let feature = {
+					label: zone.name,
+					geometry: {
+						type: zone.type,
+						distances: [zone.start, zone.end]
+					},
+					images: []
+				};
+				survey.features.push(feature);
+			}
+
+			console.log(survey)
+			var xhr = new XMLHttpRequest();
+			var url = "/surveys/" + app.state.street.ref;
+			xhr.open("POST", url, true);
+			xhr.setRequestHeader("Content-Type", "application/json");
+			xhr.onreadystatechange = function () {
+
+				if (xhr.readyState === 4 && xhr.status === 200) {
+				  // uploaded survey
+				}
+			};
+			xhr.send(JSON.stringify(survey));
 		},
 
 		loadJSON: (path, success, error) => {
