@@ -8,20 +8,20 @@ app.ui.map = new mapboxgl.Map({
 });
 
 if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(
-    function (position) {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-      map.flyTo({
-        center: [longitude, latitude],
-        zoom: 17,
-      });
-    },
-    function (err) {
-      // unable to retrieve location
-      console.log(err);
-    }
-  );
+	navigator.geolocation.getCurrentPosition(
+		function (position) {
+		const latitude = position.coords.latitude;
+		const longitude = position.coords.longitude;
+		map.flyTo({
+		center: [longitude, latitude],
+		zoom: 17,
+		});
+		},
+		function (err) {
+		// unable to retrieve location
+		console.log(err);
+		}
+	);
 } else {
   console.error("browser does not support geolocation");
 }
@@ -97,7 +97,8 @@ app.ui.map
           var edge = e.features[0].geometry.coordinates;
           app.state.street = e.features[0].properties;
 
-          app.ui.map.fitBounds(turf.bbox(e.features[0]), { padding: 60 });
+          app.ui.map
+          	.fitBounds(turf.bbox(e.features[0]), { padding: 60 });
 
           var forward = turf.lineOffset(
             turf.lineString(edge, {

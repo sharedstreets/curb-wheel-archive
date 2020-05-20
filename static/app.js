@@ -37,9 +37,9 @@ var app = {
 		prompts: {
 			beginSurvey: "Head toward the starting edge of the curb. When you're ready, press OK to start surveying",
 			exitSurvey: 'This abandons the current survey. Are you sure?',
-			deleteZone: 'This will delete the zone. Are you sure?', 
+			deleteZone: 'This will delete the curb feature. Are you sure?', 
 			takePhoto: 'Set the wheel down so that it does not fall over. Feel free get in a good position to get the zone in the frame.',
-			finishZone: "This marks the end of the zone. Once complete, you won't be able to extend it any longer.",
+			finishZone: "This marks the end of the curb span. Once complete, you won't be able to extend it any longer.",
 			completeSurvey: "This will conclude the survey. Once finished, you won't be able to make further changes."
 		},
 
