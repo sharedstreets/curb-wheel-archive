@@ -12,54 +12,68 @@
       <h1 class="title">
         CurbWheel Admin
       </h1>
-      <p class="subtitle">
-        Current version: <strong><span id="currentVersion"></span></strong>
-        <div class="buttons">
-            <input type="file" id="zipFile" label="select zip of cubwheel distribution"/>
-            <button id="clearButton" onclick="" class="button is-primary" disabled>Upload code</button>
-        </div>
-      </p>
 
-      <p class="subtitle">
-        Current OSM file: <strong><span id="currentMap"></span></strong>
-        <div class="buttons">
-            <input type="file" id="pbfFile" label="select OSM pbf file"/>
-            <button id="clearButton" onclick="uploadPbf()" class="button is-primary">Upload OSM</button>
-        </div>
-      </p>
-
-      <p class="subtitle">
-        Current MBTiles file: <strong><span id="currentMap"></span></strong>
-        <div class="buttons">
-            <input type="file" id="mbtilesFile" label="select mbtiles file"/>
-            <button id="clearButton" onclick="uploadMbtiles()" class="button is-primary">Upload MBtiles</button>
-        </div>
-      </p>
-
-      <p class="subtitle">
-        <div class="control">
-            <label class="radio">
-              <input type="radio" name="mode" value="wifi">
-              Use Local Network
-            </label>
-            <label class="radio">
-              <input type="radio" name="mode" value="ap">
-              Run Access Point
-            </label>
+      <div class="section">
+        <p class="subtitle">
+          Current version: <strong><span id="currentVersion"></span></strong>
+          <div class="buttons">
+              <input type="file" id="zipFile" label="select zip of cubwheel distribution"/>
+              <button id="clearButton" onclick="" class="button is-primary" disabled>Upload code</button>
           </div>
-        <input class="input" id="networkField" placeholder="Wifi network">
-        <input class="input" id="passwordField" placeholder="Wifi password">
-      </p>
-
-      <div class="control">
-        <button id="clearButton" onclick="updateNetwork()" class="button is-primary">Update Network</button>
+        </p>
       </div>
 
-      <div class="control">
-        <a class="button is-primary" href="/export.zip">Download Data</a>
+      <div class="section">
+        <p class="subtitle">
+          Current OSM file: <strong><span id="currentMap"></span></strong>
+          <div class="buttons">
+              <input type="file" id="pbfFile" label="select OSM pbf file"/>
+              <button id="clearButton" onclick="uploadPbf()" class="button is-primary">Upload OSM</button>
+          </div>
+        </p>
+        <p class="subtitle">
+          Current MBTiles file: <strong><span id="currentMap"></span></strong>
+          <div class="buttons">
+              <input type="file" id="mbtilesFile" label="select mbtiles file"/>
+              <button id="clearButton" onclick="uploadMbtiles()" class="button is-primary">Upload MBtiles</button>
+          </div>
+        </p>
       </div>
 
+      <div class="section">
+        <p class="subtitle">
+          <div class="control">
+              <label class="radio">
+                <input type="radio" name="mode" value="wifi">
+                Use Local Network
+              </label>
+              <label class="radio">
+                <input type="radio" name="mode" value="ap">
+                Run Access Point
+              </label>
+            </div>
+          <input class="input" id="networkField" placeholder="Wifi network">
+          <input class="input" id="passwordField" placeholder="Wifi password">
+        </p><br />
+        <div class="control">
+          <button id="clearButton" onclick="updateNetwork()" class="button is-primary">Update Network</button>
+        </div>
+      </div>
 
+      <div class="section">
+        <div class="control">
+          <p class="subtitle">
+            Export surveys
+          </p>
+          <a class="button is-primary" href="/export.zip">Download Data</a>
+        </div>
+        <form action="/reset-surveys" method="post">
+          <p class="subtitle">
+            Reset surveys
+          </p>
+          <input class="button is-danger" type="submit" name="reset" value="Reset Surveys" />
+        </form>
+      </div>
 
     </div>
   </section>

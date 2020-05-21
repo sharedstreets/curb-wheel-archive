@@ -143,6 +143,14 @@ async function main() {
       });
     });
 
+    app.post("/reset-surveys", async (req, res) => {
+      app.state.graph.surveys = new Map();
+
+      await app.state.graph.save(GRAPH);
+
+      res.status(200).redirect("/admin");
+    });
+
     app.get("/export.zip", async (req, res) => {
       let spans = [];
       let positions = [];
@@ -171,6 +179,8 @@ async function main() {
             let start = turf.along(centered, feature.geometry.distances[0]);
             let end = turf.along(centered, feature.geometry.distances[1]);
 
+            //turf.lineSliceAlong(line, start, stop, {units: 'miles'});
+
             let span = {
               type: "Feature",
               geometry: {
@@ -183,8 +193,8 @@ async function main() {
               properties: {
                 created_at: survey.created_at,
                 cwheelid: "", // todo: figure out where to find this
-                shst_ref_id: survey.ref,
-                ref_side: survey.side_of_road,
+                shst_ref_id: survey.shst_ref_id,
+                ref_side: survey.side_of_street,
                 ref_len: street.properties.distance,
                 srv_dist: survey.surveyed_distance,
                 srv_id: survey.id,
@@ -195,11 +205,14 @@ async function main() {
                 images: JSON.stringify(feature.images),
               },
             };
+            console.log(JSON.stringify(span, null, 2));
 
             spans.push(span);
           }
         }
       }
+
+      //console.log(JSON.stringify(turf.featureCollection(spans)))
 
       let exportDir = path.join(__dirname, "../export");
       let zipDir = path.join(exportDir, "./export.zip");
