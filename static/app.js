@@ -1,38 +1,58 @@
 var app = {
   state: {
     street: {
-      distance: 10,
+      distance: 0,
     },
-    systemRollOffset: 0,
-    systemRollDistance: 0,
-    currentRollDistance: 0,
+    systemRollOffset: 0, // offset to subtract from reported distance
+    systemRollDistance: 0, // rolled distance as reported by Pi
+    currentRollDistance: 0, // computed roll from distance and offset
     zones: [],
     mode: "selectStreet",
+    promptsUsed: [], // tracks prompts that have been displayed to avoid second display
   },
 
   constants: {
-    zoneTypes: [
-      "Parking",
-      "No Parking",
-      "Stopping",
-      "No Stopping",
-      "Loading",
-      "Standing",
-      "No Standing",
-      "Travel Lane",
-    ],
+    pollingInterval: 500,
+
+    curbFeatures: {
+      Span: [
+        "Parking",
+        "No Parking",
+        "No Stopping",
+        "Loading",
+        "Curb cut",
+        "Paint",
+        "Misc. Zone",
+      ],
+      Position: ["Payment device", "Fire hydrant", "Misc. Point"],
+    },
 
     prompts: {
       beginSurvey:
         "Head toward the starting edge of the curb. When you're ready, press OK to start surveying",
       exitSurvey: "This abandons the current survey. Are you sure?",
-      deleteZone: "This will delete the zone. Are you sure?",
+      deleteZone: "This will delete the curb feature. Are you sure?",
       takePhoto:
         "Set the wheel down so that it does not fall over. Feel free get in a good position to get the zone in the frame.",
       finishZone:
-        "This marks the end of the zone. Once complete, you won't be able to make further changes to this regulation.",
+        "This marks the end of the curb span. Once complete, you won't be able to extend it any longer.",
       completeSurvey:
         "This will conclude the survey. Once finished, you won't be able to make further changes.",
+    },
+
+    errors: {
+      incompleteZones: (num) => {
+        return `There ${
+          num > 1 ? "are " + num + "zones" : "is one zone"
+        } still unended. Please close those before completing the survey.`;
+      },
+      curbLengthDeviation: (ratio) => {
+        var script = `The surveyed length is significantly ${
+          ratio > 1 ? "longer" : "shorter"
+        } than expected. Tap Cancel to return to survey, or OK to proceed anyway.`;
+        var keepDubiousSurvey = confirm(script) === true;
+        if (keepDubiousSurvey) app.survey.complete(true);
+      },
     },
 
     modes: {
@@ -54,13 +74,10 @@ var app = {
 
       rolling: {
         view: 1,
+        title: "Curb Survey",
 
         set: () => {
           app.ui.updateZones();
-        },
-
-        title: () => {
-          return `Surveying ${app.state.street.name}`;
         },
 
         back: () => {
@@ -76,7 +93,7 @@ var app = {
       },
       addZone: {
         view: 2,
-        title: "Select zone type",
+        title: "Select feature type",
       },
     },
 
@@ -84,6 +101,7 @@ var app = {
   },
 
   survey: {
+    // sets up parameters of the selected street, preparing for survey
     init: () => {
       app.state.systemRollOffset = app.state.systemRollDistance;
       app.state.zones = [];
@@ -96,18 +114,34 @@ var app = {
         "max",
         app.state.street.distance
       );
+
+      d3.select("#streetName").text(app.state.street.name);
     },
 
-    complete: () => {
-      //TODO Survey validation
+    // checks current survey before submission
+    validate: () => {
+      var survey = app.state.zones;
+      var incompleteZones = survey.filter((d) => !d.end).length;
+      var surveyedLengthRatio =
+        app.state.currentRollDistance / app.state.street.distance;
+      // check for unfinished zones
+      if (incompleteZones > 0)
+        alert(app.constants.errors.incompleteZones(incompleteZones));
+      //check for significant deviations in surveyed curb length. user can restart survey or ignore
+      else if (surveyedLengthRatio < 0.8 || surveyedLengthRatio > 1.1) {
+        app.constants.errors.curbLengthDeviation(surveyedLengthRatio);
+      } else app.survey.complete();
+    },
 
+    complete: (skipConfirmation) => {
       var success = function () {
         app.io.uploadSurvey();
 
         app.ui.mode.set("selectStreet");
       };
 
-      app.ui.confirm(app.constants.prompts.completeSurvey, success, null);
+      if (skipConfirmation) success();
+      else app.ui.confirm(app.constants.prompts.completeSurvey, success, null);
     },
   },
   // functionality to add/delete/modify zones
@@ -143,18 +177,21 @@ var app = {
         });
 
         app.ui.updateZones();
+        app.ui.reset();
       };
 
       app.ui.confirm(app.constants.prompts.finishZone, success, null);
     },
 
-    add: function (zoneType) {
+    add: function (feature) {
       var newZone = {
-        type: zoneType,
+        name: feature.name,
+        type: feature.type,
         start: app.state.currentRollDistance,
         startTime: Date.now(),
       };
 
+      if (feature.type === "position") newZone.end = newZone.start;
       app.state.zones.push(newZone);
     },
   },
@@ -168,7 +205,7 @@ var app = {
         app.state.systemRollDistance - app.state.systemRollOffset);
 
       //update progress bars that aren't complete yet
-      d3.selectAll(".entry:not(.complete) .bar").style("transform", (d) => {
+      d3.selectAll(".entry:not(.complete) .span").style("transform", (d) => {
         //conditional start to account for main progress bar
         var startingMark = d ? d.start : 0;
         return `scaleX(${
@@ -188,9 +225,9 @@ var app = {
       build: function (parent) {
         parent
           .append("div")
-          .attr("class", "progressBar")
+          .attr("class", (d) => `progressBar`)
           .append("div")
-          .attr("class", "bar")
+          .attr("class", (d) => d.type)
           .style(
             "margin-left",
             (d) => `${(100 * d.start) / app.state.street.distance}%`
@@ -206,12 +243,12 @@ var app = {
         .attr("id", (d) => `entry${d.startTime}`)
         .append("span")
         .attr("class", "zoneName")
-        .text((d) => `${d.type} zone`);
+        .text((d) => `${d.name}`);
 
       // gear icon toggle for actions
       newZones
         .append("span")
-        .attr("class", "fr onlyWhenRunning")
+        .attr("class", "fr")
         .attr("href", (d) => `#entry${d.startTime}`)
         .on("mousedown", (d, i) => {
           var id = d.startTime;
@@ -234,20 +271,25 @@ var app = {
       barCaption
         .append("span")
         .attr("class", "fl")
-        .attr("id", "zoneLength")
-        .text((d) => `0 m long`);
+        .text(
+          (d) =>
+            `${d.type === "position" ? "At" : "From"} the ${d.start.toFixed(
+              1
+            )}m-mark`
+        );
 
       barCaption
         .append("span")
         .attr("class", "fr")
-        .text((d) => `From ${d.start.toFixed(0)}m-mark`);
+        .attr("id", "zoneLength")
+        .text((d) => (d.type === "position" ? "" : `0 m long`));
 
       // build zone action buttons
 
       newZones;
       var zoneActions = newZones
         .append("div")
-        .attr("class", "mt50 mb50 small onlyWhenRunning zoneActions blue");
+        .attr("class", "mt50 mb50 small zoneActions blue");
 
       Object.keys(app.zone).forEach((action) => {
         zoneActions
@@ -279,6 +321,8 @@ var app = {
         .remove();
 
       zones.classed("complete", (d) => d.end);
+
+      d3.selectAll(".complete .zoneAction").attr("class", "zoneAction col6");
 
       // add new zones
       var newZones = zones.enter().append("div").attr("class", "entry");
@@ -324,9 +368,26 @@ var app = {
     // produces a confirm dialog, with callbacks for cancel and ok
 
     confirm: function (text, ok, cancel) {
-      var confirmed = confirm(text);
-      if (confirmed === true) ok();
-      else if (cancel) cancel();
+      // if confirm prompt has already been used, go directly to "ok" state
+      if (app.state.promptsUsed.includes(text)) ok();
+      // otherwise, log it and bring up dialog
+      else {
+        app.state.promptsUsed.push(text);
+
+        // some users disable dialogs in browser, which we will detect as an immediate programmatic response to the dialog
+        var promptTime = Date.now();
+        var confirmed = confirm(text);
+
+        console.log("mark", responseTime);
+        // if user confirms or had dialogs disabled, proceed to "ok" state
+        if (confirmed === true) ok();
+        else if (cancel) {
+          var responseTime = Date.now();
+          var browserDialogsDisabled = responseTime - promptTime < 20;
+          if (browserDialogsDisabled) ok();
+          else cancel();
+        }
+      }
     },
 
     // general UI reset: collapses any open action drawers, removes curb arrows from map
@@ -339,20 +400,34 @@ var app = {
   // initializes app UI: populates curb attributes, builds modals
 
   init: function () {
-    // build Add Zone modal
-    d3.select("#addZone")
-      .selectAll(".zoneType")
-      .data(app.constants.zoneTypes)
-      .enter()
-      .append("div")
-      .attr("class", "zoneType")
-      .text((d) => d)
-      .on("mousedown", (d) => {
-        // add new zone to state, return to rolling mode, update ui
-        app.zone.add(d);
-        app.ui.updateZones();
-        app.ui.mode.set("rolling");
-      });
+    // poll Pi
+    setInterval(() => {
+      app.io.getWheelTick();
+    }, app.constants.pollingInterval);
+
+    // build Add Feature modal
+
+    Object.keys(app.constants.curbFeatures).forEach((type) => {
+      d3.select(`#addZone`)
+        .append("div")
+        .attr("id", type)
+        .selectAll(".zoneType")
+        .data(app.constants.curbFeatures[type])
+        .enter()
+        .append("div")
+        .attr("class", "zoneType")
+        .text((d) => d)
+        .on("mousedown", (d) => {
+          d = {
+            name: d,
+            type: type,
+          };
+          // add new zone to state, return to rolling mode, update ui
+          app.zone.add(d);
+          app.ui.updateZones();
+          app.ui.mode.set("rolling");
+        });
+    });
 
     app.ui.mode.set(app.state.mode);
 
@@ -377,11 +452,10 @@ var app = {
       };
 
       for (let zone of app.state.zones) {
-        console.log(zone);
         let feature = {
-          label: zone.type,
+          label: zone.name,
           geometry: {
-            type: "Span",
+            type: zone.type,
             distances: [zone.start, zone.end],
           },
           images: [],
@@ -418,7 +492,7 @@ var app = {
 
     getWheelTick: () => {
       app.io.loadJSON("/counter", (data) => {
-        app.state.systemRollDistance = data.counter / 2;
+        app.state.systemRollDistance = data.counter / 10;
         app.ui.roll();
       });
     },
@@ -434,10 +508,6 @@ var app = {
     rolling: false,
     init: function () {
       app.init();
-      setInterval(() => {
-        app.io.getWheelTick();
-      }, 500);
-      // this.dummyRolling();
     },
 
     sampleStreet: {
@@ -458,15 +528,6 @@ var app = {
         forward: "578194fd94f8b5d1e4716e64bdf23589",
         back: "cdb125fdef759ab8edb68c13f7a393c4",
       },
-    },
-
-    dummyRolling: function () {
-      setInterval(() => {
-        if (app.devMode.rolling) {
-          app.state.currentRollDistance += Math.random() / 2;
-          app.ui.roll();
-        }
-      }, 1000);
     },
   },
 };
