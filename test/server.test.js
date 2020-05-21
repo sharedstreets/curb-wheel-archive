@@ -100,7 +100,9 @@ test("server", async (t) => {
 
   t.equal(saved.statusCode, 200, "survey save returned valid status code 200");
 
-  let surveysResponse = await request.get("http://127.0.0.1:8081/surveys/" + ref);
+  let surveysResponse = await request.get(
+    "http://127.0.0.1:8081/surveys/" + ref
+  );
 
   t.equal(
     surveysResponse.statusCode,

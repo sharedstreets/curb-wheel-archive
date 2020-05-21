@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const fileUpload = require("express-fileupload");
-const bodyParser  = require('body-parser');
+const bodyParser = require("body-parser");
 const rimraf = require("rimraf");
 const mkdirp = require("mkdirp");
 const child_process = require("child_process");
@@ -15,9 +15,11 @@ async function main() {
     app.use(fileUpload());
 
     app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({
-      extended: true
-    }));
+    app.use(
+      bodyParser.urlencoded({
+        extended: true,
+      })
+    );
 
     // constants
     const PORT = 8081;
@@ -171,39 +173,52 @@ async function main() {
     });
 
     app.get("/admin/wifi", async (req, res) => {
-      var wifiSettings = { mode: "ap", network : "", password : "" };
+      var wifiSettings = { mode: "ap", network: "", password: "" };
 
       try {
         wifiSettings = JSON.parse(
           fs.readFileSync(path.join(__dirname, "../config/wifi.json"))
         );
-      }
-      catch (e) {
-        console.log(e)
+      } catch (e) {
+        console.log(e);
       }
       // return wifiSettings
       res.status(200).send(wifiSettings);
     });
 
     app.post("/admin/wifi", async (req, res) => {
-      const wifiSettings = JSON.stringify(req.body)
+      const wifiSettings = JSON.stringify(req.body);
 
       // todo validate wifi
 
       //write wifiSettings to config file
-      fs.writeFileSync(path.join(__dirname, "../config/wifi.json"), wifiSettings)
+      fs.writeFileSync(
+        path.join(__dirname, "../config/wifi.json"),
+        wifiSettings
+      );
 
-      var wpaConfTemplate = fs.readFileSync(path.join(__dirname, "../config/wpa_supplicant.conf.template"),  'utf8')
+      var wpaConfTemplate = fs.readFileSync(
+        path.join(__dirname, "../config/wpa_supplicant.conf.template"),
+        "utf8"
+      );
 
-      var wpaConf = wpaConfTemplate.replace("[NAME OF WIFI NETWORK]", req.body.network)
-                        .replace("[WIFI NETWORK PASSWORD]", req.body.password);
+      var wpaConf = wpaConfTemplate
+        .replace("[NAME OF WIFI NETWORK]", req.body.network)
+        .replace("[WIFI NETWORK PASSWORD]", req.body.password);
 
-      fs.writeFileSync(path.join(__dirname, "../config/wpa_supplicant.conf"), wpaConf);
+      fs.writeFileSync(
+        path.join(__dirname, "../config/wpa_supplicant.conf"),
+        wpaConf
+      );
 
-      if(req.body.mode === "ap")
-        child_process.execSync("sh switch-to-ap.sh", {cwd:'/home/pi/curb-wheel/'});
-      else if(req.body.mode === "wifi")
-        child_process.execSync("sh switch-to-wifi.sh", {cwd:'/home/pi/curb-wheel/'})
+      if (req.body.mode === "ap")
+        child_process.execSync("sh switch-to-ap.sh", {
+          cwd: "/home/pi/curb-wheel/",
+        });
+      else if (req.body.mode === "wifi")
+        child_process.execSync("sh switch-to-wifi.sh", {
+          cwd: "/home/pi/curb-wheel/",
+        });
       // return wifiSettings
       res.status(200).send(wifiSettings);
     });
@@ -214,7 +229,7 @@ async function main() {
       ).version;
 
       // return version number
-      res.status(200).send({version: versionNumber});
+      res.status(200).send({ version: versionNumber });
     });
 
     app.get("/*", async (req, res) => {

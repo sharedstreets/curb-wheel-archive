@@ -104,9 +104,8 @@ body, html {
 	display:none !important;
 }
 
-.zoneType {
-	width: 40vw;
-	display: inline-block;
+.zoneType {	
+	text-align:center;
 	margin: 5vw;
 	background: #eee;
 	padding: 5vw;
@@ -138,12 +137,21 @@ body, html {
 	margin-top:5px;
 }
 
-.bar {
+.span {
 	background:steelblue;
 	height:100%;
 	width:100%;
 	transform-origin:left;
 	transform:scaleX(0);
+}
+
+.position {
+    transform: translateX(-50%) rotateZ(45deg);
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    border: 3px solid steelblue;
+    background: white;
 }
 
 /*gear icon*/
@@ -177,7 +185,6 @@ body, html {
 		#eee 6px,
 		#eee 6px
 	);
-	pointer-events: none;
 }
 
 .complete .zoneName:after {
