@@ -31,9 +31,13 @@ async function main() {
 
     // debug
     app.state.graph = new Graph();
-    await app.state.graph.load(
-      path.join(__dirname, "../test/fixtures/honolulu.json")
-    );
+    // reloading graph from PBF on reboot -- need to check if there's a cached state
+    app.state.graph = await app.state.graph.extract(PBF);
+
+    // reloading saved json model
+    // await app.state.graph.load(
+    //   path.join(__dirname, "../test/fixtures/honolulu.json")
+    // );
 
     // setup static file server
     app.use("/static", express.static(path.join(__dirname, "../static")));
@@ -96,7 +100,7 @@ async function main() {
         app.state.graph = new Graph();
         app.state.graph = await app.state.graph.extract(PBF);
 
-        await fs.promises.unlink(PBF);
+        //await fs.promises.unlink(PBF);
 
         res.status(200).send("Extract complete.");
       });
