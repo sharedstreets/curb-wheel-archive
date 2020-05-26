@@ -17,5 +17,5 @@ fi
 
 
 echo "0" > ram/counter.txt
-python python/wheel-simulator.py &
+python2.7 python/wheel-simulator.py &
 echo $! > $WHEEL_PID
