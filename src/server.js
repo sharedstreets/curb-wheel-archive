@@ -40,6 +40,7 @@ async function main() {
 
     // debug
     app.state.graph = new Graph();
+
     await app.state.graph.load(GRAPH);
 
     // setup static file server
@@ -103,7 +104,7 @@ async function main() {
         app.state.graph = new Graph();
         app.state.graph = await app.state.graph.extract(PBF);
 
-        await fs.promises.unlink(PBF);
+        //await fs.promises.unlink(PBF);
 
         res.status(200).send("Extract complete.");
       });

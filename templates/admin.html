@@ -134,7 +134,8 @@
     }
 
     function uploadMbtiles() {
-        var mbtilesFile = document.getElementById("mbtilesFile");
+        var mbtilesFile = document.getElementById("mbtilesFile").files[0];   
+
         uploadFile(mbtilesFile, "mbtiles", "/mbtiles")
     }
 
