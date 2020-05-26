@@ -38,7 +38,7 @@ Graph.prototype.query = async function (bbox) {
 
 Graph.prototype.getSpans = async function () {
   let spans = [];
-  
+
   for (let [ref, surveys] of this.surveys) {
     if (!this.refs.has(ref)) {
       throw new Error("Surveyed street ref not found: ", ref);
