@@ -8,7 +8,7 @@ const Graph = require("../src/graph");
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 const unlinkAsync = promisify(fs.unlink);
-
+/*
 test("graph", async (t) => {
   const pbf = path.join(__dirname, "./fixtures/honolulu.osm.pbf");
 
@@ -17,6 +17,14 @@ test("graph", async (t) => {
   await graph.extract(pbf);
 
   t.equal(graph.streets.length, 41238, "found correct number of streets");
+
+  t.equal(graph.refs.size, 82435, "found correct number of refs");
+  let ref = "021d9d867cee1714882108b20dfdab80";
+  t.true(graph.refs.has(ref), "graph has expected ref in lookup");
+  let id = graph.refs.get(ref);
+  t.equal(id, 10, "stored refs link to street indexes");
+  let street = graph.streets[id];
+  t.equal(street.properties.forward, ref, "street has expected forward ref");
 
   t.equal(
     JSON.stringify(graph.center),
@@ -82,3 +90,14 @@ test("graph", async (t) => {
 
   t.done();
 });
+*/
+
+test('surveys', async t => {
+  const json = path.join(__dirname, "./fixtures/honolulu.json");
+  let graph = new Graph();
+  await graph.load(json);
+  t.ok(graph.surveys.size > 0, "loaded surveys")
+  let spans = graph.getSpans();
+
+  t.done();
+})

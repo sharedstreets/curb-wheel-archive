@@ -6,11 +6,18 @@ const bodyParser = require("body-parser");
 const rimraf = require("rimraf");
 const mkdirp = require("mkdirp");
 const child_process = require("child_process");
+const turf = require("@turf/turf");
+const archiver = require("archiver");
 const Graph = require("./graph");
 
 async function main() {
   return new Promise(async (resolve, reject) => {
     let app = express();
+
+    let ids = {
+      feature: 0,
+      image: 0,
+    };
 
     app.use(fileUpload());
 
@@ -24,6 +31,7 @@ async function main() {
     // constants
     const PORT = 8081;
     const PBF = path.join(__dirname, "../extract.osm.pbf");
+    const GRAPH = path.join(__dirname, "../graph.json");
     const MBTILES = path.join(__dirname, "../extract.mbtiles");
     const IMAGES = path.join(__dirname, "../static/images/survey");
 
@@ -32,13 +40,8 @@ async function main() {
 
     // debug
     app.state.graph = new Graph();
-    // reloading graph from PBF on reboot -- need to check if there's a cached state
-    app.state.graph = await app.state.graph.extract(PBF);
 
-    // reloading saved json model
-    // await app.state.graph.load(
-    //   path.join(__dirname, "../test/fixtures/honolulu.json")
-    // );
+    await app.state.graph.load(GRAPH);
 
     // setup static file server
     app.use("/static", express.static(path.join(__dirname, "../static")));
@@ -141,6 +144,104 @@ async function main() {
       });
     });
 
+    app.post("/reset-surveys", async (req, res) => {
+      app.state.graph.surveys = new Map();
+
+      await app.state.graph.save(GRAPH);
+
+      res.status(200).redirect("/admin");
+    });
+
+    app.get("/export.zip", async (req, res) => {
+      let spans = [];
+      let positions = [];
+
+      for (let [ref, surveys] of app.state.graph.surveys) {
+        if (!app.state.graph.refs.has(ref)) {
+          throw new Error("Surveyed street ref not found: ", ref);
+        }
+        let street = app.state.graph.streets[app.state.graph.refs.get(ref)];
+
+        for (let survey of surveys) {
+          for (let feature of survey.features) {
+            let centered = turf.lineString([
+              turf.along(
+                street,
+                (street.properties.distance - survey.surveyed_distance) / 2,
+                { units: "meters" }
+              ).geometry.coordinates,
+              turf.along(
+                street,
+                street.properties.distance -
+                  (street.properties.distance - survey.surveyed_distance) / 2,
+                { units: "meters" }
+              ).geometry.coordinates,
+            ]);
+            let start = turf.along(centered, feature.geometry.distances[0]);
+            let end = turf.along(centered, feature.geometry.distances[1]);
+
+            //turf.lineSliceAlong(line, start, stop, {units: 'miles'});
+
+            let span = {
+              type: "Feature",
+              geometry: {
+                type: "LineString",
+                coordinates: [
+                  start.geometry.coordinates,
+                  end.geometry.coordinates,
+                ],
+              },
+              properties: {
+                created_at: survey.created_at,
+                cwheelid: "", // todo: figure out where to find this
+                shst_ref_id: survey.shst_ref_id,
+                ref_side: survey.side_of_street,
+                ref_len: street.properties.distance,
+                srv_dist: survey.surveyed_distance,
+                srv_id: survey.id,
+                feat_id: feature.id,
+                label: feature.label,
+                dst_st: feature.geometry.distances[0],
+                dst_end: feature.geometry.distances[1],
+                images: JSON.stringify(feature.images),
+              },
+            };
+            console.log(JSON.stringify(span, null, 2));
+
+            spans.push(span);
+          }
+        }
+      }
+
+      //console.log(JSON.stringify(turf.featureCollection(spans)))
+
+      let exportDir = path.join(__dirname, "../export");
+      let zipDir = path.join(exportDir, "./export.zip");
+
+      try {
+        rimraf.sync(exportDir);
+      } catch (e) {
+        console.error(e);
+      }
+      mkdirp.sync(exportDir);
+
+      var archive = archiver("zip", {
+        zlib: { level: 9 }, // Sets the compression level.
+      });
+
+      let output = fs.createWriteStream(zipDir);
+
+      output.on("close", function () {
+        res.status(200).download(zipDir);
+      });
+
+      archive.pipe(output);
+      archive.append(JSON.stringify(turf.featureCollection(spans)), {
+        name: "spans.geojson",
+      });
+      archive.finalize();
+    });
+
     app.get("/surveys/:ref", async (req, res) => {
       let ref = req.params.ref;
       let surveys = app.state.graph.surveys.get(ref);
@@ -159,6 +260,8 @@ async function main() {
       }
       surveys.push(req.body);
       app.state.graph.surveys.set(ref, surveys);
+
+      await app.state.graph.save(GRAPH);
 
       res.status(200).send("Uploaded survey.");
     });
@@ -184,7 +287,7 @@ async function main() {
           fs.readFileSync(path.join(__dirname, "../config/wifi.json"))
         );
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
       // return wifiSettings
       res.status(200).send(wifiSettings);

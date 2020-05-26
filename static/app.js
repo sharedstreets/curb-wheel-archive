@@ -15,7 +15,7 @@ var app = {
     pollingInterval: 500,
 
     curbFeatures: {
-      span: [
+      Span: [
         "Parking",
         "No Parking",
         "No Stopping",
@@ -24,8 +24,7 @@ var app = {
         "Paint",
         "Misc. Zone",
       ],
-
-      position: ["Payment device", "Fire hydrant", "Misc. Point"],
+      Position: ["Payment device", "Fire hydrant", "Misc. Point"],
     },
 
     prompts: {
@@ -464,7 +463,6 @@ var app = {
         survey.features.push(feature);
       }
 
-      console.log(survey);
       var xhr = new XMLHttpRequest();
       var url = "/surveys/" + app.state.street.ref;
       xhr.open("POST", url, true);

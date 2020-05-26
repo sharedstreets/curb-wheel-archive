@@ -12,52 +12,73 @@
       <h1 class="title">
         CurbWheel Admin
       </h1>
-      <p class="subtitle">
-        Current version: <strong><span id="currentVersion"></span></strong>
-        <div class="buttons">
-            <input type="file" id="zipFile" label="select zip of cubwheel distribution"/>
-            <button id="clearButton" onclick="" class="button is-primary" disabled>Upload code</button>
-        </div>
-      </p>
 
-      <p class="subtitle">
-        Current OSM file: <strong><span id="currentMap"></span></strong>
-        <div class="buttons">
-            <input type="file" id="pbfFile" label="select OSM pbf file"/>
-            <button id="clearButton" onclick="uploadPbf()" class="button is-primary">Upload OSM</button>
-        </div>
-      </p>
-
-      <p class="subtitle">
-        Current MBTiles file: <strong><span id="currentMap"></span></strong>
-        <div class="buttons">
-            <input type="file" id="mbtilesFile" label="select mbtiles file"/>
-            <button id="clearButton" onclick="uploadMbtiles()" class="button is-primary">Upload MBtiles</button>
-        </div>
-      </p>
-
-
-      <p class="subtitle">
-        <div class="control">
-            <label class="radio">
-              <input type="radio" name="mode" value="wifi">
-              Use Local Network
-            </label>
-            <label class="radio">
-              <input type="radio" name="mode" value="ap">
-              Run Access Point
-            </label>
+      <div class="section">
+        <p class="subtitle">
+          Current version: <strong><span id="currentVersion"></span></strong>
+          <div class="buttons">
+              <input type="file" id="zipFile" label="select zip of cubwheel distribution"/>
+              <button id="clearButton" onclick="" class="button is-primary" disabled>Upload code</button>
           </div>
-        <input class="input" id="networkField" placeholder="Wifi network">
-        <input class="input" id="passwordField" placeholder="Wifi password">
-      </p>
-      <div class="buttons">
-        <button id="clearButton" onclick="updateNetwork()" class="button is-primary">Update Network</button>
+        </p>
       </div>
+
+      <div class="section">
+        <p class="subtitle">
+          Current OSM file: <strong><span id="currentMap"></span></strong>
+          <div class="buttons">
+              <input type="file" id="pbfFile" label="select OSM pbf file"/>
+              <button id="clearButton" onclick="uploadPbf()" class="button is-primary">Upload OSM</button>
+          </div>
+        </p>
+        <p class="subtitle">
+          Current MBTiles file: <strong><span id="currentMap"></span></strong>
+          <div class="buttons">
+              <input type="file" id="mbtilesFile" label="select mbtiles file"/>
+              <button id="clearButton" onclick="uploadMbtiles()" class="button is-primary">Upload MBtiles</button>
+          </div>
+        </p>
+      </div>
+
+      <div class="section">
+        <p class="subtitle">
+          <div class="control">
+              <label class="radio">
+                <input type="radio" name="mode" value="wifi">
+                Use Local Network
+              </label>
+              <label class="radio">
+                <input type="radio" name="mode" value="ap">
+                Run Access Point
+              </label>
+            </div>
+          <input class="input" id="networkField" placeholder="Wifi network">
+          <input class="input" id="passwordField" placeholder="Wifi password">
+        </p><br />
+        <div class="control">
+          <button id="clearButton" onclick="updateNetwork()" class="button is-primary">Update Network</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="control">
+          <p class="subtitle">
+            Export surveys
+          </p>
+          <a class="button is-primary" href="/export.zip">Download Data</a>
+        </div>
+        <form action="/reset-surveys" method="post">
+          <p class="subtitle">
+            Reset surveys
+          </p>
+          <input class="button is-danger" type="submit" name="reset" value="Reset Surveys" />
+        </form>
+      </div>
+
     </div>
   </section>
 
-  <script> 
+  <script>
 
     function loadJSON(path, success, error) {
         var xhr = new XMLHttpRequest();
@@ -101,42 +122,43 @@
 
       /* Create a FormData instance */
       var formData = new FormData();
-      /* Add the file */ 
+      /* Add the file */
       formData.append(filenameField, file);
       xhr.open("POST", url, true);
       xhr.send(formData);
     }
 
     function uploadPbf() {
-        var pbfFile = document.getElementById("pbfFile").files[0];   
+        var pbfFile = document.getElementById("pbfFile").files[0];
         uploadFile(pbfFile, "pbf", "/pbf")
     }
 
     function uploadMbtiles() {
         var mbtilesFile = document.getElementById("mbtilesFile").files[0];   
+
         uploadFile(mbtilesFile, "mbtiles", "/mbtiles")
     }
 
     // function uploadZip() {
-    //     var mbtilesFile = document.getElementById("zipFile");   
+    //     var mbtilesFile = document.getElementById("zipFile");
     //     uploadFile(mbtilesFile, "zip", "/upgrade")
     // }
 
     function getCurrentVersion() {
-        var currentVersionSpan = document.getElementById("currentVersion");   
-        loadJSON('/admin/version', 
+        var currentVersionSpan = document.getElementById("currentVersion");
+        loadJSON('/admin/version',
             function(data) { currentVersionSpan.textContent = data.version },
             function(xhr) { console.error(xhr); }
         );
     }
 
     function getCurrentNetwork() {
-        var networkField = document.getElementById("networkField");   
-        var passwordField = document.getElementById("passwordField");   
-        loadJSON('/admin/wifi', 
+        var networkField = document.getElementById("networkField");
+        var passwordField = document.getElementById("passwordField");
+        loadJSON('/admin/wifi',
             function(data) {
-                networkField.value = data.network; 
-                passwordField.value = data.password; 
+                networkField.value = data.network;
+                passwordField.value = data.password;
                 setCurrentMode(data.mode); },
             function(xhr) { console.error(xhr); }
         );
@@ -171,22 +193,22 @@
     }
 
     function updateNetwork() {
-        var networkField = document.getElementById("networkField");   
-        var passwordField = document.getElementById("passwordField"); 
+        var networkField = document.getElementById("networkField");
+        var passwordField = document.getElementById("passwordField");
         var modeValue = getCurrentMode();
         var data = {
             network : networkField.value,
             password : passwordField.value,
             mode : modeValue
         }
-     
+
         postJSON('/admin/wifi', data, function(data) {  }, function(xhr) { console.error(xhr); });
     }
-    
+
     getCurrentVersion();
     getCurrentNetwork();
 
-</script> 
+</script>
 
   </body>
 </html>

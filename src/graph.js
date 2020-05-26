@@ -15,6 +15,7 @@ const writeFileAsync = promisify(fs.writeFile);
 
 function Graph() {
   this.streets = [];
+  this.refs = new Map();
   this.bounds = [-Infinity, -Infinity, Infinity, Infinity];
   this.center = [0, 0];
   this.index = {};
@@ -35,9 +36,71 @@ Graph.prototype.query = async function (bbox) {
     });
 };
 
+Graph.prototype.getSpans = async function () {
+  let spans = [];
+  
+  for (let [ref, surveys] of this.surveys) {
+    if (!this.refs.has(ref)) {
+      throw new Error("Surveyed street ref not found: ", ref);
+    }
+    let street = this.streets[this.refs.get(ref)];
+
+    for (let survey of surveys) {
+      for (let feature of survey.features) {
+        let centered = turf.lineString([
+          turf.along(
+            street,
+            (street.properties.distance - survey.surveyed_distance) / 2,
+            { units: "meters" }
+          ).geometry.coordinates,
+          turf.along(
+            street,
+            street.properties.distance -
+              (street.properties.distance - survey.surveyed_distance) / 2,
+            { units: "meters" }
+          ).geometry.coordinates,
+        ]);
+        let start = turf.along(centered, feature.geometry.distances[0]);
+        let end = turf.along(centered, feature.geometry.distances[1]);
+
+        //turf.lineSliceAlong(line, start, stop, {units: 'miles'});
+
+        let span = {
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: [start.geometry.coordinates, end.geometry.coordinates],
+          },
+          properties: {
+            created_at: survey.created_at,
+            cwheelid: "", // todo: figure out where to find this
+            shst_ref_id: survey.shst_ref_id,
+            ref_side: survey.side_of_street,
+            ref_len: street.properties.distance,
+            srv_dist: survey.surveyed_distance,
+            srv_id: survey.id,
+            feat_id: feature.id,
+            label: feature.label,
+            dst_st: feature.geometry.distances[0],
+            dst_end: feature.geometry.distances[1],
+            images: JSON.stringify(feature.images),
+          },
+        };
+        console.log(JSON.stringify(span, null, 2));
+
+        spans.push(span);
+      }
+    }
+  }
+};
+
 Graph.prototype.save = async function (file) {
   let copy = {};
   copy.streets = this.streets;
+  copy.refs = {};
+  for (const [key, value] of this.refs) {
+    copy.refs[key] = value;
+  }
   copy.bounds = this.bounds;
   copy.center = this.center;
   copy.index = this.index.toJSON();
@@ -53,6 +116,10 @@ Graph.prototype.load = async function (file) {
   let raw = (await readFileAsync(file)).toString();
   let data = JSON.parse(raw);
   this.streets = data.streets;
+  this.refs = new Map();
+  for (const key of Object.keys(data.refs)) {
+    this.refs.set(key, data.refs[key]);
+  }
   this.bounds = data.bounds;
   this.center = data.center;
   this.index = new RBush().fromJSON(data.index);
@@ -123,10 +190,16 @@ Graph.prototype.extract = async function (pbf) {
         ways = normalizer.splitWays(ways);
         ways = normalizer.mergeWays(ways);
 
+        this.refs = new Map();
+        let i = 0;
         for (let way of ways) {
           way.properties.forward = shst.forwardReference(way).id;
           way.properties.back = shst.backReference(way).id;
           way.properties.distance = turf.length(way, { units: "meters" });
+
+          this.refs.set(way.properties.forward, i);
+          this.refs.set(way.properties.back, i);
+          i++;
         }
 
         this.streets = ways;
