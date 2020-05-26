@@ -8,7 +8,7 @@ const Graph = require("../src/graph");
 const readFileAsync = promisify(fs.readFile);
 const writeFileAsync = promisify(fs.writeFile);
 const unlinkAsync = promisify(fs.unlink);
-
+/*
 test("graph", async (t) => {
   const pbf = path.join(__dirname, "./fixtures/honolulu.osm.pbf");
 
@@ -90,3 +90,14 @@ test("graph", async (t) => {
 
   t.done();
 });
+*/
+
+test('surveys', async t => {
+  const json = path.join(__dirname, "./fixtures/honolulu.json");
+  let graph = new Graph();
+  await graph.load(json);
+  t.ok(graph.surveys.size > 0, "loaded surveys")
+  let spans = graph.getSpans();
+
+  t.done();
+})
