@@ -41,7 +41,12 @@ async function main() {
     // debug
     app.state.graph = new Graph();
 
-    await app.state.graph.load(GRAPH);
+    if (fs.existsSync(GRAPH)) {
+      console.log('Found graph.');
+      await app.state.graph.load(GRAPH);
+    } else {
+      console.log("No graph found.")
+    }
 
     // setup static file server
     app.use("/static", express.static(path.join(__dirname, "../static")));
@@ -52,17 +57,23 @@ async function main() {
     mkdirp.sync(IMAGES);
 
     app.get("/", async (req, res) => {
-      let template = (
-        await fs.promises.readFile(
-          path.join(__dirname, "../templates/index.html")
-        )
-      ).toString();
+      if (fs.existsSync(GRAPH)) {
+        let template = (
+          await fs.promises.readFile(
+            path.join(__dirname, "../templates/index.html")
+          )
+        ).toString();
 
-      template = template
-        .split("{{bounds}}")
-        .join(JSON.stringify(app.state.graph.bounds));
+        template = template
+          .split("{{bounds}}")
+          .join(JSON.stringify(app.state.graph.bounds));
 
-      res.send(template);
+        res.send(template);
+      } else {
+        // HTTP Status - 412 Precondition Failed
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/412
+        res.status(412).redirect("/admin");
+      }
     });
 
     app.get("/counter", async (req, res) => {
@@ -103,8 +114,12 @@ async function main() {
         // extract pbf and build street database
         app.state.graph = new Graph();
         app.state.graph = await app.state.graph.extract(PBF);
+        await fs.promises.unlink(PBF);
+        if (fs.existsSync(GRAPH)) {
+          await fs.promises.unlink(GRAPH);
+        }
 
-        //await fs.promises.unlink(PBF);
+        await app.state.graph.save(GRAPH);
 
         res.status(200).send("Extract complete.");
       });

@@ -92,12 +92,12 @@ test("graph", async (t) => {
 });
 */
 
-test('surveys', async t => {
+test("surveys", async (t) => {
   const json = path.join(__dirname, "./fixtures/honolulu.json");
   let graph = new Graph();
   await graph.load(json);
-  t.ok(graph.surveys.size > 0, "loaded surveys")
+  t.ok(graph.surveys.size > 0, "loaded surveys");
   let spans = graph.getSpans();
 
   t.done();
-})
+});
