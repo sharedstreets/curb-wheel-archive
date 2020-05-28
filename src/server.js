@@ -8,6 +8,7 @@ const mkdirp = require("mkdirp");
 const child_process = require("child_process");
 const turf = require("@turf/turf");
 const archiver = require("archiver");
+const copydir = require("copy-dir");
 const Graph = require("./graph");
 
 async function main() {
@@ -34,6 +35,7 @@ async function main() {
     const GRAPH = path.join(__dirname, "../graph.json");
     const MBTILES = path.join(__dirname, "../extract.mbtiles");
     const IMAGES = path.join(__dirname, "../static/images/survey");
+    const UNITS = { units: "meters" };
 
     // application state
     app.state = {};
@@ -42,10 +44,10 @@ async function main() {
     app.state.graph = new Graph();
 
     if (fs.existsSync(GRAPH)) {
-      console.log('Found graph.');
+      console.log("Found graph.");
       await app.state.graph.load(GRAPH);
     } else {
-      console.log("No graph found.")
+      console.log("No graph found.");
     }
 
     // setup static file server
@@ -170,65 +172,99 @@ async function main() {
     app.get("/export.zip", async (req, res) => {
       let spans = [];
       let positions = [];
+      let images = [];
+      let spanPoints = [];
+      let spanAndPositionPoints = [];
 
       for (let [ref, surveys] of app.state.graph.surveys) {
         if (!app.state.graph.refs.has(ref)) {
           throw new Error("Surveyed street ref not found: ", ref);
         }
+
         let street = app.state.graph.streets[app.state.graph.refs.get(ref)];
 
+        // flip geometry if survey is back ref
+        if (ref === street.properties.back) {
+          street.geometry.coordinates.reverse();
+        }
+
         for (let survey of surveys) {
+          let startOffset =
+            (street.properties.distance - survey.surveyed_distance) / 2;
+          let endOffset =
+            street.properties.distance -
+            (street.properties.distance - survey.surveyed_distance) / 2;
+
+          if (street.properties.distance <= survey.surveyed_distance) {
+            startOffset = 0;
+            endOffset = street.properties.distance;
+          }
+
+          let centered = turf.lineString([
+            turf.along(street, startOffset, UNITS).geometry.coordinates,
+            turf.along(street, endOffset, UNITS).geometry.coordinates,
+          ]);
           for (let feature of survey.features) {
-            let centered = turf.lineString([
-              turf.along(
-                street,
-                (street.properties.distance - survey.surveyed_distance) / 2,
-                { units: "meters" }
-              ).geometry.coordinates,
-              turf.along(
-                street,
-                street.properties.distance -
-                  (street.properties.distance - survey.surveyed_distance) / 2,
-                { units: "meters" }
-              ).geometry.coordinates,
-            ]);
-            let start = turf.along(centered, feature.geometry.distances[0]);
-            let end = turf.along(centered, feature.geometry.distances[1]);
+            if (feature.geometry.type === "Span") {
+              let line = turf.lineSliceAlong(
+                centered,
+                feature.geometry.distances[0],
+                feature.geometry.distances[1],
+                UNITS
+              );
 
-            //turf.lineSliceAlong(line, start, stop, {units: 'miles'});
+              let span = {
+                type: "Feature",
+                geometry: {
+                  type: "LineString",
+                  coordinates: line.geometry.coordinates,
+                },
+                properties: {
+                  created_at: survey.created_at,
+                  cwheelid: "", // todo: figure out where to find this
+                  shst_ref_id: survey.shst_ref_id,
+                  ref_side: survey.side_of_street,
+                  ref_len: street.properties.distance,
+                  srv_dist: survey.surveyed_distance,
+                  srv_id: survey.id,
+                  feat_id: feature.id,
+                  label: feature.label,
+                  dst_st: feature.geometry.distances[0],
+                  dst_end: feature.geometry.distances[1],
+                  images: JSON.stringify(feature.images),
+                },
+              };
 
-            let span = {
-              type: "Feature",
-              geometry: {
-                type: "LineString",
-                coordinates: [
-                  start.geometry.coordinates,
-                  end.geometry.coordinates,
-                ],
-              },
-              properties: {
-                created_at: survey.created_at,
-                cwheelid: "", // todo: figure out where to find this
-                shst_ref_id: survey.shst_ref_id,
-                ref_side: survey.side_of_street,
-                ref_len: street.properties.distance,
-                srv_dist: survey.surveyed_distance,
-                srv_id: survey.id,
-                feat_id: feature.id,
-                label: feature.label,
-                dst_st: feature.geometry.distances[0],
-                dst_end: feature.geometry.distances[1],
-                images: JSON.stringify(feature.images),
-              },
-            };
-            console.log(JSON.stringify(span, null, 2));
+              let start = turf.point(
+                span.geometry.coordinates[0],
+                span.properties
+              );
+              let end = turf.point(
+                span.geometry.coordinates[span.geometry.coordinates.length - 1],
+                span.properties
+              );
 
-            spans.push(span);
+              spans.push(span);
+              spanPoints.push(start);
+              spanPoints.push(end);
+              spanAndPositionPoints.push(start);
+              spanAndPositionPoints.push(end);
+            } else if (feature.geometry.type === "Position") {
+              // todo: Positions are being incorrectly stored with span style distances array. Fix upstream.
+              let point = turf.along(
+                centered,
+                feature.geometry.distances[0],
+                UNITS
+              );
+
+              positions.push(point);
+              spanAndPositionPoints.push(point);
+            } else {
+              throw new Error("Unknown geometry type.");
+            }
           }
         }
       }
-
-      //console.log(JSON.stringify(turf.featureCollection(spans)))
 
       let exportDir = path.join(__dirname, "../export");
       let zipDir = path.join(exportDir, "./export.zip");
@@ -240,20 +276,60 @@ async function main() {
       }
       mkdirp.sync(exportDir);
 
+      await fs.promises.writeFile(
+        path.join(exportDir, "spans.geojson"),
+        JSON.stringify(turf.featureCollection(spans)),
+        {
+          name: "spans.geojson",
+        }
+      );
+      await fs.promises.writeFile(
+        path.join(exportDir, "positions.geojson"),
+        JSON.stringify(turf.featureCollection(positions)),
+        {
+          name: "positions.geojson",
+        }
+      );
+      await fs.promises.writeFile(
+        path.join(exportDir, "spanPoints.geojson"),
+        JSON.stringify(turf.featureCollection(spanPoints)),
+        {
+          name: "spanPoints.geojson",
+        }
+      );
+      await fs.promises.writeFile(
+        path.join(exportDir, "spanAndPositionPoints.geojson"),
+        JSON.stringify(turf.featureCollection(spanAndPositionPoints)),
+        {
+          name: "spanAndPositionPoints.geojson",
+        }
+      );
+      await fs.promises.writeFile(
+        path.join(exportDir, "images.geojson"),
+        JSON.stringify(turf.featureCollection([])),
+        {
+          name: "images.geojson",
+        }
+      );
+
+      copydir.sync(
+        path.join(__dirname, "../static/images/survey"),
+        path.join(exportDir, "./images")
+      );
+
       var archive = archiver("zip", {
-        zlib: { level: 9 }, // Sets the compression level.
+        zlib: { level: 9 }, // compression level
       });
 
       let output = fs.createWriteStream(zipDir);
+      archive.directory(exportDir, false);
 
       output.on("close", function () {
         res.status(200).download(zipDir);
       });
 
       archive.pipe(output);
-      archive.append(JSON.stringify(turf.featureCollection(spans)), {
-        name: "spans.geojson",
-      });
+
       archive.finalize();
     });
 
