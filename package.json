@@ -7,7 +7,8 @@
     "start": "sudo sh startup.sh && node ./src/server.js",
     "simulator": "sh startup-simulator.sh && node --trace-warnings ./src/server.js",
     "test": "tap -R spec ./test/*.test.js",
-    "lint": "prettier --write **/*.js"
+    "lint": "prettier --write **/*.js",
+    "bench": "node --max-old-space-size=512 ./bench/extract.bench.js"
   },
   "repository": {
     "type": "git",
@@ -44,7 +45,6 @@
     "through2": "^3.0.1"
   },
   "devDependencies": {
-    "benchmark": "^2.1.4",
     "prettier": "^2.0.2",
     "tap": "^14.10.7"
   }
