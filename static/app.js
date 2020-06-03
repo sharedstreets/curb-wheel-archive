@@ -198,18 +198,19 @@ var app = {
   // functionality to update the UI, typically after zone changes and new rolling
 
   ui: {
-	// fires on roll signal from Pi. Updates all active progress bars and status texts
+	// fUpdates all active progress bars and status texts
 	roll: function () {
-	  var current = (app.state.currentRollDistance =
-		app.state.systemRollDistance - app.state.systemRollOffset);
+	  var current = app.state.currentRollDistance =
+		app.state.systemRollDistance - app.state.systemRollOffset;
 
 	  //update progress bars that aren't complete yet
-	  d3.selectAll(".entry:not(.complete) .span").style("transform", (d) => {
+	  d3.selectAll(".entry:not(.complete) .span").style("width", (d) => {
 		//conditional start to account for main progress bar
 		var startingMark = d ? d.start : 0;
-		return `scaleX(${
-		  (current - startingMark) / app.state.street.distance
-		})`;
+		return `${100*(current - startingMark) / app.state.street.distance}%`
+		// return `scaleX(${
+		//   (current - startingMark) / app.state.street.distance
+		// })`;
 	  });
 
 	  d3.selectAll(".entry:not(.complete) #zoneLength")
@@ -220,17 +221,23 @@ var app = {
 
 	// builds progress bar
 	progressBar: {
-	  build: function (parent) {
-		parent
-		  .append("div")
-		  .attr("class", (d) => `progressBar`)
-		  .append("div")
-		  .attr("class", (d) => d.type.toLowerCase())
-		  .style(
-			"margin-left",
-			(d) => `${(100 * d.start) / app.state.street.distance}%`
-		  );
-	  },
+		build: function (parent) {
+			var container = parent
+				.append("div")
+				.attr("class", (d) => `progressBar`);
+
+			container
+				.append('div')
+				.classed('track', true);
+
+			container
+				.append("div")
+				.attr("class", (d) => d.type.toLowerCase())
+				.style(
+					"margin-left",
+					(d) => `${(100 * d.start) / app.state.street.distance}%`
+				);
+		},
 	},
 
 	//general function to build a new zone entry.
@@ -475,11 +482,8 @@ var app = {
 	  var xhr = new XMLHttpRequest();
 	  xhr.onreadystatechange = function () {
 		if (xhr.readyState === XMLHttpRequest.DONE) {
-		  if (xhr.status === 200) {
-			if (success) success(JSON.parse(xhr.responseText));
-		  } else {
-			if (error) error(xhr);
-		  }
+			if (xhr.status === 200) if (success) success(JSON.parse(xhr.responseText));
+			else if (error) error(xhr);
 		}
 	  };
 	  xhr.open("GET", path, true);
