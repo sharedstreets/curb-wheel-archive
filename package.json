@@ -44,6 +44,7 @@
     "through2": "^3.0.1"
   },
   "devDependencies": {
+    "benchmark": "^2.1.4",
     "prettier": "^2.0.2",
     "tap": "^14.10.7"
   }
