@@ -149,7 +149,8 @@ async function main() {
       }
 
       let image = req.files.image;
-      let name = uuid() + ".jpg";
+      let ext = path.extname(req.files.image.name);
+      let name = uuid() + ext;
       let imagePath = path.join(IMAGES, "/" + name);
 
       image.mv(imagePath, async (err) => {
@@ -163,6 +164,9 @@ async function main() {
 
     app.post("/reset-surveys", async (req, res) => {
       app.state.graph.surveys = new Map();
+
+      rimraf.sync(IMAGES);
+      mkdirp.sync(IMAGES);
 
       await app.state.graph.save(GRAPH);
 
