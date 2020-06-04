@@ -1,75 +1,81 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CurbWheel</title>
-    <!-- <link rel="stylesheet" href="bulma.min.css"> -->
-    <link rel="stylesheet" href="static/basics.css">
-    <link rel="stylesheet" href="static/style.css">
-    <script src='static/mapbox-gl.js'></script>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>CurbWheel</title>
+		<!-- <link rel="stylesheet" href="bulma.min.css"> -->
+		<link rel="stylesheet" href="static/basics.css">
+		<link rel="stylesheet" href="static/style.css">
+		<script src='static/mapbox-gl.js'></script>
 
-    <link href='static/mapbox-gl.css' rel='stylesheet' />
-  </head>
-    <body class='is-mobile'>
-    <script>
-      bounds = {{bounds}}
-    </script>
-    <section class="" id='topBar'>
-      <span class="icon fl m20" onclick='app.ui.back()'>
-        <img src='static/images/back.svg' class='icon' style='fill:white'/>
-      </span>
+		<link href='static/mapbox-gl.css' rel='stylesheet' />
+	</head>
+	<body class='is-mobile'>
+		<script>
+			bounds = {{bounds}}
+		</script>
+		<section class="" id='topBar'>
+			<span class="icon fl m20" onclick='app.ui.back()'>
+				<img src='static/images/back.svg' class='icon' style='fill:white'/>
+			</span>
 
-      <div class='big' id='title'>Select a Street</div>
-    </section>
-    <div id='modes'>
-      <div id='map' class='mode big'>
-      </div>
-      <div id='rolling' class='mode'>
-        <div id='curbEntry'>
-          <div class='entry'>
-            <span>Current stretch of <span id='streetName'></span></span>
-            <div class='progressBar'>
-              <div class='track'></div>
-              <div class='span'></div>
-            </div>
+			<div class='big' id='title'>Select a Street</div>
+		</section>
+		<div id='modes'>
+			<div id='map' class='mode big'>
+			</div>
+			<div id='rolling' class='mode'>
+				<div id='curbEntry'>
+					<div class='entry'>
+						<div>Surveying 
+                            <span id='streetName'></span>
+                            <span id='rollDelta' class='fr blue'>foo</span>
+                        </div>
+						<div class='progressBar'>
+							<div class='track'></div>
+                            <div class='master span'></div>
+							<div class='wheel'>
+                                <div class='spoke'></div>                     
+                            </div>
+						</div>
 
-            <span class='small quiet'>
-              <span id='blockProgress'>0</span>m of ~
-              <span id='curbLength'></span>m
-            </span>
-          </div>
-        </div>
-        <div class='scroll-drawer'>
-          <form ref='uploadForm' id='uploadForm' class='hidden' action='http://127.0.0.1:8081/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
-            <input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
-            <input type='submit' id ='imageSubmit' value='Upload!' />
-          </form>
-          <iframe name="hiddenIframe" class='hidden'></iframe>
+						<span class='small quiet'>
+							<span id='blockProgress'>0</span>m of ~
+							<span id='curbLength'></span>m
+						</span>
+					</div>
+				</div>
+				<div class='scroll-drawer'>
+					<form ref='uploadForm' id='uploadForm' class='hidden' action='http://127.0.0.1:8081/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
+						<input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
+						<input type='submit' id ='imageSubmit' value='Upload!' />
+					</form>
+					<iframe name="hiddenIframe" class='hidden'></iframe>
 
-          <div id='zones'></div>
+					<div id='zones'></div>
 
-          <div class='text-center mt20 mb200'>
-            <p class='big' onclick='app.ui.mode.set("addZone")'>
-              <span class="blue mr10 inlineBlock" style='transform: scale(1.5)'>
-                <img src='static/images/plus.svg' class='icon'/>
-              </span>
-              Add a curb feature
-            </p>
-          </div>
-        </div>
-        <div class='bottomButton'>
-          <div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
-          <div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
-        </div>
-      </div>
-      <div id='addZone' class='scroll mode'>
-      </div>
-    </div>
-    </body>
-  <script src="static/d3.v4.min.js"></script>
-  <script src='static/app.js'></script>
-  <script src='static/turf.min.js'></script>
-  <script src='static/map.js'></script>
+					<div class='text-center mt20 mb200'>
+						<p class='big' onclick='app.ui.mode.set("addZone")'>
+							<span class="blue mr10 inlineBlock" style='transform: scale(1.5)'>
+								<img src='static/images/plus.svg' class='icon'/>
+							</span>
+							Add a curb feature
+						</p>
+					</div>
+				</div>
+				<div class='bottomButton'>
+					<div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
+					<div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
+				</div>
+			</div>
+			<div id='addZone' class='scroll mode'>
+			</div>
+		</div>
+	</body>
+	<script src="static/d3.v4.min.js"></script>
+	<script src='static/app.js'></script>
+	<script src='static/turf.min.js'></script>
+	<script src='static/map.js'></script>
 
 </html>

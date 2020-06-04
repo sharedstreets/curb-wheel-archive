@@ -89,11 +89,8 @@ body, html {
 	background:white;
 }
 
-
-.distance {
-	font-size:0.85em;
-	color:#999;
-	float:right;
+#rollDelta {
+	display:none;
 }
 
 #curbEntry .entry{
@@ -126,12 +123,21 @@ body, html {
 	display:flex !important;
 }
 
+/*rolling state*/
+
+.isRolling .wheel {
+    transform: translate(-50%, -50%);
+}
+
+.isRolling #rollDelta {
+	display:inline-block;
+}
 
 /*progress bar*/
 
 .progressBar {
 	height:12px;
-	margin:10px 0px;
+	margin:8px 0px;
 	position:relative;
 }
 
@@ -145,14 +151,50 @@ body, html {
 	position: absolute;
 }
 
+@keyframes spin {
+  0%   {transform:rotate(0deg)}
+  100%   {transform:rotate(360deg)}
+}
+
+.wheel {
+    position: absolute;
+    border: 2px solid steelblue;
+    border-radius: 50%;
+    margin-top: 6px;
+    transform: translate(-50%, -50%) scale(0);
+    background:white;
+    transition:transform 0.5s;
+}
+
+.spoke {
+	height: 2px;
+    width: 6.5px;
+    margin:5px 5.5px 5px 0px;
+    background: steelblue;
+    animation: spin;
+    animation-duration: 1s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    transform-origin: right;
+}
+
 .span {
 	width:0%;
 	transform-origin:left;
 	position:absolute;
 	top:0;
-	padding:6px 0px;
+	padding:6px;
 	border-radius:6px;
+	margin-left:-6px;
 	background:steelblue;
+}
+
+.master.span {
+	margin:0;
+	padding:2px;
+	border-radius:2px;
+	margin-top:6px;
+	transform:translateY(-50%);
 }
 
 .position {

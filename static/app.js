@@ -12,7 +12,7 @@ var app = {
   },
 
   constants: {
-	pollingInterval: 500,
+	pollingInterval: 1000,
 
 	curbFeatures: {
 	  Span: [
@@ -200,23 +200,43 @@ var app = {
   ui: {
 	// fUpdates all active progress bars and status texts
 	roll: function () {
-	  var current = app.state.currentRollDistance =
-		app.state.systemRollDistance - app.state.systemRollOffset;
+		
+		var current = app.state.systemRollDistance - app.state.systemRollOffset;
+		var hasRolled = current !== app.state.currentRollDistance;
+		console.log(current)
+		d3.select('#rolling')
+			.classed('isRolling', hasRolled);
 
-	  //update progress bars that aren't complete yet
-	  d3.selectAll(".entry:not(.complete) .span").style("width", (d) => {
-		//conditional start to account for main progress bar
-		var startingMark = d ? d.start : 0;
-		return `${100*(current - startingMark) / app.state.street.distance}%`
-		// return `scaleX(${
-		//   (current - startingMark) / app.state.street.distance
-		// })`;
-	  });
+		if (hasRolled) {
 
-	  d3.selectAll(".entry:not(.complete) #zoneLength")
-		.text((d) => `${(current - d.start).toFixed(1)} m long`);
+			var progressPercentage = 100 * current / app.state.street.distance;
 
-	  d3.select("#blockProgress").text(current.toFixed(1));
+			//update progress bars that aren't complete yet
+			d3.selectAll(".entry:not(.complete) .span")
+				.style("width", (d) => {
+
+					//conditional start to account for main progress bar
+					var startingMark = d ? d.start : 0;
+					return `${progressPercentage - 100 * startingMark / app.state.street.distance}%`
+				
+				});
+
+			d3.select('.wheel')
+				.style('margin-left', ()=>{
+					return progressPercentage+'%'
+				});
+
+			d3.selectAll(".entry:not(.complete) #zoneLength")
+				.text((d) => `${(current - d.start).toFixed(1)} m long`);
+
+			d3.select("#blockProgress")
+				.text(current.toFixed(1));
+			
+			d3.select('#rollDelta')
+				.text(`+${Math.round((current-app.state.currentRollDistance)*100)} cm`)
+		}
+
+		app.state.currentRollDistance = current;
 	},
 
 	// builds progress bar
@@ -381,7 +401,6 @@ var app = {
 		var promptTime = Date.now();
 		var confirmed = confirm(text);
 
-		console.log("mark", responseTime);
 		// if user confirms or had dialogs disabled, proceed to "ok" state
 		if (confirmed === true) ok();
 		else if (cancel) {
