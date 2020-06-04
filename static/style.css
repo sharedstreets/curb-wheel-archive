@@ -187,12 +187,11 @@ body, html {
 	top:0;
 	padding:6px;
 	border-radius:6px;
-	margin-left:-6px;
+	transform:translateX(-6px);
 	background:steelblue;
 }
 
 .master.span {
-	margin:0;
 	padding:2px;
 	border-radius:2px;
 	margin-top:6px;
@@ -212,6 +211,16 @@ body, html {
 	background:#999;
 	border-radius:2px;
 }
+
+.dot {
+	width:5px;
+	height:5px;
+	transform:translateX(-50%);
+	background:white;
+	border-radius:50%;
+	z-index:99;
+}
+
 /*gear icon*/
 
 .icon {
@@ -219,6 +228,7 @@ body, html {
     overflow: visible;
     vertical-align: -.125em;
 }
+
 .fa-cog {
 	transform-origin: center;
 	transition:transform 0.25s;
@@ -232,8 +242,6 @@ body, html {
 	opacity:1;
 	filter:grayscale(0);
 }
-
-
 
 .complete {
 	background: #fcfcfc;

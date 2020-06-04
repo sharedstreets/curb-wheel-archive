@@ -285,19 +285,19 @@ var app = {
 				});
 			})
 
-	  // build progress bar
-	  app.ui.progressBar.build(newZones);
+		// build progress bar
+		app.ui.progressBar.build(newZones);
 
-	  // add text below progress bars
-	  var barCaption = newZones
-		.append("div")
-		.attr("class", "quiet small");
+		// add text below progress bars
+		var barCaption = newZones
+			.append("div")
+			.attr("class", "quiet small");
 
-	  barCaption
-		.append("span")
-		.text(
-		  (d) =>`${d.type === "Position" ? "At" : "From"} ${d.start.toFixed(1)}m-mark`
-		);
+		barCaption
+			.append("span")
+			.text(
+				(d) =>`${d.type === "Position" ? "At" : "From"} ${d.start.toFixed(1)}m-mark`
+			);
 
 		// gear icon toggle for actions
 		barCaption
@@ -309,12 +309,11 @@ var app = {
 			.attr("src", "static/images/cog.svg");
 
 
-	  // build zone action buttons
+		// build zone action buttons
 
-	  newZones;
-	  var zoneActions = newZones
-		.append("div")
-		.attr("class", "mt50 mb50 small zoneActions blue");
+		var zoneActions = newZones
+			.append("div")
+			.attr("class", "mt50 mb50 small zoneActions blue");
 
 	  Object.keys(app.zone).forEach((action) => {
 		zoneActions
