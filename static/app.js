@@ -264,28 +264,29 @@ var app = {
 
 	buildZoneEntry: function (newZones) {
 	  // name of zone
-	  newZones
-		.attr("id", (d) => `entry${d.startTime}`)
-		.append("span")
-		.attr("class", "zoneName")
-		.text((d) => `${d.name}`);
+		newZones
+			.attr("id", (d) => `entry${d.startTime}`)
+			.append("span")
+			.attr("class", "zoneName")
+			.text((d) => `${d.name}`);
 
-	  // gear icon toggle for actions
-	  newZones
-		.append("span")
-		.attr("class", "fr")
-		.attr("href", (d) => `#entry${d.startTime}`)
-		.on("mousedown", (d, i) => {
-		  var id = d.startTime;
-		  d3.selectAll("#zones .entry")
-			  .classed("active", (d, entryIndex) => {
-				return d.startTime === id;
-			  });
-		})	
-		.append("img")
-		.attr("class", "icon fa-cog")
-		.attr("src", "static/images/cog.svg");
+		// gear icon toggle for actions
+		newZones
+			.append("span")
+			.attr("class", "fr")
+			.attr("href", (d) => `#entry${d.startTime}`)	
+			.append("img")
+			.attr("class", "icon fa-cog")
+			.attr("src", "static/images/cog.svg");
 
+		newZones
+			.on("mousedown", (d, i) => {
+				var id = d.startTime;
+				d3.selectAll("#zones .entry")
+					.classed("active", (d, entryIndex) => {
+					return d.startTime === id;
+				});
+			})
 	  // build progress bar
 	  app.ui.progressBar.build(newZones);
 
