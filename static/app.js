@@ -227,7 +227,7 @@ var app = {
 				});
 
 			d3.selectAll(".entry:not(.complete) #zoneLength")
-				.text((d) => `${(current - d.start).toFixed(1)} m long`);
+				.text((d) => `${(current - d.start).toFixed(1)} m`);
 
 			d3.select("#blockProgress")
 				.text(current.toFixed(1));
@@ -270,14 +270,11 @@ var app = {
 			.attr("class", "zoneName")
 			.text((d) => `${d.name}`);
 
-		// gear icon toggle for actions
-		newZones
+	  	newZones
 			.append("span")
-			.attr("class", "fr")
-			.attr("href", (d) => `#entry${d.startTime}`)	
-			.append("img")
-			.attr("class", "icon fa-cog")
-			.attr("src", "static/images/cog.svg");
+			.attr("class", "fr blue")
+			.attr("id", "zoneLength")
+			.text((d) => (d.type === "Position" ? "" : `0 m`));
 
 		newZones
 			.on("mousedown", (d, i) => {
@@ -287,26 +284,30 @@ var app = {
 					return d.startTime === id;
 				});
 			})
+
 	  // build progress bar
 	  app.ui.progressBar.build(newZones);
 
 	  // add text below progress bars
 	  var barCaption = newZones
 		.append("div")
-		.attr("class", "quiet small mt5 mb30");
+		.attr("class", "quiet small");
 
 	  barCaption
 		.append("span")
-		.attr("class", "fl")
 		.text(
-		  (d) =>`${d.type === "Position" ? "At" : "From"} the ${d.start.toFixed(1)}m-mark`
+		  (d) =>`${d.type === "Position" ? "At" : "From"} ${d.start.toFixed(1)}m-mark`
 		);
 
-	  barCaption
-		.append("span")
-		.attr("class", "fr")
-		.attr("id", "zoneLength")
-		.text((d) => (d.type === "Position" ? "" : `0 m long`));
+		// gear icon toggle for actions
+		barCaption
+			.append("span")
+			.attr("class", "fr")
+			.attr("href", (d) => `#entry${d.startTime}`)	
+			.append("img")
+			.attr("class", "icon fa-cog")
+			.attr("src", "static/images/cog.svg");
+
 
 	  // build zone action buttons
 

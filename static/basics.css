@@ -40,6 +40,10 @@ body {
 	opacity:0.5;
 }
 
+.strong {
+	font-style:bold;
+}
+
 .fl {
 	float:left;
 }
