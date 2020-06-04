@@ -8,10 +8,10 @@ body, html {
 	/*font-size:18px;*/
 }
 
-::-webkit-scrollbar {
+/*::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 0px;
-}
+}*/
 
 ::-webkit-scrollbar-thumb {
   border-radius: 5px;
@@ -106,6 +106,8 @@ body, html {
 	margin: 5vw;
 	background: #eee;
 	padding: 5vw;
+	width:40%;
+	white-space: nowrap;
 }
 
 .zoneAction {

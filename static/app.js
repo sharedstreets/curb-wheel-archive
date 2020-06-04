@@ -423,28 +423,32 @@ var app = {
   // initializes app UI: populates curb attributes, builds modals
 
   init: function () {
+
 	// poll Pi
-	setInterval(() => {
-	  app.io.getWheelTick();
-	}, app.constants.pollingInterval);
+	setInterval(
+		() => {app.io.getWheelTick()}, 
+		app.constants.pollingInterval
+	);
 
 	// build Add Feature modal
 
 	Object.keys(app.constants.curbFeatures).forEach((type) => {
 	  d3.select(`#addZone`)
-		.append("div")
+		.append("span")
 		.attr("id", type)
 		.selectAll(".zoneType")
 		.data(app.constants.curbFeatures[type])
 		.enter()
 		.append("div")
-		.attr("class", "zoneType")
+		.attr("class", "zoneType inlineBlock")
 		.text((d) => d)
 		.on("mousedown", (d) => {
+
 		  d = {
 			name: d,
 			type: type,
 		  };
+
 		  // add new zone to state, return to rolling mode, update ui
 		  app.zone.add(d);
 		  app.ui.updateZones();
@@ -524,32 +528,12 @@ var app = {
 	},
   },
 
-  devMode: {
-	rolling: false,
-	init: function () {
-	  app.init();
-	},
-
-	sampleStreet: {
-	  geometry: {
-		type: "LineString",
-		coordinates: [
-		  [-158.04033804684877, 21.340108455253144],
-		  [-158.0394757166505, 21.34072210086012],
-		],
-	  },
-	  type: "Feature",
-	  properties: {
-		id: "12212304!1",
-		refs: "[110619114,110561346]",
-		highway: "residential",
-		name: "Hapua Street",
-		distance: 112.52,
-		forward: "578194fd94f8b5d1e4716e64bdf23589",
-		back: "cdb125fdef759ab8edb68c13f7a393c4",
-	  },
-	},
-  },
+  	devMode: {
+		rolling: false,
+		init: function () {
+		  app.init();
+		}
+  	},
 };
 
 app.devMode.init();
