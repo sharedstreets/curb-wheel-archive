@@ -207,12 +207,12 @@ var app = {
 		roll: function () {
 			
 			var current = app.state.systemRollDistance - app.state.systemRollOffset;
-			var hasRolled = current !== app.state.currentRollDistance;
-			console.log(current)
-			d3.select('#rolling')
-				.classed('isRolling', hasRolled);
+			var rollDelta = current - app.state.currentRollDistance;
 
-			if (hasRolled) {
+			d3.select('#rolling')
+				.classed('isRolling', rollDelta !== 0);
+
+			if (rollDelta !== 0) {
 
 				var progressPercentage = 100 * current / app.state.street.distance;
 
@@ -238,7 +238,7 @@ var app = {
 					.text(current.toFixed(1));
 				
 				d3.select('#rollDelta')
-					.text(`+${Math.round((current-app.state.currentRollDistance)*100)} cm`)
+					.text(`${rollDelta > 0 ? '+' : ''}${Math.round(rollDelta*100)} cm`)
 			}
 
 			app.state.currentRollDistance = current;
