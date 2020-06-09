@@ -111,4 +111,6 @@ ram/
 wheel.pid
 static/images/survey/
 graph.json
+export.zip
 export
+extract.mbtiles
