@@ -40,18 +40,19 @@
                             </div>
 						</div>
 
-						<span class='small quiet'>
-							<span id='blockProgress'>0</span>m of ~
-							<span id='curbLength'></span>m
-						</span>
-					</div>
-				</div>
-				<div class='scroll-drawer'>
-					<form ref='uploadForm' id='uploadForm' class='hidden' action='http://127.0.0.1:8081/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
-						<input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
-						<input type='submit' id ='imageSubmit' value='Upload!' />
-					</form>
-					<iframe name="hiddenIframe" class='hidden'></iframe>
+
+            <span class='small quiet'>
+              <span id='blockProgress'>0</span>m of ~
+              <span id='curbLength'></span>m
+            </span>
+          </div>
+        </div>
+        <div class='scroll-drawer'>
+          <form ref='uploadForm' id='uploadForm' class='hidden' action='/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
+            <input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
+            <input type='submit' id ='imageSubmit' value='Upload!' />
+          </form>
+          <iframe name="hiddenIframe" class='hidden' onload='app.io.iframeOnload()'></iframe>
 
 					<div id='zones'></div>
 
