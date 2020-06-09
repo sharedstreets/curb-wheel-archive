@@ -335,26 +335,31 @@ var app = {
 		// update UI. generally fired after a zone is added, deleted or completed
 
 		updateZones: function () {
+
 			var zones = d3
-			.select("#zones")
-			.selectAll(".entry")
-			.data(app.state.zones, (d) => d.startTime);
+				.select("#zones")
+				.selectAll(".entry")
+				.data(app.state.zones, (d) => d.startTime);
 
 			//remove deleted zones
 			zones
-			.exit()
-			.transition()
-			.duration(200)
-			.style("transform", "translateY(-100%)")
-			.style("opacity", 0)
-			.remove();
+				.exit()
+				.transition()
+				.duration(200)
+				.style("transform", "translateY(-100%)")
+				.style("opacity", 0)
+				.remove();
 
-			zones.classed("complete", (d) => d.end);
+			// mark completed zones as such
+			zones
+				.classed("complete", (d) => d.end);
 
-			d3.selectAll(".complete .zoneAction").attr("class", "zoneAction col6");
+			d3.selectAll(".complete .zoneAction")
+				.attr("class", "zoneAction col6");
 
 			// add new zones
-			var newZones = zones.enter().append("div").attr("class", "entry");
+			var newZones = zones.enter()
+				.append("div").attr("class", "entry");
 
 			app.ui.buildZoneEntry(newZones);
 		},
