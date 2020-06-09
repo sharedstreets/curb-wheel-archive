@@ -101,102 +101,102 @@ var app = {
 	},
 
 	survey: {
-	// sets up parameters of the selected street, preparing for survey
-	init: () => {
-		app.state.systemRollOffset = app.state.systemRollDistance;
-		app.state.zones = [];
-		app.ui.updateZones();
+		// sets up parameters of the selected street, preparing for survey
+		init: () => {
+			app.state.systemRollOffset = app.state.systemRollDistance;
+			app.state.zones = [];
+			app.ui.updateZones();
 
-		//populate street length
-		d3.select("#curbLength").text(Math.round(app.state.street.distance));
+			//populate street length
+			d3.select("#curbLength").text(Math.round(app.state.street.distance));
 
-		d3.select("#curbEntry .progressBar").attr(
-		"max",
-		app.state.street.distance
-		);
+			d3.select("#curbEntry .progressBar").attr(
+			"max",
+			app.state.street.distance
+			);
 
-		d3.select("#streetName").text(app.state.street.name);
-	},
+			d3.select("#streetName").text(app.state.street.name);
+		},
 
-	// checks current survey before submission
-	validate: () => {
-		var survey = app.state.zones;
-		var incompleteZones = survey.filter((d) => !d.end).length;
-		var surveyedLengthRatio =
-		app.state.currentRollDistance / app.state.street.distance;
-		// check for unfinished zones
-		if (incompleteZones > 0)
-		alert(app.constants.errors.incompleteZones(incompleteZones));
-		//check for significant deviations in surveyed curb length. user can restart survey or ignore
-		else if (surveyedLengthRatio < 0.8 || surveyedLengthRatio > 1.1) {
-		app.constants.errors.curbLengthDeviation(surveyedLengthRatio);
-		} else app.survey.complete();
-	},
+		// checks current survey before submission
+		validate: () => {
+			var survey = app.state.zones;
+			var incompleteZones = survey.filter((d) => !d.end).length;
+			var surveyedLengthRatio =
+			app.state.currentRollDistance / app.state.street.distance;
+			// check for unfinished zones
+			if (incompleteZones > 0)
+			alert(app.constants.errors.incompleteZones(incompleteZones));
+			//check for significant deviations in surveyed curb length. user can restart survey or ignore
+			else if (surveyedLengthRatio < 0.8 || surveyedLengthRatio > 1.1) {
+			app.constants.errors.curbLengthDeviation(surveyedLengthRatio);
+			} else app.survey.complete();
+		},
 
-	complete: (skipConfirmation) => {
-		var success = function () {
-		app.io.uploadSurvey();
+		complete: (skipConfirmation) => {
+			var success = function () {
+			app.io.uploadSurvey();
 
-		app.ui.mode.set("selectStreet");
-		};
+			app.ui.mode.set("selectStreet");
+			};
 
-		if (skipConfirmation) success();
-		else app.ui.confirm(app.constants.prompts.completeSurvey, success, null);
-	},
+			if (skipConfirmation) success();
+			else app.ui.confirm(app.constants.prompts.completeSurvey, success, null);
+		},
 	},
 	// functionality to add/delete/modify zones
 
 	zone: {
-	delete: function (d) {
-		var success = function () {
-			app.state.zones = app.state.zones.filter((zone) => {
-				return zone.startTime !== d.startTime;
+		delete: function (d) {
+			var success = function () {
+				app.state.zones = app.state.zones.filter((zone) => {
+					return zone.startTime !== d.startTime;
+				});
+
+				app.ui.updateZones();
+			};
+
+			app.ui.confirm(app.constants.prompts.deleteZone, success, null);
+		},
+
+		"take photo": function (d,i) {
+			var success = function () {
+				document.querySelector("#uploadImg").click();
+			};
+
+			//stash feature index in iframe attribute to append to later
+			app.io.iframe().featureIndex = i;
+
+			app.ui.confirm(app.constants.prompts.takePhoto, success, null);
+		},
+
+		complete: function (d, i) {
+			var success = function () {
+			var startTimeToEnd = d.startTime;
+
+			app.state.zones.forEach((d) => {
+				if (d.startTime === startTimeToEnd) d.end = app.state.currentRollDistance;
 			});
 
 			app.ui.updateZones();
-		};
+			app.ui.reset();
+			};
 
-		app.ui.confirm(app.constants.prompts.deleteZone, success, null);
-	},
+			app.ui.confirm(app.constants.prompts.finishZone, success, null);
+		},
 
-	"take photo": function (d,i) {
-		var success = function () {
-			document.querySelector("#uploadImg").click();
-		};
+		add: function (feature) {
+			var newZone = {
+				name: feature.name,
+				type: feature.type,
+				start: app.state.currentRollDistance,
+				startTime: Date.now(),
+				images:[]
+			};
 
-		//stash feature index in iframe attribute to append to later
-		app.io.iframe.featureIndex = i;
-
-		app.ui.confirm(app.constants.prompts.takePhoto, success, null);
-	},
-
-	complete: function (d, i) {
-		var success = function () {
-		var startTimeToEnd = d.startTime;
-
-		app.state.zones.forEach((d) => {
-			if (d.startTime === startTimeToEnd) d.end = app.state.currentRollDistance;
-		});
-
-		app.ui.updateZones();
-		app.ui.reset();
-		};
-
-		app.ui.confirm(app.constants.prompts.finishZone, success, null);
-	},
-
-	add: function (feature) {
-		var newZone = {
-			name: feature.name,
-			type: feature.type,
-			start: app.state.currentRollDistance,
-			startTime: Date.now(),
-			images:[]
-		};
-
-		if (feature.type === "Position") newZone.end = newZone.start;
-		app.state.zones.push(newZone);
-	},
+			if (feature.type === "Position") newZone.end = newZone.start;
+			app.state.zones.push(newZone);
+		},
 	},
 
 	// functionality to update the UI, typically after zone changes and new rolling
@@ -440,16 +440,13 @@ var app = {
 
 	io: {
 			
-		iframe: document.querySelector('iframe'),
+		iframe: ()=>{return document.querySelector('iframe')},
+		iframeOnload: () => {
+			
+			var filename = app.io.iframe().contentDocument.querySelector('body').innerText;
+			var featureIndex = app.io.iframe().featureIndex;
 
-		// uploads image via the form, and retrieves the filepath from the hidden iframe
-		uploadImage: (e, cb) => {
-
-			app.io.iframe.onload = () =>{
-				
-				var filename = app.io.iframe.contentDocument.querySelector('body').innerText;
-				var featureIndex = app.io.iframe.featureIndex;
-				
+			if (typeof featureIndex === 'number') {
 				app.state.zones[featureIndex].images.push({
 					url: filename,
 					geometry: {
@@ -458,9 +455,11 @@ var app = {
 					}
 				})
 			}
+		},
 
+		// uploads image via the form, and retrieves the filepath from the hidden iframe
+		uploadImage: (e, cb) => {
 			document.querySelector("#imageSubmit").click();
-
 		},
 
 		uploadSurvey: () => {
@@ -514,16 +513,16 @@ var app = {
 
 		getWheelTick: () => {
 			app.io.loadJSON("/counter", (data) => {
-			app.state.systemRollDistance = data.counter / 10;
-			app.ui.roll();
+				app.state.systemRollDistance = data.counter / 10;
+				app.ui.roll();
 			});
 		},
 	},
 
 	util: {
-	copy: function (original) {
-		return JSON.parse(JSON.stringify(original));
-	},
+		copy: function (original) {
+			return JSON.parse(JSON.stringify(original));
+		},
 	},
 
 	devMode: {
