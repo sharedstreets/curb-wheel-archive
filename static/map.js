@@ -12,7 +12,7 @@ if (navigator.geolocation) {
     function (position) {
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
-      map.flyTo({
+      app.ui.map.flyTo({
         center: [longitude, latitude],
         zoom: 17,
       });

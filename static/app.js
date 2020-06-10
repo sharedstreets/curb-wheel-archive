@@ -159,10 +159,13 @@ var app = {
       app.ui.confirm(app.constants.prompts.deleteZone, success, null);
     },
 
-    "take photo": function (d) {
+    "take photo": function (d, i) {
       var success = function () {
         document.querySelector("#uploadImg").click();
       };
+
+      //stash feature index in iframe attribute to append to later
+      app.io.iframe().featureIndex = i;
 
       app.ui.confirm(app.constants.prompts.takePhoto, success, null);
     },
@@ -189,6 +192,7 @@ var app = {
         type: feature.type,
         start: app.state.currentRollDistance,
         startTime: Date.now(),
+        images: [],
       };
 
       if (feature.type === "Position") newZone.end = newZone.start;
@@ -286,7 +290,6 @@ var app = {
 
       // build zone action buttons
 
-      newZones;
       var zoneActions = newZones
         .append("div")
         .attr("class", "mt50 mb50 small zoneActions blue");
@@ -365,7 +368,8 @@ var app = {
       var executeCustomFn = customFn ? customFn() : app.ui.mode.set(newMode);
     },
 
-    // produces a confirm dialog, with callbacks for cancel and ok
+    // produces a confirm dialog once for each instance, with callbacks for cancel and ok.
+    // also handles disabled dialogs
 
     confirm: function (text, ok, cancel) {
       // if confirm prompt has already been used, go directly to "ok" state
@@ -378,7 +382,6 @@ var app = {
         var promptTime = Date.now();
         var confirmed = confirm(text);
 
-        console.log("mark", responseTime);
         // if user confirms or had dialogs disabled, proceed to "ok" state
         if (confirmed === true) ok();
         else if (cancel) {
@@ -438,7 +441,27 @@ var app = {
   },
 
   io: {
-    uploadImage: (e) => {
+    iframe: () => {
+      return document.querySelector("iframe");
+    },
+    iframeOnload: () => {
+      var filename = app.io.iframe().contentDocument.querySelector("body")
+        .innerText;
+      var featureIndex = app.io.iframe().featureIndex;
+
+      if (typeof featureIndex === "number") {
+        app.state.zones[featureIndex].images.push({
+          url: filename,
+          geometry: {
+            type: "Position",
+            distance: app.state.currentRollDistance,
+          },
+        });
+      }
+    },
+
+    // uploads image via the form, and retrieves the filepath from the hidden iframe
+    uploadImage: (e, cb) => {
       document.querySelector("#imageSubmit").click();
     },
 
@@ -458,8 +481,9 @@ var app = {
             type: zone.type,
             distances: [zone.start, zone.end],
           },
-          images: [],
+          images: zone.images,
         };
+
         survey.features.push(feature);
       }
 
