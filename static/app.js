@@ -9,6 +9,7 @@ var app = {
 		zones: [],
 		mode: "selectStreet",
 		promptsUsed: [], // tracks prompts that have been displayed to avoid second display
+		featureToAddPhoto: null // ephemeral tracker for adding images 
 	},
 
 	constants: {
@@ -161,26 +162,26 @@ var app = {
 		},
 
 		"take photo": function (d,i) {
-			var success = function () {
+			var success = () => {
 				document.querySelector("#uploadImg").click();
 			};
 
 			//stash feature index in iframe attribute to append to later
-			app.io.iframe().featureIndex = i;
+			app.state.featureToAddPhoto = d.startTime;
 
 			app.ui.confirm(app.constants.prompts.takePhoto, success, null);
 		},
 
 		complete: function (d, i) {
 			var success = function () {
-			var startTimeToEnd = d.startTime;
+				var startTimeToEnd = d.startTime;
 
-			app.state.zones.forEach((d) => {
-				if (d.startTime === startTimeToEnd) d.end = app.state.currentRollDistance;
-			});
+				app.state.zones.forEach((d) => {
+					if (d.startTime === startTimeToEnd) d.end = app.state.currentRollDistance;
+				});
 
-			app.ui.updateZones();
-			app.ui.reset();
+				app.ui.updateZones();
+				app.ui.reset();
 			};
 
 			app.ui.confirm(app.constants.prompts.finishZone, success, null);
@@ -247,9 +248,10 @@ var app = {
 		// builds progress bar
 		progressBar: {
 			build: function (parent) {
+
 				var container = parent
 					.append("div")
-					.attr("class", (d) => `progressBar`);
+					.attr("class", `progressBar mt10 mb10`);
 
 				container
 					.append('div')
@@ -263,13 +265,24 @@ var app = {
 						(d) => `${(100 * d.start) / app.state.street.distance}%`
 					);
 			},
+
+			update: (parent) => {
+
+				parent.select('.progressBar')
+					.selectAll('.dot')
+					.data(d=>d.images)
+					.enter()
+					.append('div')
+					.attr('class', 'dot')
+					.style('margin-left', d=>`${100 * d.geometry.distance / app.state.street.distance}%`)
+			}
 		},
 
 		//general function to build a new zone entry.
 
 		buildZoneEntry: function (newZones) {
 
-		  // name of zone
+			// name of zone
 			newZones
 				.attr("id", (d) => `entry${d.startTime}`)
 				.append("span")
@@ -321,14 +334,14 @@ var app = {
 				.attr("class", "mt30 small zoneActions blue");
 
 			Object.keys(app.zone).forEach((action) => {
-			zoneActions
-				.append("div")
-				.attr("class", `col4 zoneAction`)
-				.text(action)
-				.on("mousedown", (d, i) => {
-				d3.event.stopPropagation();
-				app.zone[action](d, i);
-				});
+				zoneActions
+					.append("div")
+					.attr("class", `col4 zoneAction`)
+					.text(action)
+					.on("mousedown", (d, i) => {
+						d3.event.stopPropagation();
+						app.zone[action](d, i);
+					});
 			});
 		},
 
@@ -339,7 +352,7 @@ var app = {
 			var zones = d3
 				.select("#zones")
 				.selectAll(".entry")
-				.data(app.state.zones, (d) => d.startTime);
+				.data(app.state.zones, d => d.startTime);
 
 			//remove deleted zones
 			zones
@@ -362,6 +375,9 @@ var app = {
 				.append("div").attr("class", "entry");
 
 			app.ui.buildZoneEntry(newZones);
+
+			// update progress bar with dots for new photos
+			app.ui.progressBar.update(zones);
 		},
 
 		// sets the current mode of the app, and updates title
@@ -482,19 +498,24 @@ var app = {
 	io: {
 			
 		iframe: ()=>{return document.querySelector('iframe')},
+
 		iframeOnload: () => {
 			
 			var filename = app.io.iframe().contentDocument.querySelector('body').innerText;
-			var featureIndex = app.io.iframe().featureIndex;
-			console.log(featureIndex)
-			if (typeof featureIndex === 'number') {
-				app.state.zones[featureIndex].images.push({
+			var ft = app.state.zones
+				.filter(ft => ft.startTime === app.state.featureToAddPhoto)[0];
+
+			if (ft) {
+
+				ft.images.push({
 					url: filename,
 					geometry: {
 						type: 'Position',
 						distance: app.state.currentRollDistance
 					}
 				})
+
+				app.ui.updateZones()
 			}
 		},
 

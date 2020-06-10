@@ -139,7 +139,6 @@ body, html {
 
 .progressBar {
 	height:12px;
-	margin:8px 0px;
 	position:relative;
 }
 
@@ -214,14 +213,20 @@ body, html {
 }
 
 .dot {
-	width:5px;
-	height:5px;
-	transform:translateX(-50%);
+	width:10px;
+	height:10px;
 	background:white;
 	border-radius:50%;
 	z-index:99;
+	margin-top:6px;
+	position:absolute;
+	transform: translate(-50%, -50%);
+	border: 2px solid steelblue;
 }
 
+.complete .dot {
+	border: 2px solid #666;
+}
 /*gear icon*/
 
 .icon {
