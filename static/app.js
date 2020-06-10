@@ -222,7 +222,7 @@ var app = {
 
 						//conditional start to account for main progress bar
 						var startingMark = d ? d.start : 0;
-						return `${progressPercentage - 100 * startingMark / app.state.street.distance}%`
+						return `calc(${progressPercentage - 100 * startingMark / app.state.street.distance}% ${startingMark ? '+ 12px' : ''})`
 					
 					});
 
@@ -486,7 +486,7 @@ var app = {
 			
 			var filename = app.io.iframe().contentDocument.querySelector('body').innerText;
 			var featureIndex = app.io.iframe().featureIndex;
-
+			console.log(featureIndex)
 			if (typeof featureIndex === 'number') {
 				app.state.zones[featureIndex].images.push({
 					url: filename,
@@ -535,6 +535,8 @@ var app = {
 				// uploaded survey
 			}
 			};
+			console.log(survey)
+
 			xhr.send(JSON.stringify(survey));
 		},
 
