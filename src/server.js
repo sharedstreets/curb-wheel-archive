@@ -269,8 +269,22 @@ async function main() {
                 UNITS
               );
 
+              point.properties = {
+                created_at: survey.created_at,
+                cwheelid: "", // todo: figure out where to find this
+                shst_ref_id: survey.shst_ref_id,
+                ref_side: survey.side_of_street,
+                ref_len: street.properties.distance,
+                srv_dist: survey.surveyed_distance,
+                srv_id: survey.id,
+                feat_id: feature.id,
+                label: feature.label,
+                dst_st: feature.geometry.distances[0],
+                images: JSON.stringify(feature.images),
+              };
+
               for (let image of feature.images) {
-                let pt = turf.along(centered, image.distance, UNITS);
+                let pt = turf.point(point.geometry.coordinates);
 
                 pt.properties.url = image.url;
 
