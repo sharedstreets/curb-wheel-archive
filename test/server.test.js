@@ -41,7 +41,7 @@ test("server", async (t) => {
     path.join(__dirname, "./fixtures/sign-3.jpg")
   );
   let image4 = fs.createReadStream(
-    path.join(__dirname, "./fixtures/sign-4.jpg")
+    path.join(__dirname, "./fixtures/sign-4.png")
   );
 
   let upload1 = await request
@@ -85,10 +85,26 @@ test("server", async (t) => {
       if (err) throw err;
     });
 
-  t.equal(upload1.statusCode, 200, "upload 1 returned valid status code 200");
-  t.equal(upload2.statusCode, 200, "upload 2 returned valid status code 200");
-  t.equal(upload3.statusCode, 200, "upload 3 returned valid status code 200");
-  t.equal(upload4.statusCode, 200, "upload 4 returned valid status code 200");
+  t.equal(
+    upload1.statusCode,
+    200,
+    "upload 1 (jpg) returned valid status code 200"
+  );
+  t.equal(
+    upload2.statusCode,
+    200,
+    "upload 2 (jpg) returned valid status code 200"
+  );
+  t.equal(
+    upload3.statusCode,
+    200,
+    "upload 3 (jpg) returned valid status code 200"
+  );
+  t.equal(
+    upload4.statusCode,
+    200,
+    "upload 4 (png) returned valid status code 200"
+  );
 
   let survey = { ok: 1 };
   let ref = "123";

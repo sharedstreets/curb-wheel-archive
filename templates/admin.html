@@ -27,6 +27,7 @@
         <p class="subtitle">
           Current OSM file: <strong><span id="currentMap"></span></strong>
           <div class="buttons">
+              <span id="osmProcessing">Processing...</span><br/>
               <input type="file" id="pbfFile" label="select OSM pbf file"/>
               <button id="clearButton" onclick="uploadPbf()" class="button is-primary">Upload OSM</button>
           </div>
@@ -34,6 +35,7 @@
         <p class="subtitle">
           Current MBTiles file: <strong><span id="currentMap"></span></strong>
           <div class="buttons">
+              <span id="mbTilesProcessing">Processing...</span><br/>
               <input type="file" id="mbtilesFile" label="select mbtiles file"/>
               <button id="clearButton" onclick="uploadMbtiles()" class="button is-primary">Upload MBtiles</button>
           </div>
@@ -80,6 +82,17 @@
 
   <script>
 
+    function hide(id) {
+      var em = document.getElementById(id);
+      em.style.display = "none";
+    }
+
+    function show(id) {
+      var em = document.getElementById(id);
+      em.style.display = "block";
+    }
+
+
     function loadJSON(path, success, error) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function()
@@ -117,8 +130,21 @@
         };
     }
 
-    function uploadFile(file, filenameField, url) {
+    function uploadFile(file, filenameField, url, id) {
       const xhr = new XMLHttpRequest();
+
+      show(id);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          hide(id);
+          // var response = JSON.parse(xmlhttp.responseText);
+          //   if (xmlhttp.status === 200) {
+          //     console.log('successful');
+          //   } else {
+          //     console.log('failed');
+          //   }
+        }
+      }
 
       /* Create a FormData instance */
       var formData = new FormData();
@@ -126,17 +152,18 @@
       formData.append(filenameField, file);
       xhr.open("POST", url, true);
       xhr.send(formData);
+
+      
     }
 
     function uploadPbf() {
         var pbfFile = document.getElementById("pbfFile").files[0];
-        uploadFile(pbfFile, "pbf", "/pbf")
+        uploadFile(pbfFile, "pbf", "/pbf", "osmProcessing")
     }
 
     function uploadMbtiles() {
         var mbtilesFile = document.getElementById("mbtilesFile").files[0];   
-
-        uploadFile(mbtilesFile, "mbtiles", "/mbtiles")
+        uploadFile(mbtilesFile, "mbtiles", "/mbtiles", "mbTilesProcessing");
     }
 
     // function uploadZip() {
@@ -204,6 +231,9 @@
 
         postJSON('/admin/wifi', data, function(data) {  }, function(xhr) { console.error(xhr); });
     }
+
+    hide("osmProcessing");
+    hide("mbTilesProcessing");
 
     getCurrentVersion();
     getCurrentNetwork();
