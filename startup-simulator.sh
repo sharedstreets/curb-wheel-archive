@@ -5,9 +5,12 @@ if test -f "$TILESERVER_PID"; then
     pkill -F $TILESERVER_PID
 fi
 
-echo "run tileserver"
-tileserver-gl-light ./extract.mbtiles &
-echo $! > $TILESERVER_PID
+TILE_PATH=./extract.mbtiles
+if test -f "$TILE_PATH"; then
+    echo "run tileserver"
+    tileserver-gl-light $TILE_PATH &
+    echo $! > $TILESERVER_PID
+fi
 
 
 WHEEL_PID=./wheel.pid
