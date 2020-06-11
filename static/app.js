@@ -6,7 +6,7 @@ var app = {
 		systemRollOffset: 0, // offset to subtract from reported distance
 		systemRollDistance: 0, // rolled distance as reported by Pi
 		currentRollDistance: 0, // computed roll from distance and offset
-		zones: [],
+		features: [],
 		mode: "selectStreet",
 		promptsUsed: [], // tracks prompts that have been displayed to avoid second display
 		featureToAddPhoto: null // ephemeral tracker for adding images 
@@ -24,7 +24,7 @@ var app = {
 				"Loading",
 				"Curb cut",
 				"Paint",
-				"Misc. Zone",
+				"Misc. Span",
 			],
 			Position: ["Payment device", "Fire hydrant", "Misc. Point"],
 		},
@@ -33,20 +33,20 @@ var app = {
 			beginSurvey:
 			"Head toward the starting edge of the curb. When you're ready, press OK to start surveying",
 			exitSurvey: "This abandons the current survey. Are you sure?",
-			deleteZone: "This will delete the curb feature. Are you sure?",
+			deleteFeature: "This will delete the curb feature. Are you sure?",
 			takePhoto:
-			"Set the wheel down so that it does not fall over. Feel free get in a good position to get the zone in the frame.",
-			finishZone:
+			"Roll the wheel right up to what you're snapping. Once it's securely parked, feel free get in a good position to get the object in the frame.",
+			finishFeature:
 			"This marks the end of the curb span. Once complete, you won't be able to extend it any longer.",
 			completeSurvey:
 			"This will conclude the survey. Once finished, you won't be able to make further changes.",
 		},
 
 		errors: {
-			incompleteZones: (num) => {
+			incompleteSpans: (num) => {
 			return `There ${
-				num > 1 ? "are " + num + "zones" : "is one zone"
-			} still unended. Please close those before completing the survey.`;
+				num > 1 ? "are " + num + " curb spans" : "is one curb span"
+			} still running. Please close before completing the survey.`;
 			},
 			curbLengthDeviation: (ratio) => {
 			var script = `The surveyed length is significantly ${
@@ -79,12 +79,12 @@ var app = {
 				title: "Curb Survey",
 
 				set: () => {
-					app.ui.updateZones();
+					app.ui.updateFeatures();
 				},
 
 				back: () => {
 					var success = () => {
-					app.state.zones = [];
+					app.state.features = [];
 					app.ui.mode.set("selectStreet");
 					};
 
@@ -93,9 +93,9 @@ var app = {
 					return true;
 				},
 			},
-			addZone: {
-			view: 2,
-			title: "Select feature type",
+			addFeature: {
+				view: 2,
+				title: "Select feature type",
 			},
 		},
 
@@ -106,8 +106,8 @@ var app = {
 		// sets up parameters of the selected street, preparing for survey
 		init: () => {
 			app.state.systemRollOffset = app.state.systemRollDistance;
-			app.state.zones = [];
-			app.ui.updateZones();
+			app.state.features = [];
+			app.ui.updateFeatures();
 
 			//populate street length
 			d3.select("#curbLength").text(Math.round(app.state.street.distance));
@@ -122,13 +122,14 @@ var app = {
 
 		// checks current survey before submission
 		validate: () => {
-			var survey = app.state.zones;
-			var incompleteZones = survey.filter((d) => !d.end).length;
+
+			var survey = app.state.features;
+			var incompleteSpans = survey.filter((d) => !d.end).length;
 			var surveyedLengthRatio =
 			app.state.currentRollDistance / app.state.street.distance;
-			// check for unfinished zones
-			if (incompleteZones > 0)
-			alert(app.constants.errors.incompleteZones(incompleteZones));
+			// check for unfinished spans
+			if (incompleteSpans > 0)
+			alert(app.constants.errors.incompleteSpans(incompleteSpans));
 			//check for significant deviations in surveyed curb length. user can restart survey or ignore
 			else if (surveyedLengthRatio < 0.8 || surveyedLengthRatio > 1.1) {
 			app.constants.errors.curbLengthDeviation(surveyedLengthRatio);
@@ -146,19 +147,20 @@ var app = {
 			else app.ui.confirm(app.constants.prompts.completeSurvey, success, null);
 		},
 	},
-	// functionality to add/delete/modify zones
+	// functionality to add/delete/modify features
 
-	zone: {
+	feature: {
+
 		delete: function (d) {
 			var success = function () {
-				app.state.zones = app.state.zones.filter((zone) => {
-					return zone.startTime !== d.startTime;
+				app.state.features = app.state.features.filter((feature) => {
+					return feature.startTime !== d.startTime;
 				});
 
-				app.ui.updateZones();
+				app.ui.updateFeatures();
 			};
 
-			app.ui.confirm(app.constants.prompts.deleteZone, success, null);
+			app.ui.confirm(app.constants.prompts.deleteFeature, success, null);
 		},
 
 		"take photo": function (d,i) {
@@ -176,19 +178,20 @@ var app = {
 			var success = function () {
 				var startTimeToEnd = d.startTime;
 
-				app.state.zones.forEach((d) => {
+				app.state.features.forEach((d) => {
 					if (d.startTime === startTimeToEnd) d.end = app.state.currentRollDistance;
 				});
 
-				app.ui.updateZones();
+				app.ui.updateFeatures();
 				app.ui.reset();
 			};
 
-			app.ui.confirm(app.constants.prompts.finishZone, success, null);
+			app.ui.confirm(app.constants.prompts.finishFeature, success, null);
 		},
 
 		add: function (feature) {
-			var newZone = {
+
+			var newFeature = {
 				name: feature.name,
 				type: feature.type,
 				start: app.state.currentRollDistance,
@@ -196,15 +199,16 @@ var app = {
 				images:[]
 			};
 
-			if (feature.type === "Position") newZone.end = newZone.start;
-			app.state.zones.push(newZone);
+			if (feature.type === "Position") newFeature.end = newFeature.start;
+			app.state.features.push(newFeature);
 		},
 	},
 
-	// functionality to update the UI, typically after zone changes and new rolling
+	// functionality to update the UI, typically after feature changes and new rolling
 
   	ui: {
-		// fUpdates all active progress bars and status texts
+
+		// Updates all active progress bars and status texts
 		roll: function () {
 			
 			var current = app.state.systemRollDistance - app.state.systemRollOffset;
@@ -232,7 +236,7 @@ var app = {
 						return progressPercentage+'%'
 					});
 
-				d3.selectAll(".entry:not(.complete) #zoneLength")
+				d3.selectAll(".entry:not(.complete) #spanLength")
 					.text((d) => `${(current - d.start).toFixed(1)} m`);
 
 				d3.select("#blockProgress")
@@ -278,37 +282,37 @@ var app = {
 			}
 		},
 
-		//general function to build a new zone entry.
+		//general function to build a new feature entry.
 
-		buildZoneEntry: function (newZones) {
+		buildFeatureEntry: function (newFeatures) {
 
-			// name of zone
-			newZones
+			// name of feature
+			newFeatures
 				.attr("id", (d) => `entry${d.startTime}`)
 				.append("span")
-				.attr("class", "zoneName")
+				.attr("class", "featureName")
 				.text((d) => `${d.name}`);
 
-		  	newZones
+		  	newFeatures
 				.append("span")
 				.attr("class", "fr blue")
-				.attr("id", "zoneLength")
+				.attr("id", "spanLength")
 				.text((d) => (d.type === "Position" ? "" : `0 m`));
 
-			newZones
+			newFeatures
 				.on("mousedown", (d, i) => {
 					var id = d.startTime;
-					d3.selectAll("#zones .entry")
+					d3.selectAll("#features .entry")
 						.classed("active", (d, entryIndex) => {
 						return d.startTime === id;
 					});
 				})
 
 			// build progress bar
-			app.ui.progressBar.build(newZones);
+			app.ui.progressBar.build(newFeatures);
 
 			// add text below progress bars
-			var barCaption = newZones
+			var barCaption = newFeatures
 				.append("div")
 				.attr("class", "quiet small");
 
@@ -327,35 +331,35 @@ var app = {
 				.attr("class", "icon fa-cog")
 				.attr("src", "static/images/cog.svg");
 
-			// build zone action buttons
+			// build feature action buttons
 
-			var zoneActions = newZones
+			var featureActions = newFeatures
 				.append("div")
-				.attr("class", "mt30 small zoneActions blue");
+				.attr("class", "mt30 small featureActions blue");
 
-			Object.keys(app.zone).forEach((action) => {
-				zoneActions
+			Object.keys(app.feature).forEach((action) => {
+				featureActions
 					.append("div")
-					.attr("class", `col4 zoneAction`)
+					.attr("class", `col4 featureAction`)
 					.text(action)
 					.on("mousedown", (d, i) => {
 						d3.event.stopPropagation();
-						app.zone[action](d, i);
+						app.feature[action](d, i);
 					});
 			});
 		},
 
-		// update UI. generally fired after a zone is added, deleted or completed
+		// update UI. generally fired after a feature is added, deleted or completed
 
-		updateZones: function () {
+		updateFeatures: function () {
 
-			var zones = d3
-				.select("#zones")
+			var features = d3
+				.select("#features")
 				.selectAll(".entry")
-				.data(app.state.zones, d => d.startTime);
+				.data(app.state.features, d => d.startTime);
 
-			//remove deleted zones
-			zones
+			//remove deleted features
+			features
 				.exit()
 				.transition()
 				.duration(200)
@@ -363,21 +367,21 @@ var app = {
 				.style("opacity", 0)
 				.remove();
 
-			// mark completed zones as such
-			zones
+			// mark completed features as such
+			features
 				.classed("complete", (d) => d.end);
 
-			d3.selectAll(".complete .zoneAction")
-				.attr("class", "zoneAction col6");
+			d3.selectAll(".complete .featureAction")
+				.attr("class", "featureAction col6");
 
-			// add new zones
-			var newZones = zones.enter()
+			// add new features
+			var newFeatures = features.enter()
 				.append("div").attr("class", "entry");
 
-			app.ui.buildZoneEntry(newZones);
+			app.ui.buildFeatureEntry(newFeatures);
 
 			// update progress bar with dots for new photos
-			app.ui.progressBar.update(zones);
+			app.ui.progressBar.update(features);
 		},
 
 		// sets the current mode of the app, and updates title
@@ -463,14 +467,14 @@ var app = {
 
 		Object.keys(app.constants.curbFeatures)
 			.forEach((type) => {
-				d3.select(`#addZone`)
+				d3.select(`#addFeature`)
 					.append("span")
 					.attr("id", type)
-					.selectAll(".zoneType")
+					.selectAll(".featureType")
 					.data(app.constants.curbFeatures[type])
 					.enter()
 					.append("div")
-					.attr("class", "zoneType inlineBlock")
+					.attr("class", "featureType inlineBlock")
 					.text((d) => d)
 					.on("mousedown", (d) => {
 
@@ -479,9 +483,9 @@ var app = {
 							type: type,
 						};
 
-						// add new zone to state, return to rolling mode, update ui
-						app.zone.add(d);
-						app.ui.updateZones();
+						// add new feature to state, return to rolling mode, update ui
+						app.feature.add(d);
+						app.ui.updateFeatures();
 						app.ui.mode.set("rolling");
 					});
 
@@ -502,7 +506,7 @@ var app = {
 		iframeOnload: () => {
 			
 			var filename = app.io.iframe().contentDocument.querySelector('body').innerText;
-			var ft = app.state.zones
+			var ft = app.state.features
 				.filter(ft => ft.startTime === app.state.featureToAddPhoto)[0];
 
 			if (ft) {
@@ -515,7 +519,7 @@ var app = {
 					}
 				})
 
-				app.ui.updateZones()
+				app.ui.updateFeatures()
 			}
 		},
 
@@ -534,14 +538,14 @@ var app = {
 			features: [],
 			};
 
-			for (let zone of app.state.zones) {
+			for (let ft of app.state.features) {
 				let feature = {
-					label: zone.name,
+					label: ft.name,
 					geometry: {
-						type: zone.type,
-						distances: [zone.start, zone.end],
+						type: ft.type,
+						distances: [ft.start, ft.end],
 					},
-					images: zone.images,
+					images: ft.images,
 				};
 				
 				survey.features.push(feature);
@@ -593,7 +597,7 @@ var app = {
   	devMode: {
 		rolling: false,
 		init: function () {
-		  app.init();
+			app.init();
 		}
   	}
 

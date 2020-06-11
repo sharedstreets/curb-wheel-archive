@@ -8,16 +8,9 @@ body, html {
 	/*font-size:18px;*/
 }
 
-/*::-webkit-scrollbar {
-  -webkit-appearance: none;
-  width: 0px;
-}*/
 
-::-webkit-scrollbar-thumb {
-  border-radius: 5px;
-  background-color: rgba(0,0,0,.5);
-  -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
-}
+
+
 #topBar {
 	height:60px;
 	background:steelblue;
@@ -35,11 +28,25 @@ body, html {
 }
 
 .scroll-drawer {
-	/*outline: 5px solid blue;*/
     position: absolute;
     width: 100%;
     height: 100%;
-    overflow: scroll;
+    overflow-y: scroll;
+}
+
+.scroll-drawer::-webkit-scrollbar{
+	-webkit-appearance: none;
+}
+
+.scroll-drawer::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border:2px solid white;
+}
+
+.scroll-drawer::-webkit-scrollbar:vertical {
+	background:none;
+	width:10px;
 }
 
 .bottomButton {
@@ -73,7 +80,7 @@ body, html {
 	background:#f6f6f6;
 }
 
-#zones {
+#features {
 	overflow: scroll;
 	/*outline:2px solid red;*/
 }
@@ -101,27 +108,28 @@ body, html {
 	display:none !important;
 }
 
-.zoneType {	
+.featureType {	
 	text-align:center;
 	margin: 5vw;
-	background: #eee;
+	background: #fff;
 	padding: 5vw;
 	width:40%;
 	white-space: nowrap;
+	border-radius:5px;
 }
 
-.zoneAction {
+.featureAction {
 	text-align:center;
 	text-transform: capitalize;
 	/*color:#999;*/
 }
 
-.zoneActions {
+.featureActions {
 	overflow:hidden;
 	display:none !important;
 }
 
-.active .zoneActions {
+.active .featureActions {
 	display:flex !important;
 }
 
@@ -205,6 +213,7 @@ body, html {
 	position: absolute;
 	border: 3px solid #666;
 	background: white;
+	border-radius:2px;
 }
 
 .entry.complete .span {
@@ -253,7 +262,7 @@ body, html {
 	background: #fcfcfc;
 }
 
-.complete .zoneName:after {
+.complete .featureName:after {
 	content:' ✓';
 	color:green;
 	-webkit-text-stroke:2px;

@@ -48,16 +48,11 @@
           </div>
         </div>
         <div class='scroll-drawer'>
-          <form ref='uploadForm' id='uploadForm' class='hidden' action='/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
-            <input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
-            <input type='submit' id ='imageSubmit' value='Upload!' />
-          </form>
-          <iframe name="hiddenIframe" class='hidden' onload='app.io.iframeOnload()'></iframe>
 
-					<div id='zones'></div>
+					<div id='features'></div>
 
 					<div class='text-center mt20 mb200'>
-						<p class='big' onclick='app.ui.mode.set("addZone")'>
+						<p class='big' onclick='app.ui.mode.set("addFeature")'>
 							<span class="blue mr10 inlineBlock" style='transform: scale(1.5)'>
 								<img src='static/images/plus.svg' class='icon'/>
 							</span>
@@ -70,9 +65,15 @@
 					<div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
 				</div>
 			</div>
-			<div id='addZone' class='scroll mode'>
+			<div id='addFeature' class='scroll mode'>
 			</div>
 		</div>
+
+        <form ref='uploadForm' id='uploadForm' class='hidden' action='/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
+        <input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
+        <input type='submit' id ='imageSubmit' value='Upload!' />
+        </form>
+        <iframe name="hiddenIframe" class='hidden' onload='app.io.iframeOnload()'></iframe>
 	</body>
 	<script src="static/d3.v4.min.js"></script>
 	<script src='static/app.js'></script>
