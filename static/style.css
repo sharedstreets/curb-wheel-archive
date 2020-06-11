@@ -1,3 +1,9 @@
+:root{
+	--completeColor: #666;
+	--defaultColor: steelblue;
+	--activeColor: orangered;
+}
+
 body, html {
 	margin:0;
 	overflow:hidden;
@@ -8,12 +14,9 @@ body, html {
 	/*font-size:18px;*/
 }
 
-
-
-
 #topBar {
 	height:60px;
-	background:steelblue;
+	background:var(--defaultColor);
 	color:white;
 	position:fixed;
 	width:100%;
@@ -24,7 +27,7 @@ body, html {
     text-align: center;
     width: 100%;
     line-height: 3em;
-     pointer-events: none
+    pointer-events: none
 }
 
 .scroll-drawer {
@@ -46,7 +49,7 @@ body, html {
 
 .scroll-drawer::-webkit-scrollbar:vertical {
 	background:none;
-	width:10px;
+	width:0px;
 }
 
 .bottomButton {
@@ -90,10 +93,11 @@ body, html {
 }
 
 .entry {
-	padding:5vw;
+	padding:4vw 5vw;
 	border-bottom:1px solid #ddd;
 	transition: transform 0.2s;
 	background:white;
+	overflow:hidden;
 }
 
 #rollDelta {
@@ -101,7 +105,7 @@ body, html {
 }
 
 #curbEntry .entry{
-	border-bottom:3px solid steelblue;
+	border-bottom:3px solid var(--defaultColor);
 }
 
 .hidden {
@@ -167,7 +171,7 @@ body, html {
 
 .wheel {
     position: absolute;
-    border: 2px solid steelblue;
+    border: 2px solid var(--defaultColor);
     border-radius: 50%;
     margin-top: 6px;
     transform: translate(-50%, -50%) scale(0);
@@ -179,7 +183,7 @@ body, html {
 	height: 2px;
     width: 6.5px;
     margin:5px 5.5px 5px 0px;
-    background: steelblue;
+    background: var(--defaultColor);
     animation: spin;
     animation-duration: 1s;
     animation-iteration-count: infinite;
@@ -193,7 +197,7 @@ body, html {
 	position:absolute;
 	top:0;
 	border-radius:6px;
-	border:6px solid steelblue;
+	border:6px solid var(--defaultColor);
 	transform:translateX(-6px);
 }
 
@@ -203,7 +207,7 @@ body, html {
 	margin-top:6px;
 	transform:translateY(-50%);
 	border: none;
-    background: steelblue;
+    background: var(--defaultColor);
 }
 
 .position {
@@ -211,13 +215,13 @@ body, html {
     width: 12px;
     height: 12px;
 	position: absolute;
-	border: 3px solid #666;
+	border: 3px solid var(--completeColor);
 	background: white;
 	border-radius:2px;
 }
 
 .entry.complete .span {
-	border: 6px solid #666;
+	border: 6px solid var(--completeColor);
 	border-radius:2px;
 }
 
@@ -230,12 +234,10 @@ body, html {
 	margin-top:6px;
 	position:absolute;
 	transform: translate(-50%, -50%);
-	border: 2px solid steelblue;
+	border: 2px solid var(--defaultColor);
 }
 
-.complete .dot {
-	border: 2px solid #666;
-}
+
 /*gear icon*/
 
 .icon {
@@ -253,23 +255,35 @@ body, html {
 
 .active .fa-cog {
 	transform:rotate(90deg);
-	color:steelblue;
+	color:var(--defaultColor);
 	opacity:1;
 	filter:grayscale(0);
 }
 
+
+/*styling for completed entries*/
+
 .complete {
-	background: #fcfcfc;
+	background: #f6f6f6;
+}
+
+.complete .dot {
+	border: 2px solid var(--completeColor);
 }
 
 .complete .featureName:after {
-	content:' ✓';
-	color:green;
-	-webkit-text-stroke:2px;
-	transform:scale(1.5);
+	content: 'COMPLETE';
+    background: var(--completeColor);
+    color: white;
+    margin-left: 10px;
+    padding: 1px 4px;
+    font-size: 0.75em;
+    opacity: 0.5;
+    border-radius: 2px;
+    display: inline-block;
 }
 
-.complete .onlyWhenRunning {
-	display:none !important;
+.complete .spanLength {
+	color: var(--completeColor);
 }
 

@@ -236,7 +236,7 @@ var app = {
 						return progressPercentage+'%'
 					});
 
-				d3.selectAll(".entry:not(.complete) #spanLength")
+				d3.selectAll(".entry:not(.complete) .spanLength")
 					.text((d) => `${(current - d.start).toFixed(1)} m`);
 
 				d3.select("#blockProgress")
@@ -295,8 +295,7 @@ var app = {
 
 		  	newFeatures
 				.append("span")
-				.attr("class", "fr blue")
-				.attr("id", "spanLength")
+				.attr("class", "fr blue spanLength")
 				.text((d) => (d.type === "Position" ? "" : `0 m`));
 
 			newFeatures
