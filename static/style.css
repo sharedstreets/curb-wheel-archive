@@ -24,34 +24,50 @@ body, html {
 
 #title {
 	position: absolute;
-    text-align: center;
-    width: 100%;
-    line-height: 3em;
-    pointer-events: none
+	text-align: center;
+	width: 100%;
+	line-height: 3em;
+	pointer-events: none
 }
 
 .scroll-drawer {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    overflow-y: scroll;
+	position: absolute;
+	width: 100%;
+	bottom:80px;
 }
 
+.scroll-inner {
+	overflow-y: scroll;
+	height:100%;
+}
 .scroll-drawer::-webkit-scrollbar{
 	-webkit-appearance: none;
 }
 
 .scroll-drawer::-webkit-scrollbar-thumb {
 	border-radius: 5px;
-    background-color: rgba(0, 0, 0, 0.5);
-    border:2px solid white;
+	background-color: rgba(0, 0, 0, 0.5);
+	border:2px solid white;
 }
 
 .scroll-drawer::-webkit-scrollbar:vertical {
 	background:none;
-	width:0px;
+	width:10px;
 }
 
+#scrollBar {
+	position:absolute;
+	right:0;
+	height:100%;
+	width: 0vw;
+	z-index: 99
+}
+
+#scrollThumb {
+	width:100%;
+	height:100%;
+	background:purple;
+}
 .bottomButton {
 	height:80px;
 	text-align:center;
@@ -60,8 +76,8 @@ body, html {
 	width:100%;
 	background:#333;
 	color:white;
-    font-size: 1.25em;
-    line-height: 4em;
+	font-size: 1.25em;
+	line-height: 4em;
 }
 
 #modes {
@@ -104,7 +120,7 @@ body, html {
 	display:none;
 }
 
-#curbEntry .entry{
+#master .entry{
 	border-bottom:3px solid var(--defaultColor);
 }
 
@@ -140,7 +156,7 @@ body, html {
 /*rolling state*/
 
 .isRolling .wheel {
-    transform: translate(-50%, -50%);
+	transform: translate(-50%, -50%);
 }
 
 .isRolling #rollDelta {
@@ -155,7 +171,7 @@ body, html {
 }
 
 .track {
-	background:#eee;
+	background:#e9e9e9;
 	height:4px;
 	width:100%;
 	margin-top:6px;
@@ -170,25 +186,25 @@ body, html {
 }
 
 .wheel {
-    position: absolute;
-    border: 2px solid var(--defaultColor);
-    border-radius: 50%;
-    margin-top: 6px;
-    transform: translate(-50%, -50%) scale(0);
-    background:white;
-    transition:transform 0.5s;
+	position: absolute;
+	border: 2px solid var(--defaultColor);
+	border-radius: 50%;
+	margin-top: 6px;
+	transform: translate(-50%, -50%) scale(0);
+	background:white;
+	transition:transform 0.5s;
 }
 
 .spoke {
 	height: 2px;
-    width: 6.5px;
-    margin:5px 5.5px 5px 0px;
-    background: var(--defaultColor);
-    animation: spin;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
-    transform-origin: right;
+	width: 6.5px;
+	margin:5px 5.5px 5px 0px;
+	background: var(--defaultColor);
+	animation: spin;
+	animation-duration: 1s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+	transform-origin: right;
 }
 
 .span {
@@ -201,19 +217,19 @@ body, html {
 	transform:translateX(-6px);
 }
 
-.master.span {
+#master .span {
 	padding:2px;
 	border-radius:2px;
 	margin-top:6px;
 	transform:translateY(-50%);
 	border: none;
-    background: var(--defaultColor);
+	background: var(--defaultColor);
 }
 
 .position {
-    transform: translateX(-50%) rotateZ(45deg);
-    width: 12px;
-    height: 12px;
+	transform: translateX(-50%) rotateZ(45deg);
+	width: 12px;
+	height: 12px;
 	position: absolute;
 	border: 3px solid var(--completeColor);
 	background: white;
@@ -242,8 +258,8 @@ body, html {
 
 .icon {
 	width: 1em;
-    overflow: visible;
-    vertical-align: -.125em;
+	overflow: visible;
+	vertical-align: -.125em;
 }
 
 .fa-cog {
@@ -273,14 +289,15 @@ body, html {
 
 .complete .featureName:after {
 	content: 'COMPLETE';
-    background: var(--completeColor);
-    color: white;
-    margin-left: 10px;
-    padding: 1px 4px;
-    font-size: 0.75em;
-    opacity: 0.5;
-    border-radius: 2px;
-    display: inline-block;
+	background: var(--completeColor);
+	color: white;
+	margin-left: 10px;
+	padding: 1px 4px;
+	font-size: 0.75em;
+	opacity: 0.5;
+	border-radius: 2px;
+	display: inline-block;
+	transform:translateY(-10%);
 }
 
 .complete .spanLength {

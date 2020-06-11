@@ -391,8 +391,8 @@ var app = {
 			d3.select("#modes").style(
 				"transform",
 				`translateX(-${
-				app.constants.modes[mode].view *
-				(100 / Object.keys(app.constants.modes).length)
+					app.constants.modes[mode].view *
+					(100 / Object.keys(app.constants.modes).length)
 				}%)`
 			);
 
@@ -444,6 +444,13 @@ var app = {
 			}
 		},
 
+		scrollBar: {
+			init: () => {
+
+				d3.select('.scroll-drawer')
+					.append('div')
+			}
+		},
 		// general UI reset: collapses any open action drawers, removes curb arrows from map
 
 		reset: function () {
@@ -461,6 +468,10 @@ var app = {
 			app.constants.pollingInterval
 		);
 
+		// set entries div based on computed height of the master curb bar (a hack)
+
+		d3.select('.scroll-drawer')
+			.style('top', document.querySelector('#master').offsetHeight+'px')
 
 		// build Add Feature modal
 
