@@ -29,7 +29,7 @@ body {
 	font-size: 1.25em;
 }
 .small {
-	font-size:0.85em;
+	font-size:0.8em;
 }
 
 .blue {
@@ -38,6 +38,10 @@ body {
 
 .quiet {
 	opacity:0.5;
+}
+
+.strong {
+	font-style:bold;
 }
 
 .fl {
@@ -90,6 +94,10 @@ body {
 
 .mt200 {
 	margin-top:200px;
+}
+
+.mb10 {
+	margin-bottom: 10px
 }
 
 .mb30 {
