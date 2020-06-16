@@ -7,166 +7,148 @@ app.ui.map = new mapboxgl.Map({
 	hash: true,
 });
 
-if (navigator.geolocation) {
-	navigator.geolocation.getCurrentPosition(
-		function (position) {
-			const latitude = position.coords.latitude;
-			const longitude = position.coords.longitude;
-			app.ui.map.flyTo({
-				center: [longitude, latitude],
-				zoom: 17,
-			});
-		},
-		function (err) {
-			// unable to retrieve location
-			console.log(err);
-		}
-	);
-} else console.error("browser does not support geolocation");
-
 app.ui.map
-.fitBounds([bounds.slice(0, 2), bounds.slice(2, 4)])
-.on("load", function () {
-	app.ui.map
-	.addLayer({
-		id: "streets",
-		type: "line",
-		source: {
-			type: "geojson",
-			data: app.constants.emptyGeojson,
-		},
-		paint: {
-			"line-width": 10,
-			"line-opacity": 0.2,
-			"line-color": "steelblue",
-		},
-	})
-	.addLayer({
-		id: "arrows",
-		type: "symbol",
-		source: {
-			type: "geojson",
-			data: app.constants.emptyGeojson,
-		},
-		layout: {
-			"text-keep-upright": false,
-			"text-font": ["Noto Sans Regular"],
-			"text-field": "{direction} > ",
-			"symbol-placement": "line",
-			"symbol-spacing": {
-				stops: [
-					[16, 20],
-					[22, 80],
-				],
-			},
-			"text-size": {
-				stops: [
-					[16, 12],
-					[22, 45],
-				],
-			},
-			"text-allow-overlap": true,
-			"text-ignore-placement": true,
-		},
-		paint: {
-			"text-color": {
-				property: "direction",
-				type: "categorical",
-				stops: [
-					["A", "orangered"],
-					["B", "green"],
-				],
-			},
-		},
-	})
-	.addLayer({
-		id: "curbs",
-		type: "line",
-		source: {
-			type: "geojson",
-			data: { type: "FeatureCollection", features: [] },
-		},
-		paint: {
-			"line-width": 3,
-		},
-	})
-	.on("click", "streets", (e) => {
+	.fitBounds([bounds.slice(0, 2), bounds.slice(2, 4)])
+	.on("load", () => {
 
-		if (app.state.mode = "selectStreet") {
+		app.ui.map
+			.addLayer({
+				id: "streets",
+				type: "line",
+				source: {
+					type: "geojson",
+					data: app.constants.emptyGeojson,
+				},
+				paint: {
+					"line-width": 10,
+					"line-opacity": 0.2,
+					"line-color": "steelblue",
+				},
+			})
+			.addLayer({
+				id: "arrows",
+				type: "symbol",
+				source: {
+					type: "geojson",
+					data: app.constants.emptyGeojson,
+				},
+				layout: {
+					"text-keep-upright": false,
+					// "text-font": ["Noto Sans Regular"],
+					"text-field": app.constants.mapStyle.arrows.direction.forward,
+					"symbol-placement": "line",
+					"symbol-spacing": {
+						stops: [
+							[16, 20],
+							[22, 80],
+						],
+					},
+					"text-size": {
+						stops: [
+							[16, 12],
+							[22, 45],
+						],
+					},
+					"text-allow-overlap": true,
+					"text-ignore-placement": true,
+					"text-offset": {
+						base:2,
+						stops: app.constants.mapStyle.arrows.side.right,
+					}
+				},
+				paint: {
+					"text-color": 'steelblue',
+				},
+			})
+			.addLayer({
+				id: 'youarehere',
+				type: 'circle',
+				source: {
+					type: "geojson",
+					data: app.constants.emptyGeojson,
+				},
+				paint: {
+					'circle-color':'steelblue'
+				}
+			})
+			.on("click", "streets", (e) => {
 
-			var edge = e.features[0].geometry.coordinates;
-			app.state.street = e.features[0].properties;
+				if (app.state.mode === "selectStreet") {
 
-			app.ui.map.fitBounds(turf.bbox(e.features[0]), { padding: 60 });
+					var edge = e.features[0].geometry.coordinates;
+					app.state.street = e.features[0].properties;
 
-			var forward = turf.lineOffset(
-				turf.lineString(edge, {
-					direction: "A",
-					ref: e.features[0].properties.forward,
-				}),
-				10,
-				{ units: "meters" }
-			);
+					app.ui.map
+						.fitBounds(
+							turf.bbox(e.features[0]), { 
+								padding: {
+									top:30,
+									left:30,
+									right:30,
+									bottom: 30 + document.querySelector('#mapModal').offsetHeight
+								}
+							}
+						);
 
-			edge.reverse();
-			
-			var backward = turf.lineOffset(
-				turf.lineString(edge, {
-					direction: "B",
-					ref: e.features[0].properties.back,
-				}),
-				10,
-				{ units: "meters" }
-			);
+					app.ui.map
+						.getSource("arrows")
+						.setData({
+							type: "FeatureCollection",
+							features: [e.features[0]],
+						});
 
-			app.ui.map.getSource("arrows").setData({
-				type: "FeatureCollection",
-				features: [forward, backward],
+					app.ui.mode
+						.set("selectDirection");
+				}
+			})
+			.on("moveend", (e) => {
+
+				let zoom = app.ui.map.getZoom();
+
+				if (zoom >= 14) {
+					let viewport = app.ui.map.getBounds();
+
+					let url = "/query?";
+					url += "minX=" + viewport._sw.lng;
+					url += "&minY=" + viewport._sw.lat;
+					url += "&maxX=" + viewport._ne.lng;
+					url += "&maxY=" + viewport._ne.lat;
+
+					fetch(url)
+						.then((response) => {
+							return response.json();
+						})
+						.then((streets) => {
+							app.ui.map.getSource("streets").setData(streets);
+						});
+				} 
+
+				else app.ui.map.getSource("streets").setData(app.constants.emptyGeojson);
 			});
-
-			app.ui.mode.set("selectDirection");
-		}
-	})
-	.on("click", "arrows", (e) => {
-
-		if ((app.state.mode = "selectDirection")) {
-
-			var ref = e.features[0].properties.ref;
-
-			// sets the street direction and initializes the survey
-			var success = () => {
-				app.state.street.ref = ref;
-
-				app.ui.mode.set("rolling");
-				app.devMode.rolling = true;
-
-				app.survey.init();
-			};
-
-			app.ui.confirm(app.constants.prompts.beginSurvey, success);
-		}
-
-	})
-	.on("moveend", (e) => {
-
-		let zoom = app.ui.map.getZoom();
-
-		if (zoom >= 14) {
-			let viewport = app.ui.map.getBounds();
-
-			let url = "/query?";
-			url += "minX=" + viewport._sw.lng;
-			url += "&minY=" + viewport._sw.lat;
-			url += "&maxX=" + viewport._ne.lng;
-			url += "&maxY=" + viewport._ne.lat;
-
-			fetch(url)
-				.then((response) => {
-					return response.json();
-				})
-				.then((streets) => {
-					app.ui.map.getSource("streets").setData(streets);
-				});
-				} else app.ui.map.getSource("streets").setData(app.constants.emptyGeojson);
 	});
-});
+
+
+
+
+app.ui.map.switch = {
+	side: () =>{
+
+		app.state.streetSide = app.state.streetSide === 'right' ? 'left' : 'right'; 
+
+		app.ui.map
+			.setLayoutProperty('arrows', 'text-offset', 
+				{
+					base: 2,
+					stops: app.constants.mapStyle.arrows.side[app.state.streetSide]
+				}
+
+			)
+	},
+
+	direction: () => {
+		app.state.rollDirection = app.state.rollDirection === 'forward' ? 'back' : 'forward'; 
+
+		app.ui.map
+			.setLayoutProperty('arrows', 'text-field', app.constants.mapStyle.arrows.direction[app.state.rollDirection])
+	}
+}
