@@ -34,7 +34,7 @@ app.ui.map
 				},
 				layout: {
 					"text-keep-upright": false,
-					"text-font": ["Noto Sans Regular"],
+					// "text-font": ["Noto Sans Regular"],
 					"text-field": app.constants.mapStyle.arrows.direction.forward,
 					"symbol-placement": "line",
 					"symbol-spacing": {
@@ -57,14 +57,7 @@ app.ui.map
 					}
 				},
 				paint: {
-					"text-color": {
-						property: "direction",
-						type: "categorical",
-						stops: [
-							["A", "orangered"],
-							["B", "green"],
-						],
-					},
+					"text-color": 'steelblue',
 				},
 			})
 			.addLayer({
