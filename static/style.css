@@ -71,13 +71,26 @@ body, html {
 .bottomButton {
 	height:80px;
 	text-align:center;
-	position:absolute;
-	bottom:0px;
 	width:100%;
 	background:#333;
 	color:white;
 	font-size: 1.25em;
 	line-height: 4em;
+}
+
+/*mode slider functionality*/
+
+#modes[currentMode='selectStreet'],
+#modes[currentMode='selectDirection'] {
+	transform:none;
+}
+
+#modes[currentMode='rolling'] {
+	transform: translateX(-25%);
+}
+
+#modes[currentMode='addFeature'] {
+	transform: translateX(-50%);
 }
 
 #modes {
@@ -99,9 +112,32 @@ body, html {
 	background:#f6f6f6;
 }
 
+/* curb side/direction selection view*/
+#modes[currentMode='selectDirection'] #mapModal {
+	transform:translateY(0%);
+}
+
+/*map view*/
+#map {
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+}
+
+#mapModal {
+	width: 100%;
+	bottom: 0px;
+	position:absolute;
+	z-index: 99;
+	transform:translateY(100%);
+	transition:transform 0.5s;
+}
+
+/*surveying view*/
+
 #features {
 	overflow: scroll;
-	/*outline:2px solid red;*/
 }
 
 #backArrow {
@@ -128,7 +164,7 @@ body, html {
 	display:none !important;
 }
 
-.featureType {	
+.halfButton {	
 	text-align:center;
 	margin: 5vw;
 	background: #fff;
@@ -227,7 +263,7 @@ body, html {
 }
 
 .position {
-	transform: translateX(-50%) rotateZ(45deg);
+	transform: translateX(-70.7%) rotateZ(45deg);
 	width: 12px;
 	height: 12px;
 	position: absolute;
@@ -289,8 +325,8 @@ body, html {
 
 .complete .featureName:after {
 	content: 'COMPLETE';
-	background: var(--completeColor);
-	color: white;
+	background: #ddd;
+	color: black;
 	margin-left: 10px;
 	padding: 1px 4px;
 	font-size: 0.75em;

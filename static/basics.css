@@ -55,6 +55,11 @@ body {
 .text-center {
 	text-align: center
 }
+
+.pin-bottom {
+	position: absolute;
+	bottom:0;
+}
 /*margins*/
 
 .m10 {

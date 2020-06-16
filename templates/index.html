@@ -22,7 +22,16 @@
 			<div class='big' id='title'>Select a Street</div>
 		</section>
 		<div id='modes'>
-			<div id='map' class='mode big'>
+			<div class='mode'>
+				<div id='map'></div>
+				<div id='mapModal'>
+					<div>
+						<div class='inlineBlock halfButton' onclick='app.ui.map.switch.side()'>Other side</div><div class='inlineBlock halfButton' onclick='app.ui.map.switch.direction()'>Other direction</div>
+					</div>
+					<div class='bottomButton' onclick='app.survey.init()'>
+						Start Survey
+					</div>
+				</div>
 			</div>
 			<div id='rolling' class='mode'>
 				<div id='master'>
@@ -62,7 +71,7 @@
 						</div>
 					</div>
 				</div>
-				<div class='bottomButton'>
+				<div class='pin-bottom bottomButton'>
 					<div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
 					<div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
 				</div>

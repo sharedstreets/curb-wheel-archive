@@ -3,6 +3,8 @@ var app = {
 		street: {
 			distance: 0,
 		},
+		streetSide: 'right',
+		rollDirection: 'forward',
 		systemRollOffset: 0, // offset to subtract from reported distance
 		systemRollDistance: 0, // rolled distance as reported by Pi
 		currentRollDistance: 0, // computed roll from distance and offset
@@ -14,7 +16,6 @@ var app = {
 
 	constants: {
 		pollingInterval: 1000,
-
 
 		curbFeatures: {
 			Span: [
@@ -43,35 +44,41 @@ var app = {
 		},
 
 		errors: {
+
 			incompleteSpans: (num) => {
-			return `There ${
-				num > 1 ? "are " + num + " curb spans" : "is one curb span"
-			} still running. Please close before completing the survey.`;
+				return `There ${
+					num > 1 ? "are " + num + " curb spans" : "is one curb span"
+					} still running. Please close before completing the survey.`;
 			},
+
 			curbLengthDeviation: (ratio) => {
-			var script = `The surveyed length is significantly ${
-				ratio > 1 ? "longer" : "shorter"
-			} than expected. Tap Cancel to return to survey, or OK to proceed anyway.`;
-			var keepDubiousSurvey = confirm(script) === true;
-			if (keepDubiousSurvey) app.survey.complete(true);
+				var script = `The surveyed length is significantly ${
+					ratio > 1 ? "longer" : "shorter"
+				} than expected. Tap Cancel to return to survey, or OK to proceed anyway.`;
+				var keepDubiousSurvey = confirm(script) === true;
+				if (keepDubiousSurvey) app.survey.complete(true);
 			},
 		},
 
 		modes: {
+
 			selectStreet: {
 				view: 0,
 				title: "Select a street",
 				set: () => {
 					//conditional on whether the map has instantiated
 					if (app.ui.map) {
-						app.ui.map.getSource("arrows").setData(app.constants.emptyGeojson);
+						app.ui.map
+							.getSource("arrows")
+							.setData(app.constants.emptyGeojson);
+
 					}
 				}
 			},
 
 			selectDirection: {
 				view: 0,
-				title: "Select curb side",
+				title: "Curb Side & Direction"
 			},
 
 			rolling: {
@@ -79,13 +86,13 @@ var app = {
 				title: "Curb Survey",
 
 				set: () => {
-					app.ui.updateFeatures();
+					app.ui.features.update();
 				},
 
 				back: () => {
 					var success = () => {
-					app.state.features = [];
-					app.ui.mode.set("selectStreet");
+						app.state.features = [];
+						app.ui.mode.set("selectStreet");
 					};
 
 					app.ui.confirm(app.constants.prompts.exitSurvey, success);
@@ -93,31 +100,75 @@ var app = {
 					return true;
 				},
 			},
+
 			addFeature: {
 				view: 2,
 				title: "Select feature type",
 			},
 		},
 
-		emptyGeojson: { type: "FeatureCollection", features: [] },
+		mapStyle: {
+			arrows: {
+
+				direction: {
+					forward: '> ',
+					back: ' <'
+				},
+
+				side: {
+					right: [
+						[16, [0, 1]],
+						[22, [0, 10]]
+					],
+					left: [
+						[16, [0, -1]],
+						[22, [0, -10]]
+					]
+				}
+			}
+		},
+
+		emptyGeojson: { 
+			type: "FeatureCollection", 
+			features: [] 
+		}
 	},
 
 	survey: {
+
 		// sets up parameters of the selected street, preparing for survey
 		init: () => {
-			app.state.systemRollOffset = app.state.systemRollDistance;
-			app.state.features = [];
-			app.ui.updateFeatures();
 
-			//populate street length
-			d3.select("#curbLength").text(Math.round(app.state.street.distance));
+			app.io.getWheelTick( (cb) => {
 
-			d3.select("#curbEntry .progressBar").attr(
-			"max",
-			app.state.street.distance
-			);
+				app.state.systemRollOffset = cb.counter/10;
+				app.state.features = [];
+				app.ui.features.update();
 
-			d3.select("#streetName").text(app.state.street.name);
+				//populate street length
+				d3.select("#curbLength")
+					.text(Math.round(app.state.street.distance));
+
+				d3.select("#curbEntry .progressBar")
+					.attr(
+						"max",
+						app.state.street.distance
+					);
+
+				d3.select("#streetName")
+					.text(app.state.street.name);
+
+				// sets the street direction and initializes the survey
+				var success = () => {
+
+					app.state.street.ref = 'forward';
+					app.ui.mode.set("rolling");
+					app.devMode.rolling = true;
+
+				};
+
+				app.ui.confirm(app.constants.prompts.beginSurvey, success);
+			})
 		},
 
 		// checks current survey before submission
@@ -157,7 +208,7 @@ var app = {
 					return feature.startTime !== d.startTime;
 				});
 
-				app.ui.updateFeatures();
+				app.ui.features.update();
 			};
 
 			app.ui.confirm(app.constants.prompts.deleteFeature, success, null);
@@ -182,7 +233,7 @@ var app = {
 					if (d.startTime === startTimeToEnd) d.end = app.state.currentRollDistance;
 				});
 
-				app.ui.updateFeatures();
+				app.ui.features.update();
 				app.ui.reset();
 			};
 
@@ -209,7 +260,7 @@ var app = {
   	ui: {
 
 		// Updates all active progress bars and status texts
-		roll: function () {
+		roll: () => {
 			
 			var current = app.state.systemRollDistance - app.state.systemRollOffset;
 			var rollDelta = current - app.state.currentRollDistance;
@@ -282,133 +333,134 @@ var app = {
 			}
 		},
 
-		//general function to build a new feature entry.
+		features: {
 
-		buildFeatureEntry: function (newFeatures) {
+			//general function to build a new feature entry.
 
-			// name of feature
-			newFeatures
-				.attr("id", (d) => `entry${d.startTime}`)
-				.append("span")
-				.attr("class", "featureName")
-				.text((d) => `${d.name}`);
+			build: (newFeatures) => {
 
-		  	newFeatures
-				.append("span")
-				.attr("class", "fr blue spanLength")
-				.text((d) => (d.type === "Position" ? "" : `0 m`));
+				// name of feature
+				newFeatures
+					.attr("id", (d) => `entry${d.startTime}`)
+					.append("span")
+					.attr("class", "featureName")
+					.text((d) => `${d.name}`);
 
-			newFeatures
-				.on("mousedown", (d, i) => {
-					var id = d.startTime;
-					d3.selectAll("#features .entry")
-						.classed("active", (d, entryIndex) => {
-						return d.startTime === id;
-					});
-				})
+			  	newFeatures
+					.append("span")
+					.attr("class", "fr blue spanLength")
+					.text((d) => (d.type === "Position" ? "" : `0 m`));
 
-			// build progress bar
-			app.ui.progressBar.build(newFeatures);
-
-			// add text below progress bars
-			var barCaption = newFeatures
-				.append("div")
-				.attr("class", "quiet small");
-
-			barCaption
-				.append("span")
-				.text(
-					(d) =>`${d.type === "Position" ? "At" : "From"} ${d.start.toFixed(1)}m-mark`
-				);
-
-			// gear icon toggle for actions
-			barCaption
-				.append("span")
-				.attr("class", "fr")
-				.attr("href", (d) => `#entry${d.startTime}`)	
-				.append("img")
-				.attr("class", "icon fa-cog")
-				.attr("src", "static/images/cog.svg");
-
-			// build feature action buttons
-
-			var featureActions = newFeatures
-				.append("div")
-				.attr("class", "mt30 small featureActions blue");
-
-			Object.keys(app.feature).forEach((action) => {
-				featureActions
-					.append("div")
-					.attr("class", `col4 featureAction`)
-					.text(action)
+				newFeatures
 					.on("mousedown", (d, i) => {
-						d3.event.stopPropagation();
-						app.feature[action](d, i);
-					});
-			});
+						var id = d.startTime;
+						d3.selectAll("#features .entry")
+							.classed("active", (d, entryIndex) => {
+							return d.startTime === id;
+						});
+					})
+
+				// build progress bar
+				app.ui.progressBar.build(newFeatures);
+
+				// add text below progress bars
+				var barCaption = newFeatures
+					.append("div")
+					.attr("class", "quiet small");
+
+				barCaption
+					.append("span")
+					.text(
+						(d) =>`${d.type === "Position" ? "At" : "From"} ${d.start.toFixed(1)}m-mark`
+					);
+
+				// gear icon toggle for actions
+				barCaption
+					.append("span")
+					.attr("class", "fr")
+					.attr("href", (d) => `#entry${d.startTime}`)	
+					.append("img")
+					.attr("class", "icon fa-cog")
+					.attr("src", "static/images/cog.svg");
+
+				// build feature action buttons
+
+				var featureActions = newFeatures
+					.append("div")
+					.attr("class", "mt30 small featureActions blue");
+
+				Object.keys(app.feature).forEach((action) => {
+					featureActions
+						.append("div")
+						.attr("class", `col4 featureAction`)
+						.text(action)
+						.on("mousedown", (d, i) => {
+							d3.event.stopPropagation();
+							app.feature[action](d, i);
+						});
+				});
+			},
+
+			// update UI. generally fired after a feature is added, deleted or completed
+
+			update: () => {
+
+				var features = d3
+					.select("#features")
+					.selectAll(".entry")
+					.data(app.state.features, d => d.startTime);
+
+				//remove deleted features
+				features
+					.exit()
+					.transition()
+					.duration(200)
+					.style("transform", "translateY(-100%)")
+					.style("opacity", 0)
+					.remove();
+
+				// mark completed features as such
+				features
+					.classed("complete", (d) => d.end);
+
+				d3.selectAll(".complete .featureAction")
+					.attr("class", "featureAction col6");
+
+				// add new features
+				var newFeatures = features.enter()
+					.append("div").attr("class", "entry");
+
+				app.ui.features
+					.build(newFeatures);
+
+				// update progress bar with dots for new photos
+				app.ui.progressBar.update(features);
+			}
+
 		},
 
-		// update UI. generally fired after a feature is added, deleted or completed
-
-		updateFeatures: function () {
-
-			var features = d3
-				.select("#features")
-				.selectAll(".entry")
-				.data(app.state.features, d => d.startTime);
-
-			//remove deleted features
-			features
-				.exit()
-				.transition()
-				.duration(200)
-				.style("transform", "translateY(-100%)")
-				.style("opacity", 0)
-				.remove();
-
-			// mark completed features as such
-			features
-				.classed("complete", (d) => d.end);
-
-			d3.selectAll(".complete .featureAction")
-				.attr("class", "featureAction col6");
-
-			// add new features
-			var newFeatures = features.enter()
-				.append("div").attr("class", "entry");
-
-			app.ui.buildFeatureEntry(newFeatures);
-
-			// update progress bar with dots for new photos
-			app.ui.progressBar.update(features);
-		},
 
 		// sets the current mode of the app, and updates title
 
 		mode: {
-			set: function (mode) {
-			app.ui.reset();
-			d3.select("#modes").style(
-				"transform",
-				`translateX(-${
-					app.constants.modes[mode].view *
-					(100 / Object.keys(app.constants.modes).length)
-				}%)`
-			);
+			set: (mode) => {
+				app.ui.reset();
+				d3.select("#modes")
+					.attr('currentMode', mode)
 
-			app.state.mode = mode;
+				app.state.mode = mode;
 
-			// apply any custom functions for mode
-			if (app.constants.modes[mode].set) app.constants.modes[mode].set();
+				// apply any custom functions for mode
+				if (app.constants.modes[mode].set) app.constants.modes[mode].set();
 
-			// update title
-			d3.select("#title").text(app.constants.modes[mode].title);
+				// update title
+				d3.select("#title").text(app.constants.modes[mode].title);
 			},
 		},
 
 		// functionality for the back button, conditional on the current mode
 
-		back: function () {
+		back: () => {
 			var modes = Object.keys(app.constants.modes);
 			var modeIndex = modes.indexOf(app.state.mode) - 1;
 			var newMode = modes[modeIndex];
@@ -421,7 +473,7 @@ var app = {
 		// produces a confirm dialog once for each instance, with callbacks for cancel and ok. 
 		// also handles disabled dialogs
 
-		confirm: function (text, ok, cancel) {
+		confirm: (text, ok, cancel) => {
 
 			// if confirm prompt has already been used, go directly to "ok" state
 			if (app.state.promptsUsed.includes(text)) ok();
@@ -464,7 +516,19 @@ var app = {
 
 		// poll Pi
 		setInterval(
-			() => {app.io.getWheelTick()}, 
+
+			() => {
+
+				if (app.state.mode === 'rolling') app.io.getWheelTick()
+
+				else if (app.state.mode === 'selectStreet' || app.state.mode === 'selectDirection') {
+					app.io.geolocate((lnglat) => {
+						app.ui.map.getSource('youarehere')
+							.setData(turf.point(lnglat))
+					})
+				}
+			}, 
+
 			app.constants.pollingInterval
 		);
 
@@ -477,14 +541,15 @@ var app = {
 
 		Object.keys(app.constants.curbFeatures)
 			.forEach((type) => {
+
 				d3.select(`#addFeature`)
 					.append("span")
 					.attr("id", type)
-					.selectAll(".featureType")
+					.selectAll(".halfButton")
 					.data(app.constants.curbFeatures[type])
 					.enter()
 					.append("div")
-					.attr("class", "featureType inlineBlock")
+					.attr("class", "halfButton inlineBlock")
 					.text((d) => d)
 					.on("mousedown", (d) => {
 
@@ -495,7 +560,7 @@ var app = {
 
 						// add new feature to state, return to rolling mode, update ui
 						app.feature.add(d);
-						app.ui.updateFeatures();
+						app.ui.features.update();
 						app.ui.mode.set("rolling");
 					});
 
@@ -529,23 +594,24 @@ var app = {
 					}
 				})
 
-				app.ui.updateFeatures()
+				app.ui.features.update()
 			}
 		},
 
 
 		// uploads image via the form, and retrieves the filepath from the hidden iframe
-		uploadImage: (e, cb) => {
+		uploadImage: (e) => {
 			document.querySelector("#imageSubmit").click();
 		},
 
 		uploadSurvey: () => {
+
 			let survey = {
-			created_at: Date.now(),
-			shst_ref_id: app.state.street.ref,
-			side_of_street: "right",
-			surveyed_distance: app.state.currentRollDistance,
-			features: [],
+				created_at: Date.now(),
+				shst_ref_id: app.state.street.ref,
+				side_of_street: app.state.streetSide,
+				surveyed_distance: app.state.currentRollDistance,
+				features: [],
 			};
 
 			for (let ft of app.state.features) {
@@ -566,9 +632,9 @@ var app = {
 			xhr.open("POST", url, true);
 			xhr.setRequestHeader("Content-Type", "application/json");
 			xhr.onreadystatechange = function () {
-			if (xhr.readyState === 4 && xhr.status === 200) {
-				// uploaded survey
-			}
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					// uploaded survey
+				}
 			};
 			console.log(survey)
 
@@ -578,30 +644,59 @@ var app = {
 		loadJSON: (path, success, error) => {
 			var xhr = new XMLHttpRequest();
 			xhr.onreadystatechange = function () {
-			if (xhr.readyState === XMLHttpRequest.DONE) {
-				if (xhr.status === 200) {
-				if (success) success(JSON.parse(xhr.responseText));
-				} else {
-				if (error) error(xhr);
+				if (xhr.readyState === XMLHttpRequest.DONE) {
+					if (xhr.status === 200) {
+						if (success) success(JSON.parse(xhr.responseText));
+					} 
+					else if (error) error(xhr);
+
 				}
-			}
 			};
 			xhr.open("GET", path, true);
 			xhr.send();
 		},
 
-		getWheelTick: () => {
+		getWheelTick: (cb) => {
+
 			app.io.loadJSON("/counter", (data) => {
+				if (cb) cb(data)
 				app.state.systemRollDistance = data.counter / 10;
 				app.ui.roll();
 			});
 		},
+
+		geolocate: (cb) => {
+
+			var n = navigator.geolocation;
+			if (n) {
+
+				n.getCurrentPosition(
+
+					(position) => {
+						var coords = [position.coords.longitude, position.coords.latitude];
+						cb(coords)
+					},
+
+					(err) => {
+						// unable to retrieve location
+						console.log(err);
+					}
+				);
+			} 
+
+			else console.error("browser does not support geolocation");
+		}
 	},
 
 	util: {
 		copy: function (original) {
 			return JSON.parse(JSON.stringify(original));
 		},
+		extend: (obj, addition) =>{
+			Object.keys(addition)
+				.forEach((key)=>{obj[key] = addition[key]})
+			return obj
+		}
 	},
 
   	devMode: {
