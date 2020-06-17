@@ -175,23 +175,44 @@ var app = {
 		validate: () => {
 
 			var survey = app.state.features;
-			var incompleteSpans = survey.filter((d) => !d.end).length;
+
+			var incompleteSpans = survey
+				.filter((d) => !d.end).length;
+
 			var surveyedLengthRatio =
 			app.state.currentRollDistance / app.state.street.distance;
+
 			// check for unfinished spans
 			if (incompleteSpans > 0)
 			alert(app.constants.errors.incompleteSpans(incompleteSpans));
 			//check for significant deviations in surveyed curb length. user can restart survey or ignore
 			else if (surveyedLengthRatio < 0.8 || surveyedLengthRatio > 1.1) {
-			app.constants.errors.curbLengthDeviation(surveyedLengthRatio);
-			} else app.survey.complete();
+				app.constants.errors.curbLengthDeviation(surveyedLengthRatio);
+			} 
+			else app.survey.complete();
+
+		},
+
+		// coerce backward-rolling surveys into the forward direction
+		flip: () => {
+			var fullLength = app.state.currentRollDistance;
+			
+			app.state.features.forEach((ft)=>{
+				ft.start = fullLength - ft.start;
+				ft.end = fullLength - ft.end;
+
+				ft.images.forEach((img)=>{
+					img.geometry.distance = fullLength - img.geometry.distance
+				})
+			})
 		},
 
 		complete: (skipConfirmation) => {
-			var success = function () {
-			app.io.uploadSurvey();
 
-			app.ui.mode.set("selectStreet");
+			var success = () => {
+				if (app.state.rollDirection === 'back') app.survey.flip()
+				app.io.uploadSurvey();
+				app.ui.mode.set("selectStreet");
 			};
 
 			if (skipConfirmation) success();
@@ -629,8 +650,10 @@ var app = {
 
 			var xhr = new XMLHttpRequest();
 			var url = "/surveys/" + app.state.street.ref;
+
 			xhr.open("POST", url, true);
 			xhr.setRequestHeader("Content-Type", "application/json");
+
 			xhr.onreadystatechange = function () {
 				if (xhr.readyState === 4 && xhr.status === 200) {
 					// uploaded survey
