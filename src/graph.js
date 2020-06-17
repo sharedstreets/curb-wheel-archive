@@ -32,7 +32,22 @@ Graph.prototype.query = async function (bbox) {
       maxY: bbox[3],
     })
     .map((k) => {
-      return this.streets[k.id];
+      let street = this.streets[k.id];
+      street.properties.surveyed = false;
+
+      if (
+        this.surveys.has(street.properties.forward) &&
+        this.surveys.get(street.properties.forward).length > 0
+      ) {
+        street.properties.surveyed = true;
+      } else if (
+        this.surveys.has(street.properties.back) &&
+        this.surveys.get(street.properties.back).length > 0
+      ) {
+        street.properties.surveyed = true;
+      }
+
+      return street;
     });
 };
 
