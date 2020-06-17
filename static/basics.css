@@ -3,6 +3,7 @@
 }
 
 body {
+	margin:0;
 	font-size: 16px;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
@@ -41,7 +42,7 @@ body {
 }
 
 .strong {
-	font-style:bold;
+	font-weight:bold;
 }
 
 .fl {
@@ -59,6 +60,10 @@ body {
 .pin-bottom {
 	position: absolute;
 	bottom:0;
+}
+/*paddings*/
+.p10 {
+	padding:10px;
 }
 /*margins*/
 
@@ -140,4 +145,10 @@ body {
 	width:50%;
 	flex:none;
 	float:left;
+}
+
+/*heights*/
+
+.fullHeight {
+	height:100%;
 }
