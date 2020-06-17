@@ -680,8 +680,9 @@ var app = {
 		},
 
 		getWheelTick: (cb) => {
-
+			var t = performance.now()
 			app.io.loadJSON("/counter", (data) => {
+				console.log(performance.now()-t)
 				if (cb) cb(data)
 				app.state.systemRollDistance = data.counter / 10;
 				app.ui.roll();
