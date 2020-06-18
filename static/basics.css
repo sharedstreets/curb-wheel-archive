@@ -3,12 +3,13 @@
 }
 
 body {
+	margin:0;
 	font-size: 16px;
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
     min-width: 300px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: hidden;
     text-rendering: optimizeLegibility; 
     -webkit-text-size-adjust: 100%;
     -moz-text-size-adjust: 100%;
@@ -19,6 +20,11 @@ body {
     line-height: 1.5;
     color:#4a4a4a;
 	font-family:BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+::-webkit-scrollbar{
+	width:0;
+	height:0;
+	/*-webkit-appearance: none;*/
 }
 
 .scroll {
@@ -41,7 +47,7 @@ body {
 }
 
 .strong {
-	font-style:bold;
+	font-weight:bold;
 }
 
 .fl {
@@ -59,6 +65,10 @@ body {
 .pin-bottom {
 	position: absolute;
 	bottom:0;
+}
+/*paddings*/
+.p10 {
+	padding:10px;
 }
 /*margins*/
 
@@ -140,4 +150,10 @@ body {
 	width:50%;
 	flex:none;
 	float:left;
+}
+
+/*heights*/
+
+.fullHeight {
+	height:100%;
 }

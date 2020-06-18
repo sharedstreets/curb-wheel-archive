@@ -465,6 +465,15 @@ async function main() {
       res.status(200).send({ version: versionNumber });
     });
 
+    app.get("/digitizer", async (req, res) => {
+      let template = (
+        await fs.promises.readFile(
+          path.join(__dirname, "../templates/digitizer.html")
+        )
+      ).toString();
+      res.send(template);
+    });
+
     app.get("/*", async (req, res) => {
       let template = (
         await fs.promises.readFile(
