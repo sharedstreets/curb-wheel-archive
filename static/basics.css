@@ -9,7 +9,7 @@ body {
     -webkit-font-smoothing: antialiased;
     min-width: 300px;
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: hidden;
     text-rendering: optimizeLegibility; 
     -webkit-text-size-adjust: 100%;
     -moz-text-size-adjust: 100%;
@@ -20,6 +20,11 @@ body {
     line-height: 1.5;
     color:#4a4a4a;
 	font-family:BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+::-webkit-scrollbar{
+	width:0;
+	height:0;
+	/*-webkit-appearance: none;*/
 }
 
 .scroll {
