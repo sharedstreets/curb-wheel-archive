@@ -40,7 +40,7 @@ var app = {
 					.enter()
 					.append('option')
 					.attr('value', d=>d)
-					.text(d=> d%60 === 0 ? `${d/60} hour` : `${d} min`)
+					.text(d=> d%60 === 0 ? `${d/60} hour` : d)
 			}
 		}
 	},
