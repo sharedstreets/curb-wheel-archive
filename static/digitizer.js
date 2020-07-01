@@ -7,6 +7,38 @@ var app = {
 	ui: {
 
 		entry: {
+
+			applyPropagations: function(d,i) {
+				var entry = d3.select(this)
+
+				app.constants.ui.entryPropagations
+					.forEach(propagation=>{
+						entry.select(`div[prop=${propagation.originProp}] select`)
+							.on('change', updateDestination)
+
+
+						function updateDestination(d,i){
+							
+							var parentValue = d3.select(this).property('value');
+							var propagatingRule = propagation.propagatingValues[parentValue] || false;
+							var prop = entry.select(`div[prop=${propagation.destinationProp}]`)
+								
+							prop
+								.classed('hidden', !propagatingRule)
+							if (propagatingRule) {
+								var input = prop.select('input')
+									.attr('placeholder', propagatingRule.placeholder)
+									.property('value', '')
+									.node()
+
+								if (propagatingRule.values) autocomplete(input, propagatingRule.values)
+								
+								input.focus();
+							}
+						}
+					})
+			},
+
 			updateRegulation: (entries) =>{
 				
 				var rules = entries
@@ -15,7 +47,7 @@ var app = {
 					.data(d=>d.properties.regulations)
 					.enter()
 					.append('div')
-					.attr('class', 'rule mt10')
+					.attr('class', 'rule m10')
 
 				var props = rules
 					.selectAll('.property')
@@ -40,44 +72,89 @@ var app = {
 					.enter()
 					.append('option')
 					.attr('value', d=>d)
-					.text(d=> d%60 === 0 ? `${d/60} hour` : d)
+					.text(d=>d)
 			}
 		}
 	},
 	constants: {
 
 		ui: {
+
+			entryPropagations: [{
+
+				originProp: 'assetType',
+				destinationProp: 'assetSubtype',
+				propagatingValues: {
+
+					'pavement marking': {
+						placeholder: 'Marking type',
+						values: [
+							'ramp', 
+							'driveway', 
+							'street'
+						]
+					},
+
+					'curb cut': {
+						placeholder: 'Cut type',
+						values: [
+							'bike', 
+							'bus', 
+							'taxi', 
+							'arrow', 
+							'diagonal lines', 
+							'zigzag', 
+							'parallel parking', 
+							'perpendicular parking', 
+							'yellow', 
+							'red', 
+							'blue', 
+							'ISA'
+						]
+					},
+
+					'curb paint': {
+						placeholder: 'Paint color'
+					},
+				}
+			}],
+
 			entryParams: [
 				{
 					param: 'shstRefId',
+					placeholder: 'unique identifier',
 					inputProp: 'shst_ref_id',
 					output: 'location'
 				},
 
 				{
 					param: 'sideOfStreet',
+					placeholder: 'street side',
 					inputProp: 'ref_side',
 					output: 'location'
 				},
 
 				{
 					param: 'shstLocationStart',
+					placeholder: 'start of regulation',
 					inputProp: 'dst_st',
 					output: 'location'
 				},			
 				{
 					param: 'shstLocationEnd',
+					placeholder: 'end of regulation',
 					inputProp: 'dst_end',
 					output: 'location'
 				},			
 				{
 					param: 'assetType',
 					output: 'location',
-					propagates: {
-						param: 'assetSubtype',
-						output: 'location'
-					}
-				},					
+				},
+				{
+					param: 'assetSubtype',
+					output: 'location',
+					defaultHidden: true
+				}					
 
 			],
 
@@ -93,7 +170,11 @@ var app = {
 				{
 					param: 'userClasses',
 					output: ['regulation', 'rule']
-				}
+				},
+				{
+					param: 'payment',
+					output: ['regulation', 'rule']
+				},
 			]
 		},
 
@@ -120,7 +201,6 @@ var app = {
 
 			assetType: {
 				type: 'string', 
-				subParameter: 'assetSubtype',
 				oneOf: [
 					'sign', 
 					'curb paint', 
@@ -132,37 +212,18 @@ var app = {
 					'bollards', 
 					'fence', 
 					'parking meter',
-					{
-						value: 'pavement marking',
-						subValues: [
-							'ramp', 
-							'driveway', 
-							'street'
-						]
-					},
-					{
-						value: 'curb cut',
-						subValues: [
-							'bike', 
-							'bus', 
-							'taxi', 
-							'arrow', 
-							'diagonal lines', 
-							'zigzag', 
-							'parallel parking', 
-							'perpendicular parking', 
-							'yellow', 
-							'red', 
-							'blue', 
-							'ISA'
-						]
-					}
+					'pavement marking',
+					'curb cut'
 				],
+
 				allowCustomValues: false,
+				subParameter: 'assetSubtype',
 
 			},
 
-				
+			assetSubtype: {
+				allowCustomValues: true,
+			},	
 			activity: {
 				oneOf: [
 					'standing', 
@@ -183,7 +244,9 @@ var app = {
 			},
 
 			payment: {
-				// TODO: rates/durations
+				type: 'number',
+				oneOf: [false, true],
+				allowCustomValues: false
 			},
 
 			userClasses: {
