@@ -4,6 +4,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Digitizer</title>
 		<link rel="stylesheet" href="static/basics.css">
+		<link rel="stylesheet" href='static/autocomplete.css'>
 		<link href='static/mapbox-gl.css' rel='stylesheet' />
 		<style>
 			.entry {
@@ -23,6 +24,42 @@
 				height:300px;
 				background-size: cover;
 			}
+
+			select {
+				padding: 2px;
+			    font-size: 1em;
+			    border:1px solid #aaa;
+			}
+			input {
+				padding:13px;
+				border: none;
+				background: none;
+				font-size: 1em;
+				width: 100%;
+				text-align: right;
+			}
+
+			input:focus {
+				border:none;
+				outline:none;
+				background:#fafafa;
+			}
+			.rule {
+				border: 1px solid #ddd;
+				border-radius:5px;				
+			}
+
+			.clickable {
+				color: steelblue;
+				cursor:pointer;
+			}
+
+			.half {
+				width:50%;
+				display: inline-block
+			}
+
+
 		</style>
 	</head>
 	<body>
@@ -30,6 +67,9 @@
 		<div class='col6 fullHeight scroll' id='dataPanel'></div>
 	</body>
 	<script src='static/mapbox-gl.js'></script>
+	<script src='static/digitizer.js'></script>
+	<script src='static/autocomplete.js'></script>
+
 	<script>
 
 		mapboxgl.accessToken = "pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ";
@@ -42,7 +82,8 @@
 
 			data.features.forEach((d,i)=>{
 				d.properties.id = i;
-				d.properties.images = JSON.parse(d.properties.images)
+				d.properties.images = JSON.parse(d.properties.images);
+				d.properties.regulations = [];
 				// d.geometry.coordinates.push(d.geometry.coordinates[0])
 
 			})
@@ -96,16 +137,17 @@
 			var entries = 
 				d3.select('#dataPanel')
 					.selectAll('.entry')
-					.data(data.features)
+					.data(data.features, d=>d.id)
 					.enter()
 					.append('div')
 					.attr('class', 'entry m20')
 					.on('mouseenter', (d,i)=>{
 
+						app.state.activeFeatureIndex = i;
 						var rule = [
 							'match',
 							['get', 'id'],
-							i, 'steelblue',
+							app.state.activeFeatureIndex, 'steelblue',
 							'#ccc'
 						]
 
@@ -114,53 +156,169 @@
 
 				entries
 					.append('div')
-					.text((d)=>{return d.properties.label})
+					.text(d => d.properties.label)
 					.attr('class', 'm10 blue strong')
 
-				var properties = 
+
+
+				var params = 
+					entries
+						.selectAll('.property')
+						.data(app.constants.ui.entryParams)
+						.enter()
+						.append('div')
+						.attr('class', 'property')
+						.classed('hidden', d=>d.defaultHidden)
+
+				params
+					.each(appendProperty)
+
+				entries
+					.each(prepopulateProperties)
+
+				entries
+					.each(app.ui.entry.applyPropagations)
+
+
+				var regulations = 
 				entries
 					.append('div')
-					.selectAll('.property')
-					.data((d)=>{
+					.attr('class', 'property')
 
-						return Object.keys(d.properties)
-							.filter(key=> key!== 'images' && key !== 'id')
-							.map(e=>{
+				regulations
+					.append('div')
+					.attr('class', 'mr10 inlineBlock quiet p10')
+					.text('Regulation');
 
-								return[e, d.properties[e]]
-							})
+				regulations
+					.append('div')
+					.text('add rule')
+					.attr('class', 'fr clickable p10')
+					.on('click', (d,i) => {
+
+						d.properties.regulations.push({
+							activity: 'foo',
+							maxStay: 15
+						})
+						app.ui.entry.updateRegulation(entries)
 					})
-					.enter()
-						.append('div')
-						.attr('class', d=>`p10 property`)
-						.selectAll('div')
-						.data(d=>d)
-						.enter()
-							.append('div')
-							.text(d=>d)
-							.attr('class', (d,i)=>`mr10 inlineBlock ${i===0 ? 'quiet' : ''}`);
 
-				entries
-					.each(appendImages)
-
-
+				regulations
+					.append('div')
+					.attr('class', 'rules')
 
 
 
 		})
 
-		function appendImages(d,i) {
 
-			d3.select(this)
-				.append('div')
-				.attr('class', 'images p10 property')
-				.selectAll('img')
-				.data(d.properties.images)
-				.enter()
-				.append('div')
-				.style('background-image', d=>`url(${d.url})`)
-				.attr('class', 'inlineBlock image mr10')
+		function appendProperty(d,i) {
+
+			var container = d3.select(this)
+
+			appendInput(container, d)
+
+			function appendInput(container, data){
+
+				container
+					.attr('prop', data.param)
+					.append('div')
+					.attr('class', 'mr10 inlineBlock quiet p10')
+					.text(data.param);
+
+				var validate = app.constants.validate[data.param];
+
+				// add dropdown
+
+				if (validate.oneOf && validate.allowCustomValues === false) {
+
+					var dropdown = container
+						.append('select')
+						.attr('class', 'fr m10')
+						.on('change', foo);
+
+					dropdown
+						.selectAll('option')
+						.data(() => {
+							
+							var output = []
+
+							validate.oneOf.forEach(item=>{
+								if (typeof item === 'string') output.push(item)
+								else output.push(item.value)
+									// output = output.concat(item.subValues.map(subVal=>`${item.value}: ${subVal}`))
+							})
+
+							return output
+						})
+						.enter()
+						.append('option')
+						.attr('value', function(d){return d})
+						.text(d=>d)
+
+					return dropdown
+				}
+
+				else {
+
+					var textInput = 
+					container
+						.append('div')
+						.attr('class', 'fr')
+						.style('width', '50%')
+							.append('div')
+							.attr('class', 'autocomplete')
+							.style('width', '100%')
+							.append('input')
+							.attr('type', validate.type)
+							.attr('class', 'fr')
+							.attr('onclick', 'this.select()')
+							.attr('placeholder', d.placeholder)
+						// .style('width', '50%')
+
+					return textInput
+				}
+
+				function foo(propData){
+					
+					var value = d3.select(this).property('value');
+					
+					if (data.propagates) {
+
+						
+					}
+					// console.log(propData, d3.select(this).property('value'))
+				}
+			}
+
 		}
+
+
+		function prepopulateProperties(d,i){
+			console.log(d3.select(this))
+			var props = app.constants.ui.entryParams
+				.filter(param=>param.inputProp);
+
+			for (prop of props){
+				d3.select(this)
+					.select(`div[prop=${prop.param}] input`)
+					.attr('value', d=>	d.properties[prop.inputProp])
+			}
+
+		};
+
+		// function appendImages(d,i) {
+
+		// 	d3.select(this)
+		// 		.append('div')
+		// 		.attr('class', 'images p10 property')
+		// 		.selectAll('img')
+		// 		.data(d.properties.images)
+		// 		.enter()
+		// 		.append('div')
+		// 		.style('background-image', d=>`url(${d.url})`)
+		// 		.attr('class', 'inlineBlock image mr10')
+		// }
 
 		var data = {
 			"type": "FeatureCollection",
@@ -252,5 +410,6 @@
 		}
 	</script>
 	<script src="static/d3.v4.min.js"></script>
+
 	<script src='static/turf.min.js'></script>
 </html>

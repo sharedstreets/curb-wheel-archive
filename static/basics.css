@@ -21,6 +21,20 @@ body {
     color:#4a4a4a;
 	font-family:BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
 }
+
+
+/*remove arrows on number inputs*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 ::-webkit-scrollbar{
 	width:0;
 	height:0;
@@ -29,6 +43,10 @@ body {
 
 .scroll {
 	overflow:scroll;
+}
+
+.hidden {
+	display:none;
 }
 /*utility classes*/
 .big {
@@ -66,6 +84,7 @@ body {
 	position: absolute;
 	bottom:0;
 }
+
 /*paddings*/
 .p10 {
 	padding:10px;
