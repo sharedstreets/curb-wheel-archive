@@ -40,9 +40,10 @@
 			}
 
 			input:focus {
-				border:none;
+				border:1px solid steelblue;
 				outline:none;
 				background:#fafafa;
+				padding:12px;
 			}
 			.rule {
 				border: 1px solid #ddd;
@@ -171,7 +172,7 @@
 						.classed('hidden', d=>d.defaultHidden)
 
 				params
-					.each(appendProperty)
+					.each(app.ui.entry.appendProperty)
 
 				entries
 					.each(prepopulateProperties)
@@ -197,7 +198,7 @@
 					.on('click', (d,i) => {
 
 						d.properties.regulations.push({
-							activity: 'foo',
+							activity: 'test',
 							maxStay: 15
 						})
 						app.ui.entry.updateRegulation(entries)
@@ -212,86 +213,6 @@
 		})
 
 
-		function appendProperty(d,i) {
-
-			var container = d3.select(this)
-
-			appendInput(container, d)
-
-			function appendInput(container, data){
-
-				container
-					.attr('prop', data.param)
-					.append('div')
-					.attr('class', 'mr10 inlineBlock quiet p10')
-					.text(data.param);
-
-				var validate = app.constants.validate[data.param];
-
-				// add dropdown
-
-				if (validate.oneOf && validate.allowCustomValues === false) {
-
-					var dropdown = container
-						.append('select')
-						.attr('class', 'fr m10')
-						.on('change', foo);
-
-					dropdown
-						.selectAll('option')
-						.data(() => {
-							
-							var output = []
-
-							validate.oneOf.forEach(item=>{
-								if (typeof item === 'string') output.push(item)
-								else output.push(item.value)
-									// output = output.concat(item.subValues.map(subVal=>`${item.value}: ${subVal}`))
-							})
-
-							return output
-						})
-						.enter()
-						.append('option')
-						.attr('value', function(d){return d})
-						.text(d=>d)
-
-					return dropdown
-				}
-
-				else {
-
-					var textInput = 
-					container
-						.append('div')
-						.attr('class', 'fr')
-						.style('width', '50%')
-							.append('div')
-							.attr('class', 'autocomplete')
-							.style('width', '100%')
-							.append('input')
-							.attr('type', validate.type)
-							.attr('class', 'fr')
-							.attr('onclick', 'this.select()')
-							.attr('placeholder', d.placeholder)
-						// .style('width', '50%')
-
-					return textInput
-				}
-
-				function foo(propData){
-					
-					var value = d3.select(this).property('value');
-					
-					if (data.propagates) {
-
-						
-					}
-					// console.log(propData, d3.select(this).property('value'))
-				}
-			}
-
-		}
 
 
 		function prepopulateProperties(d,i){

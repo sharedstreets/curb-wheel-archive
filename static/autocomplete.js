@@ -1,11 +1,18 @@
-function autocomplete(inp, arr) {
+function autocomplete(inp, options) {
 
+	// input element,
 
-	/*the autocomplete function takes two arguments,
-	the text field element and an array of possible autocompleted values:*/
+	// options.values: array of values to match to, 
+	// options.match: optional "any" part of string, or "start" of string only
+	// onEnter: optional function to call when enter key pressed. default is blurring from input
+	// options.inputTransform: optional function to match to a transformation of the input value, 
+	// options.outputTransform: optional function to set input value upon selecting item
+
 	var currentFocus;
+	
 	/*execute a function when someone writes in the text field:*/
-	inp.addEventListener("focus", onInput)
+
+	// inp.addEventListener("focus", onInput)
 	inp.addEventListener("input", onInput);
 
 	/*execute a function presses a key on the keyboard:*/
@@ -35,7 +42,9 @@ function autocomplete(inp, arr) {
 	});
 
 	function onInput(){
-		var a, b, i, val = this.value;
+
+		var a, b, i, val = options.inputTransform ? options.inputTransform(this.value) : this.value;
+		
 		/*close any already open lists of autocompleted values*/
 		closeAllLists();
 		// if (!val) { return false;}
@@ -47,29 +56,38 @@ function autocomplete(inp, arr) {
 		/*append the DIV element as a child of the autocomplete container:*/
 		this.parentNode.appendChild(a);
 		/*for each item in the array...*/
-		for (i = 0; i < arr.length; i++) {
+		for (i = 0; i < options.values.length; i++) {
+
+			var matchFound = options.match === 'any' ? options.values[i].includes(val) : options.values[i].substr(0, val.length).toUpperCase() == val.toUpperCase()
 			/*check if the item starts with the same letters as the text field value:*/
-			if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+			if (matchFound) {
 				/*create a DIV element for each matching element:*/
 				b = document.createElement("DIV");
 				/*make the matching letters bold:*/
-				b.innerHTML = "<strong class='blue'>" + arr[i].substr(0, val.length) + "</strong>";
-				b.innerHTML += arr[i].substr(val.length);
+				b.innerHTML = options.values[i].replace(val, `<strong class="blue">${val}</strong>`)
+				// "<strong class='blue'>" + options.values[i].substr(0, val.length) + "</strong>";
+				// b.innerHTML += options.values[i].substr(val.length);
 				/*insert a input field that will hold the current array item's value:*/
-				b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+				b.innerHTML += "<input type='hidden' value='" + options.values[i] + "'>";
+				
 				/*execute a function when someone clicks on the item value (DIV element):*/
-						b.addEventListener("click", function(e) {
-							/*insert the value for the autocomplete text field:*/
-							inp.value = this.getElementsByTagName("input")[0].value;
-							/*close the list of autocompleted values,
-							(or any other open lists of autocompleted values:*/
-							closeAllLists();
-							inp.blur()
-						});
-						a.appendChild(b);
+				b.addEventListener("click", function(e) {
+					console.log(this)
+					// apply the selected value, optionally with an output transform
+					var selectedValue = this.getElementsByTagName("input")[0].value;
+					var valueToApply = options.outputTransform ? options.outputTransform(inp.value, selectedValue) : selectedValue;
+					inp.value = valueToApply;
+					
+					/*close the list of autocompleted values,
+					(or any other open lists of autocompleted values:*/
+					closeAllLists();
+					options.onEnter ? options.onEnter(inp) : inp.blur()
+				});
+				a.appendChild(b);
 			}
 		}
 	}
+
 	function addActive(x) {
 		/*a function to classify an item as "active":*/
 		if (!x) return false;

@@ -8,14 +8,92 @@ var app = {
 
 		entry: {
 
+			appendProperty: function(d,i) {
+
+				var container = d3.select(this)
+
+				// append label
+				container
+					.attr('prop', d.param)
+					.append('div')
+					.attr('class', 'mr10 inlineBlock quiet p10')
+					.text(d.param);
+
+				var validate = app.constants.validate[d.param];
+
+				if (validate.allowCustomValues === false) appendDropdown()
+				else appendInput()
+				// var strictList = validate.oneOf && validate.allowCustomValues === false;
+				// if (strictList) appendDropdown()
+
+				// else appendInput()
+
+				function appendInput(){
+					var textInput = 
+					container
+						.append('div')
+						.attr('class', 'fr')
+						.style('width', '50%')
+							.append('div')
+							.attr('class', 'autocomplete')
+							.style('width', '100%')
+							.append('input')
+							.attr('type', validate.type)
+							.attr('class', 'fr')
+							.attr('onclick', 'this.setSelectionRange(this.value.length, this.value.length)')
+							.attr('placeholder', d.placeholder)
+
+					if (validate.oneOf) {
+						autocomplete(
+							textInput.node(), 
+							{
+								values: validate.oneOf,
+								match: 'any',
+								onEnter: app.utils.autocomplete.keepTyping, 
+								inputTransform: app.utils.autocomplete.lastListItem,
+								outputTransform: app.utils.autocomplete.returnFullListString
+							}
+						)
+					}
+
+					return textInput
+				}
+				
+				function appendDropdown(){
+
+					var dropdown = container
+						.append('select')
+						.attr('class', 'fr m10')
+						.on('change', onChange);
+
+					dropdown
+						.selectAll('option')
+						.data(validate.oneOf)
+						.enter()
+						.append('option')
+						.attr('value', function(d){return d})
+						.text(d=>d)
+
+					return dropdown
+				}
+
+				function onChange(propData){
+					
+					var value = d3.select(this).property('value');
+					
+				}
+			
+
+			},
+
 			applyPropagations: function(d,i) {
 				var entry = d3.select(this)
 
 				app.constants.ui.entryPropagations
 					.forEach(propagation=>{
+
 						entry.select(`div[prop=${propagation.originProp}] select`)
 							.on('change', updateDestination)
-
 
 						function updateDestination(d,i){
 							
@@ -25,13 +103,18 @@ var app = {
 								
 							prop
 								.classed('hidden', !propagatingRule)
+
 							if (propagatingRule) {
+
 								var input = prop.select('input')
 									.attr('placeholder', propagatingRule.placeholder)
 									.property('value', '')
 									.node()
 
-								if (propagatingRule.values) autocomplete(input, propagatingRule.values)
+
+								autocomplete(input, {
+									values: propagatingRule.values || []
+								})
 								
 								input.focus();
 							}
@@ -54,25 +137,26 @@ var app = {
 					.data(app.constants.ui.ruleParams)
 					.enter()
 					.append('div')
-					.attr('class', 'property p10');
+					.attr('class', 'property')
+					.each(app.ui.entry.appendProperty);
 
-				props
-					.append('div')
-					.attr('class', 'mr10 inlineBlock quiet')
-					.text(d=>d.param);
+				// props
+				// 	.append('div')
+				// 	.attr('class', 'mr10 inlineBlock quiet')
+				// 	.text(d=>d.param);
 
-				props
-					.append('select')
-					.attr('class', 'fr')
-					.on('change', ()=>{
-						console.log(d3.select(this).property('value'))
-					})
-					.selectAll('option')
-					.data(d=>app.constants.validate[d.param].oneOf)
-					.enter()
-					.append('option')
-					.attr('value', d=>d)
-					.text(d=>d)
+				// props
+				// 	.append('select')
+				// 	.attr('class', 'fr')
+				// 	.on('change', ()=>{
+				// 		console.log(d3.select(this).property('value'))
+				// 	})
+				// 	.selectAll('option')
+				// 	.data(d=>app.constants.validate[d.param].oneOf)
+				// 	.enter()
+				// 	.append('option')
+				// 	.attr('value', d=>d)
+				// 	.text(d=>d)
 			}
 		}
 	},
@@ -169,6 +253,12 @@ var app = {
 				},	
 				{
 					param: 'userClasses',
+					placeholder: 'Comma-delimited values',
+					output: ['regulation', 'rule']
+				},
+				{
+					param: 'userSubclasses',
+					placeholder: 'Comma-delimited values',
 					output: ['regulation', 'rule']
 				},
 				{
@@ -240,7 +330,6 @@ var app = {
 				type: 'number',
 				oneOf: [5, 10, 15, 20, 30, 45, 60, 120, 180, 240, 300, 360, 480],
 				allowCustomValues: false
-
 			},
 
 			payment: {
@@ -281,13 +370,50 @@ var app = {
 			},
 
 			userSubclasses: {
-				conditionalOn: 'userClasses',
-				values: {}, // TODO: add subclasses
+				type: 'array',
+				arrayMemberType: 'string',
 				allowCustomValues: true
 			}
 		},
 
 		regulation: {
+
+		}
+	},
+
+	utils: {
+
+		autocomplete: {
+
+			// return the last item in a comma-delimited list, for autocomplete input
+			lastListItem: (listString)=>{
+
+				var lastItemStart = listString.lastIndexOf(', ')
+				if (lastItemStart ===-1) return listString
+
+				var arrayed = listString.split(', ')
+				var lastItem = arrayed[arrayed.length-1] 
+				return lastItem
+			},
+
+			// returns a transformed value from an autocomplete selection
+
+			returnFullListString: (listString, matchedItem) =>{
+
+				var lastItemStart = listString.lastIndexOf(', ')
+				if (lastItemStart ===-1) return matchedItem
+
+				var arrayed = listString.split(', ')
+				arrayed[arrayed.length-1] = matchedItem
+
+				return arrayed.join(', ')
+			},
+
+			// empty function to keep typing stringed arrays when pressing enter button 
+
+			keepTyping: (input) =>{
+				// input.value += ', '
+			}
 
 		}
 	}
