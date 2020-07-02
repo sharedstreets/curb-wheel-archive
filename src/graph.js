@@ -97,7 +97,25 @@ Graph.prototype.extract = async function (pbf) {
               nodes.set(item.id, item);
             } else if (
               item.type === "way" &&
-              item.tags.highway &&
+              item.tags.highway && // must have a highway tag
+              // must be one of the following highway types
+              (item.tags.highway === "motorway" ||
+                item.tags.highway === "trunk" ||
+                item.tags.highway === "primary" ||
+                item.tags.highway === "secondary" ||
+                item.tags.highway === "tertiary" ||
+                item.tags.highway === "unclassified" ||
+                item.tags.highway === "residential" ||
+                item.tags.highway === "living_street" ||
+                item.tags.highway === "service" ||
+                item.tags.highway === "motorway") &&
+              // filter the following special service road types
+              (!item.tags.service ||
+                !(
+                  item.tags.service === "parking" ||
+                  item.tags.service === "driveway" ||
+                  item.tags.service === "drive-through"
+                )) &&
               item.refs.length >= 2
             ) {
               ways.push(item);
