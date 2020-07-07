@@ -107,8 +107,7 @@ Graph.prototype.extract = async function (pbf) {
                 item.tags.highway === "unclassified" ||
                 item.tags.highway === "residential" ||
                 item.tags.highway === "living_street" ||
-                item.tags.highway === "service" ||
-                item.tags.highway === "motorway") &&
+                item.tags.highway === "service") &&
               // filter the following special service road types
               (!item.tags.service ||
                 !(
