@@ -148,7 +148,7 @@ var app = {
 
         // sets the street direction and initializes the survey
         var success = () => {
-          app.state.street.ref = "forward";
+          app.state.street.ref = ref;
           app.ui.mode.set("rolling");
           app.devMode.rolling = true;
         };
