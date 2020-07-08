@@ -591,6 +591,20 @@ var app = {
           },
           images: ft.images,
         };
+        
+        if (app.state.rollDirection === 'back') {
+
+        	feature.geometry.distances = 
+        	feature.geometry.distances.reverse()
+				.map(meters => app.state.currentRollDistance - meters)
+
+        	feature.images = feature.images
+        		.map(image=>{
+        			image.geometry.distance = app.state.currentRollDistance - image.geometry.distance
+        			return image
+        		})
+
+        }
 
         survey.features.push(feature);
       }
