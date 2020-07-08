@@ -429,7 +429,8 @@ var app = {
         if (app.constants.modes[mode].set) app.constants.modes[mode].set();
 
         // update title
-        d3.select("#title").text(app.constants.modes[mode].title);
+        d3.select("#title")
+        	.text(app.constants.modes[mode].title);
       },
     },
 
