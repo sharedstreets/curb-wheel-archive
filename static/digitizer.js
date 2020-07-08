@@ -19,16 +19,21 @@ var app = {
 					.attr('class', 'mr10 inlineBlock quiet p10')
 					.text(d.param);
 
-				var validate = app.constants.validate[d.param];
+				if (d.inputType === 'text') appendInput()
+				else if(d.inputType === 'dropdown') appendDropdown();
 
-				if (validate.allowCustomValues === false) appendDropdown()
-				else appendInput()
-				// var strictList = validate.oneOf && validate.allowCustomValues === false;
-				// if (strictList) appendDropdown()
+				else {
+					var validate = app.constants.validate[d.param];
 
-				// else appendInput()
+					if (validate.allowCustomValues === false) appendDropdown()
+					else appendInput()
+				}
+
 
 				function appendInput(){
+
+					var validate = app.constants.validate[d.param];
+
 					var textInput = 
 					container
 						.append('div')
@@ -38,13 +43,17 @@ var app = {
 							.attr('class', 'autocomplete')
 							.style('width', '100%')
 							.append('input')
+							.attr('prop', d.param)
 							.attr('type', validate.type)
 							.attr('class', 'fr')
 							.attr('onclick', 'this.setSelectionRange(this.value.length, this.value.length)')
 							.attr('placeholder', d.placeholder)
+							// .on('change', onChange)
 
 					if (validate.oneOf) {
+
 						autocomplete(
+
 							textInput.node(), 
 							{
 								values: validate.oneOf,
@@ -63,8 +72,9 @@ var app = {
 
 					var dropdown = container
 						.append('select')
+						.attr('prop', d.param)
 						.attr('class', 'fr m10')
-						.on('change', onChange);
+						// .on('change', onChange);
 
 					dropdown
 						.selectAll('option')
@@ -77,49 +87,56 @@ var app = {
 					return dropdown
 				}
 
-				function onChange(propData){
-					
-					var value = d3.select(this).property('value');
-					
-				}
-			
-
 			},
 
-			applyPropagations: function(d,i) {
+
+			onChange: function(d,i){
+
 				var entry = d3.select(this)
 
-				app.constants.ui.entryPropagations
-					.forEach(propagation=>{
+				entry.selectAll('input, select')
+					.on('change', c)
 
-						entry.select(`div[prop=${propagation.originProp}] select`)
-							.on('change', updateDestination)
+				function c(data){
 
-						function updateDestination(d,i){
+					var prop = d3.select(this).attr('prop')
+					var value = d3.select(this).property('value')
+
+					var target = d.properties;
+					var subdirectory = app.constants.validate[prop].output
+					console.log(prop, subdirectory)
+					for (item of subdirectory) target = target[item === '_index' ? i : item]
+					target[prop] = value;
+
+
+					// propagations
+					var propagationEntry = app.constants.ui.eP[prop]; 
+					if (propagationEntry) {
+						
+						var propagatingRule = propagationEntry.propagatingValues[value] || false;
+						var destination = entry.select(`div[prop=${propagationEntry.destinationProp}]`)
+						
+						destination
+							.classed('hidden', !propagatingRule)
+
+						if (propagatingRule) {
+
+							var input = destination.select('input')
+								.attr('placeholder', propagatingRule.placeholder)
+								.property('value', '')
+								.node()
+
+
+							autocomplete(input, {
+								values: propagatingRule.values || []
+							})
 							
-							var parentValue = d3.select(this).property('value');
-							var propagatingRule = propagation.propagatingValues[parentValue] || false;
-							var prop = entry.select(`div[prop=${propagation.destinationProp}]`)
-								
-							prop
-								.classed('hidden', !propagatingRule)
-
-							if (propagatingRule) {
-
-								var input = prop.select('input')
-									.attr('placeholder', propagatingRule.placeholder)
-									.property('value', '')
-									.node()
-
-
-								autocomplete(input, {
-									values: propagatingRule.values || []
-								})
-								
-								input.focus();
-							}
+							input.focus();
 						}
-					})
+					}
+
+
+				}
 			},
 
 			updateRegulation: (entries) =>{
@@ -134,35 +151,59 @@ var app = {
 
 				var props = rules
 					.selectAll('.property')
-					.data(app.constants.ui.ruleParams)
+					.data(app.constants.ui.regulationParams)
 					.enter()
 					.append('div')
 					.attr('class', 'property')
-					.each(app.ui.entry.appendProperty);
+					.each(app.ui.entry.appendProperty)
+					.select('input, select')
 
-				// props
-				// 	.append('div')
-				// 	.attr('class', 'mr10 inlineBlock quiet')
-				// 	.text(d=>d.param);
-
-				// props
-				// 	.append('select')
-				// 	.attr('class', 'fr')
-				// 	.on('change', ()=>{
-				// 		console.log(d3.select(this).property('value'))
-				// 	})
-				// 	.selectAll('option')
-				// 	.data(d=>app.constants.validate[d.param].oneOf)
-				// 	.enter()
-				// 	.append('option')
-				// 	.attr('value', d=>d)
-				// 	.text(d=>d)
+				return rules
 			}
 		}
 	},
 	constants: {
 
 		ui: {
+
+			eP: {
+				assetType: {
+					destinationProp: 'assetSubtype',
+					propagatingValues: {
+
+						'pavement marking': {
+							placeholder: 'Marking type',
+							values: [
+								'ramp', 
+								'driveway', 
+								'street'
+							]
+						},
+
+						'curb cut': {
+							placeholder: 'Cut type',
+							values: [
+								'bike', 
+								'bus', 
+								'taxi', 
+								'arrow', 
+								'diagonal lines', 
+								'zigzag', 
+								'parallel parking', 
+								'perpendicular parking', 
+								'yellow', 
+								'red', 
+								'blue', 
+								'ISA'
+							]
+						},
+
+						'curb paint': {
+							placeholder: 'Paint color'
+						},
+					}					
+				}
+			},
 
 			entryPropagations: [{
 
@@ -207,64 +248,64 @@ var app = {
 				{
 					param: 'shstRefId',
 					placeholder: 'unique identifier',
-					inputProp: 'shst_ref_id',
-					output: 'location'
+					inputProp: 'shst_ref_id'
 				},
 
 				{
 					param: 'sideOfStreet',
 					placeholder: 'street side',
-					inputProp: 'ref_side',
-					output: 'location'
+					inputProp: 'ref_side'
 				},
 
 				{
 					param: 'shstLocationStart',
 					placeholder: 'start of regulation',
-					inputProp: 'dst_st',
-					output: 'location'
+					inputProp: 'dst_st'
 				},			
 				{
 					param: 'shstLocationEnd',
 					placeholder: 'end of regulation',
-					inputProp: 'dst_end',
-					output: 'location'
+					inputProp: 'dst_end'
 				},			
 				{
-					param: 'assetType',
-					output: 'location',
+					param: 'assetType'
 				},
 				{
 					param: 'assetSubtype',
-					output: 'location',
 					defaultHidden: true
 				}					
 
 			],
 
-			ruleParams: [
+			regulationParams: [
 				{
-					param: 'activity',
-					output: ['regulation', 'rule']
+					param: 'activity'
 				},	
 				{
-					param: 'maxStay',
-					output: ['regulation', 'rule']
+					param: 'maxStay'
 				},	
 				{
 					param: 'userClasses',
-					placeholder: 'Comma-delimited values',
-					output: ['regulation', 'rule']
+					placeholder: 'Comma-delimited values'
 				},
 				{
 					param: 'userSubclasses',
-					placeholder: 'Comma-delimited values',
-					output: ['regulation', 'rule']
+					placeholder: 'Comma-delimited values'
 				},
 				{
-					param: 'payment',
-					output: ['regulation', 'rule']
+					param: 'payment'
 				},
+
+
+				{
+					param: 'daysOfWeek',
+					inputType: 'text',
+					placeholder: 'Comma-delimited values'
+				},
+				{
+					param: 'timesOfDay',
+					placeholder: 'HH:MM-HH:MM, comma-separated'				
+				}
 			]
 		},
 
@@ -272,21 +313,25 @@ var app = {
 		validate: {
 
 			shstRefId: {
-				type: 'string'
+				type: 'string',
+				output: ['location']
 			},
 
 			sideOfStreet: {
 				type: 'string',
+				output: ['location'],
 				oneOf: ['left', 'right', 'unknown'],
 				allowCustomValues: false
 			},
 
 			shstLocationStart: {
-				type: 'number'
+				type: 'number',
+				output: ['location']
 			},	
 
 			shstLocationEnd: {
 				type: 'number',
+				output: ['location']
 			},	
 
 			assetType: {
@@ -305,7 +350,7 @@ var app = {
 					'pavement marking',
 					'curb cut'
 				],
-
+				output: ['location'],
 				allowCustomValues: false,
 				subParameter: 'assetSubtype',
 
@@ -313,7 +358,9 @@ var app = {
 
 			assetSubtype: {
 				allowCustomValues: true,
-			},	
+				output: ['location']
+			},
+
 			activity: {
 				oneOf: [
 					'standing', 
@@ -323,19 +370,22 @@ var app = {
 					'parking', 
 					'no parking'
 				],
-				allowCustomValues: false
+				allowCustomValues: false,
+				output: ['regulation', '_index']
 			},
 			
 			maxStay: {
 				type: 'number',
 				oneOf: [5, 10, 15, 20, 30, 45, 60, 120, 180, 240, 300, 360, 480],
-				allowCustomValues: false
+				allowCustomValues: false,
+				output: ['regulation', '_index']
 			},
 
 			payment: {
 				type: 'number',
 				oneOf: [false, true],
-				allowCustomValues: false
+				allowCustomValues: false,
+				output: ['regulation', '_index']
 			},
 
 			userClasses: {
@@ -366,18 +416,79 @@ var app = {
 					'truck', 
 					'visitor'
 				],
-				allowCustomValues: true
+				output: ['regulation', '_index'],
+				allowCustomValues: true,
+				transform: (input) =>{
+					return input.split(', ')
+				}
 			},
 
 			userSubclasses: {
 				type: 'array',
 				arrayMemberType: 'string',
-				allowCustomValues: true
+				allowCustomValues: true,
+				output: ['regulation', '_index'],
+				transform: (input) =>{
+					return input.split(', ')
+				}
+			},
+
+			daysOfWeek: {
+				type: 'array',
+				arrayMemberType:'string',
+				allowCustomValues: false,
+				oneOf: ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'],
+				transform: (input) =>{
+					return input.split(', ')
+				},
+				output: ['regulation', '_index', 'timeSpan']
+			},
+
+			timesOfDay: {
+				type: 'array',
+				arrayMemberType:'string',
+				allowCustomValues: true,
+				transform: (input)=>{
+					var arr = input.split(', ')
+						.map(period=>{
+							var startEnd = period.split('-');
+							return {
+								start: startEnd[0],
+								end: startEnd[1]
+							}
+						})
+
+					return arr
+				},
+				output: ['regulation', '_index', 'timeSpan']
 			}
 		},
 
 		regulation: {
 
+		}
+	},
+
+	io: {
+		export: () =>{
+
+			var output = []
+			d3.selectAll('.entry')
+				.each(scrape)
+
+			function scrape(d,i,j){
+
+				output[i] = {};
+
+				d3.select(this)
+					.selectAll('.property')
+					.attr('f', (d)=>{
+						var value = this.select('input').property('value')
+						output[i][d.param] = value
+					})
+			}
+
+			console.log(output)
 		}
 	},
 

@@ -85,8 +85,13 @@
 				d.properties.id = i;
 				d.properties.images = JSON.parse(d.properties.images);
 				d.properties.regulations = [];
-				// d.geometry.coordinates.push(d.geometry.coordinates[0])
+				d.properties.location = {};
 
+
+				app.constants.ui.entryParams
+					.forEach(param=>{
+						d.properties.location[param.param] = d.properties[param.inputProp]
+					})
 			})
 
 			map.fitBounds(turf.bbox(data), {duration:200, padding:100});
@@ -165,21 +170,20 @@
 				var params = 
 					entries
 						.selectAll('.property')
-						.data(app.constants.ui.entryParams)
+						.data((d) => Object.keys(d.properties.location)
+							.map(key=>{return {param: key, value: d.properties.location[key]}})
+						)
 						.enter()
 						.append('div')
 						.attr('class', 'property')
-						.classed('hidden', d=>d.defaultHidden)
+						.classed('hidden', (d,i)=>app.constants.ui.entryParams[i].defaultHidden)
 
 				params
 					.each(app.ui.entry.appendProperty)
 
 				entries
 					.each(prepopulateProperties)
-
-				entries
-					.each(app.ui.entry.applyPropagations)
-
+					.each(app.ui.entry.onChange)
 
 				var regulations = 
 				entries
@@ -193,20 +197,33 @@
 
 				regulations
 					.append('div')
-					.text('add rule')
+					.text('Add')
 					.attr('class', 'fr clickable p10')
 					.on('click', (d,i) => {
 
 						d.properties.regulations.push({
-							activity: 'test',
-							maxStay: 15
+							rule: {
+								activity: 'standing',
+								priorityCategory: null, 
+								maxStay: 5, 
+								payment: false,
+								userClasses: [],
+								userSubClasses: [],
+							},
+
+							timeSpans: [
+							]
 						})
-						app.ui.entry.updateRegulation(entries)
+
+						app.ui.entry
+							.updateRegulation(entries)
+							.each(app.ui.entry.onChange)
 					})
 
 				regulations
 					.append('div')
 					.attr('class', 'rules')
+
 
 
 
@@ -216,16 +233,11 @@
 
 
 		function prepopulateProperties(d,i){
-			console.log(d3.select(this))
-			var props = app.constants.ui.entryParams
-				.filter(param=>param.inputProp);
-
-			for (prop of props){
-				d3.select(this)
-					.select(`div[prop=${prop.param}] input`)
-					.attr('value', d=>	d.properties[prop.inputProp])
-			}
-
+			console.log(d)
+			d3.select(this)
+				.selectAll('.property')
+				.select('input, select')
+				.property('value', d=>d.value)
 		};
 
 		// function appendImages(d,i) {

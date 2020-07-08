@@ -48,12 +48,18 @@ input:focus + .autocomplete-items,
   text-align:right;
   color:#666;
 }
-.autocomplete-items div:hover {
-  /*when hovering an item:*/
-  background-color: #abcdef;
-}
+
 .autocomplete-active {
   /*when navigating through the items using the arrow keys:*/
   background-color: #abcdef !important;
   color: #ffffff;
+}
+
+.autocomplete-items:hover .autocomplete-active {
+  background: white !important;
+}
+
+.autocomplete-items div:hover {
+  /*when hovering an item:*/
+  background-color: #abcdef !important;
 }

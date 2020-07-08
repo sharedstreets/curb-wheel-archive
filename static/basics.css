@@ -171,7 +171,11 @@ input[type=number] {
 	flex:none;
 	float:left;
 }
-
+.col9{
+	width:75%;
+	flex:none;
+	float:left;
+}
 /*heights*/
 
 .fullHeight {

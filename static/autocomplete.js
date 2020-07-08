@@ -4,6 +4,7 @@ function autocomplete(inp, options) {
 
 	// options.values: array of values to match to, 
 	// options.match: optional "any" part of string, or "start" of string only
+	// options.minLength: min length of input to 
 	// onEnter: optional function to call when enter key pressed. default is blurring from input
 	// options.inputTransform: optional function to match to a transformation of the input value, 
 	// options.outputTransform: optional function to set input value upon selecting item
@@ -12,7 +13,7 @@ function autocomplete(inp, options) {
 	
 	/*execute a function when someone writes in the text field:*/
 
-	// inp.addEventListener("focus", onInput)
+	inp.addEventListener("focus", onInput)
 	inp.addEventListener("input", onInput);
 
 	/*execute a function presses a key on the keyboard:*/
@@ -55,6 +56,7 @@ function autocomplete(inp, options) {
 		a.setAttribute("class", "autocomplete-items");
 		/*append the DIV element as a child of the autocomplete container:*/
 		this.parentNode.appendChild(a);
+
 		/*for each item in the array...*/
 		for (i = 0; i < options.values.length; i++) {
 
@@ -72,7 +74,7 @@ function autocomplete(inp, options) {
 				
 				/*execute a function when someone clicks on the item value (DIV element):*/
 				b.addEventListener("click", function(e) {
-					console.log(this)
+
 					// apply the selected value, optionally with an output transform
 					var selectedValue = this.getElementsByTagName("input")[0].value;
 					var valueToApply = options.outputTransform ? options.outputTransform(inp.value, selectedValue) : selectedValue;
@@ -116,7 +118,7 @@ function autocomplete(inp, options) {
 	}
 	/*execute a function when someone clicks in the document:*/
 	document.addEventListener("click", function (e) {
-		closeAllLists(e.target);
+		// closeAllLists(e.target);
 	});
 
 }
