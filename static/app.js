@@ -148,7 +148,7 @@ var app = {
 
         // sets the street direction and initializes the survey
         var success = () => {
-          app.state.street.ref = "forward";
+          app.state.street.ref = app.state.street.forward;
           app.ui.mode.set("rolling");
           app.devMode.rolling = true;
         };
@@ -429,7 +429,8 @@ var app = {
         if (app.constants.modes[mode].set) app.constants.modes[mode].set();
 
         // update title
-        d3.select("#title").text(app.constants.modes[mode].title);
+        d3.select("#title")
+        	.text(app.constants.modes[mode].title);
       },
     },
 
@@ -590,6 +591,20 @@ var app = {
           },
           images: ft.images,
         };
+        
+        if (app.state.rollDirection === 'back') {
+
+        	feature.geometry.distances = 
+        	feature.geometry.distances.reverse()
+				.map(meters => app.state.currentRollDistance - meters)
+
+        	feature.images = feature.images
+        		.map(image=>{
+        			image.geometry.distance = app.state.currentRollDistance - image.geometry.distance
+        			return image
+        		})
+
+        }
 
         survey.features.push(feature);
       }
