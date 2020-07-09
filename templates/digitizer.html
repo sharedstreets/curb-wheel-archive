@@ -84,13 +84,17 @@
 			data.features.forEach((d,i)=>{
 				d.properties.id = i;
 				d.properties.images = JSON.parse(d.properties.images);
-				d.properties.regulations = [];
-				d.properties.location = {};
+				d.output = {
+					regulations:[],
+					location:{}
+				}
+				d.output.regulations = [];
+				d.output.location = {};
 
 
 				app.constants.ui.entryParams
 					.forEach(param=>{
-						d.properties.location[param.param] = d.properties[param.inputProp]
+						d.output.location[param.param] = d.properties[param.inputProp]
 					})
 			})
 
@@ -170,8 +174,8 @@
 				var params = 
 					entries
 						.selectAll('.property')
-						.data((d) => Object.keys(d.properties.location)
-							.map(key=>{return {param: key, value: d.properties.location[key]}})
+						.data((d) => Object.keys(d.output.location)
+							.map(key=>{return {param: key, value: d.output.location[key]}})
 						)
 						.enter()
 						.append('div')
@@ -201,14 +205,16 @@
 					.attr('class', 'fr clickable p10')
 					.on('click', (d,i) => {
 
-						d.properties.regulations.push({
+						d.output.regulations.push({
 							rule: {
 								activity: 'standing',
-								priorityCategory: null, 
+								// priorityCategory: null, 
 								maxStay: 5, 
 								payment: false,
 								userClasses: [],
 								userSubClasses: [],
+								daysOfWeek: [],
+								timesOfDay: []
 							},
 
 							timeSpans: [

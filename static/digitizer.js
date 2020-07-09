@@ -19,11 +19,12 @@ var app = {
 					.attr('class', 'mr10 inlineBlock quiet p10')
 					.text(d.param);
 
-				if (d.inputType === 'text') appendInput()
-				else if(d.inputType === 'dropdown') appendDropdown();
+				var validate = app.constants.validate[d.param];
+
+				if (validate.inputType === 'text') appendInput()
+				else if(validate.inputType === 'dropdown') appendDropdown();
 
 				else {
-					var validate = app.constants.validate[d.param];
 
 					if (validate.allowCustomValues === false) appendDropdown()
 					else appendInput()
@@ -74,7 +75,6 @@ var app = {
 						.append('select')
 						.attr('prop', d.param)
 						.attr('class', 'fr m10')
-						// .on('change', onChange);
 
 					dropdown
 						.selectAll('option')
@@ -102,11 +102,13 @@ var app = {
 					var prop = d3.select(this).attr('prop')
 					var value = d3.select(this).property('value')
 
-					var target = d.properties;
+					var target = d;
 					var subdirectory = app.constants.validate[prop].output
-					console.log(prop, subdirectory)
+					console.log(d, prop, subdirectory)
 					for (item of subdirectory) target = target[item === '_index' ? i : item]
-					target[prop] = value;
+
+					var tfFn = app.constants.validate[prop].transform;
+					target[prop] = tfFn ? tfFn(value) : value;
 
 
 					// propagations
@@ -144,14 +146,20 @@ var app = {
 				var rules = entries
 					.select('.rules')
 					.selectAll('.rule')
-					.data(d=>d.properties.regulations)
+					.data(d=>d.output.regulations)
 					.enter()
 					.append('div')
 					.attr('class', 'rule m10')
 
 				var props = rules
 					.selectAll('.property')
-					.data(app.constants.ui.regulationParams)
+					// .data(app.constants.ui.regulationParams)
+					.data((d) => Object.keys(d.rule)
+						.map(key=>{
+							return {param: key, value: d.rule[key]
+							}
+						})
+					)
 					.enter()
 					.append('div')
 					.attr('class', 'property')
@@ -299,7 +307,7 @@ var app = {
 
 				{
 					param: 'daysOfWeek',
-					inputType: 'text',
+					// inputType: 'text',
 					placeholder: 'Comma-delimited values'
 				},
 				{
@@ -314,24 +322,24 @@ var app = {
 
 			shstRefId: {
 				type: 'string',
-				output: ['location']
+				output: ['output', 'location']
 			},
 
 			sideOfStreet: {
 				type: 'string',
-				output: ['location'],
+				output: ['output', 'location'],
 				oneOf: ['left', 'right', 'unknown'],
 				allowCustomValues: false
 			},
 
 			shstLocationStart: {
 				type: 'number',
-				output: ['location']
+				output: ['output', 'location']
 			},	
 
 			shstLocationEnd: {
 				type: 'number',
-				output: ['location']
+				output: ['output', 'location']
 			},	
 
 			assetType: {
@@ -350,7 +358,7 @@ var app = {
 					'pavement marking',
 					'curb cut'
 				],
-				output: ['location'],
+				output: ['output', 'location'],
 				allowCustomValues: false,
 				subParameter: 'assetSubtype',
 
@@ -358,7 +366,7 @@ var app = {
 
 			assetSubtype: {
 				allowCustomValues: true,
-				output: ['location']
+				output: ['output', 'location'],
 			},
 
 			activity: {
@@ -371,21 +379,21 @@ var app = {
 					'no parking'
 				],
 				allowCustomValues: false,
-				output: ['regulation', '_index']
+				output: ['rule']
 			},
 			
 			maxStay: {
 				type: 'number',
 				oneOf: [5, 10, 15, 20, 30, 45, 60, 120, 180, 240, 300, 360, 480],
 				allowCustomValues: false,
-				output: ['regulation', '_index']
+				output: ['rule']
 			},
 
 			payment: {
 				type: 'number',
 				oneOf: [false, true],
 				allowCustomValues: false,
-				output: ['regulation', '_index']
+				output: ['rule']
 			},
 
 			userClasses: {
@@ -416,18 +424,18 @@ var app = {
 					'truck', 
 					'visitor'
 				],
-				output: ['regulation', '_index'],
+				output: ['rule'],
 				allowCustomValues: true,
 				transform: (input) =>{
 					return input.split(', ')
 				}
 			},
 
-			userSubclasses: {
+			userSubClasses: {
 				type: 'array',
 				arrayMemberType: 'string',
 				allowCustomValues: true,
-				output: ['regulation', '_index'],
+				output: ['rule'],
 				transform: (input) =>{
 					return input.split(', ')
 				}
@@ -437,11 +445,12 @@ var app = {
 				type: 'array',
 				arrayMemberType:'string',
 				allowCustomValues: false,
+				inputType: 'text',
 				oneOf: ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'],
 				transform: (input) =>{
 					return input.split(', ')
 				},
-				output: ['regulation', '_index', 'timeSpan']
+				output: ['rule']
 			},
 
 			timesOfDay: {
@@ -460,7 +469,7 @@ var app = {
 
 					return arr
 				},
-				output: ['regulation', '_index', 'timeSpan']
+				output: ['rule']
 			}
 		},
 
