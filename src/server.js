@@ -209,21 +209,68 @@ async function main() {
             turf.along(street, endOffset, UNITS).geometry.coordinates,
           ]);
           for (let feature of survey.features) {
-            if (feature.geometry.type === "Span") {
-              let line = turf.lineSliceAlong(
-                centered,
-                feature.geometry.distances[0],
-                feature.geometry.distances[1],
-                UNITS
-              );
+            try {
+              if (feature.geometry.type === "Span") {
+                let line = turf.lineSliceAlong(
+                  centered,
+                  feature.geometry.distances[0],
+                  feature.geometry.distances[1],
+                  UNITS
+                );
 
-              let span = {
-                type: "Feature",
-                geometry: {
-                  type: "LineString",
-                  coordinates: line.geometry.coordinates,
-                },
-                properties: {
+                let span = {
+                  type: "Feature",
+                  geometry: {
+                    type: "LineString",
+                    coordinates: line.geometry.coordinates,
+                  },
+                  properties: {
+                    created_at: survey.created_at,
+                    cwheelid: "", // todo: figure out where to find this
+                    shst_ref_id: survey.shst_ref_id,
+                    ref_side: survey.side_of_street,
+                    ref_len: street.properties.distance,
+                    srv_dist: survey.surveyed_distance,
+                    srv_id: survey.id,
+                    feat_id: feature.id,
+                    label: feature.label,
+                    dst_st: feature.geometry.distances[0],
+                    dst_end: feature.geometry.distances[1],
+                    images: JSON.stringify(feature.images),
+                  },
+                };
+
+                let start = turf.point(
+                  span.geometry.coordinates[0],
+                  span.properties
+                );
+                let end = turf.point(
+                  span.geometry.coordinates[span.geometry.coordinates.length - 1],
+                  span.properties
+                );
+
+                for (let image of feature.images) {
+                  let pt = turf.along(centered, image.geometry.distance, UNITS);
+
+                  pt.properties.url = image.url;
+
+                  images.push(pt);
+                }
+
+                spans.push(span);
+                spanPoints.push(start);
+                spanPoints.push(end);
+                spanAndPositionPoints.push(start);
+                spanAndPositionPoints.push(end);
+              } else if (feature.geometry.type === "Position") {
+                // todo: Positions are being incorrectly stored with span style distances array. Fix upstream.
+                let point = turf.along(
+                  centered,
+                  feature.geometry.distances[0],
+                  UNITS
+                );
+
+                point.properties = {
                   created_at: survey.created_at,
                   cwheelid: "", // todo: figure out where to find this
                   shst_ref_id: survey.shst_ref_id,
@@ -234,68 +281,27 @@ async function main() {
                   feat_id: feature.id,
                   label: feature.label,
                   dst_st: feature.geometry.distances[0],
-                  dst_end: feature.geometry.distances[1],
                   images: JSON.stringify(feature.images),
-                },
-              };
+                };
 
-              let start = turf.point(
-                span.geometry.coordinates[0],
-                span.properties
-              );
-              let end = turf.point(
-                span.geometry.coordinates[span.geometry.coordinates.length - 1],
-                span.properties
-              );
+                for (let image of feature.images) {
+                  let pt = turf.point(point.geometry.coordinates);
 
-              for (let image of feature.images) {
-                let pt = turf.along(centered, image.geometry.distance, UNITS);
+                  pt.properties.url = image.url;
 
-                pt.properties.url = image.url;
+                  images.push(pt);
+                }
 
-                images.push(pt);
+                positions.push(point);
+                spanAndPositionPoints.push(point);
+              } else {
+                throw new Error("Unknown geometry type.");
               }
-
-              spans.push(span);
-              spanPoints.push(start);
-              spanPoints.push(end);
-              spanAndPositionPoints.push(start);
-              spanAndPositionPoints.push(end);
-            } else if (feature.geometry.type === "Position") {
-              // todo: Positions are being incorrectly stored with span style distances array. Fix upstream.
-              let point = turf.along(
-                centered,
-                feature.geometry.distances[0],
-                UNITS
-              );
-
-              point.properties = {
-                created_at: survey.created_at,
-                cwheelid: "", // todo: figure out where to find this
-                shst_ref_id: survey.shst_ref_id,
-                ref_side: survey.side_of_street,
-                ref_len: street.properties.distance,
-                srv_dist: survey.surveyed_distance,
-                srv_id: survey.id,
-                feat_id: feature.id,
-                label: feature.label,
-                dst_st: feature.geometry.distances[0],
-                images: JSON.stringify(feature.images),
-              };
-
-              for (let image of feature.images) {
-                let pt = turf.point(point.geometry.coordinates);
-
-                pt.properties.url = image.url;
-
-                images.push(pt);
-              }
-
-              positions.push(point);
-              spanAndPositionPoints.push(point);
-            } else {
-              throw new Error("Unknown geometry type.");
             }
+            catch(e) {
+              console.log('unable to export feature: ' + e);
+            }
+
           }
         }
       }
