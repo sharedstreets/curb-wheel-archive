@@ -16,29 +16,29 @@ test("graph", async (t) => {
 
   await graph.extract(pbf);
 
-  t.equal(graph.streets.length, 41238, "found correct number of streets");
+  t.equal(graph.streets.length, 32577, "found correct number of streets");
 
-  t.equal(graph.refs.size, 82435, "found correct number of refs");
+  t.equal(graph.refs.size, 65138, "found correct number of refs");
   let ref = "021d9d867cee1714882108b20dfdab80";
   t.true(graph.refs.has(ref), "graph has expected ref in lookup");
   let id = graph.refs.get(ref);
-  t.equal(id, 10, "stored refs link to street indexes");
+  t.equal(id, 9, "stored refs link to street indexes");
   let street = graph.streets[id];
   t.equal(street.properties.forward, ref, "street has expected forward ref");
 
   t.equal(
     JSON.stringify(graph.center),
-    JSON.stringify([-157.92574368339038, 21.392388274836083]),
+    JSON.stringify([-157.9297923506125, 21.38802573823529]),
     "calculated center"
   );
 
   t.equal(
     JSON.stringify(graph.bounds),
     JSON.stringify([
-      -158.27867790000002,
-      21.2551476,
-      -157.6497798,
-      21.708617500000003,
+      -158.27079110000003,
+      21.255709600000003,
+      -157.65507910000002,
+      21.704852900000002,
     ]),
     "calculated bounds"
   );
@@ -55,7 +55,7 @@ test("graph", async (t) => {
   await graph.save(file);
   let raw = (await readFileAsync(file)).toString();
   let data = JSON.parse(raw);
-  t.equal(data.streets.length, 41238, "save graph");
+  t.equal(data.streets.length, 32577, "save graph");
   delete data;
   delete raw;
 
