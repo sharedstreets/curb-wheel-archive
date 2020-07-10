@@ -49,6 +49,12 @@ input[type=number] {
 	display:none;
 }
 
+.button {
+	background:steelblue;
+	color:white;
+	cursor:pointer;	
+	border-radius:2px;
+}
 /*utility classes*/
 .big {
 	font-size: 1.25em;
@@ -154,6 +160,7 @@ input[type=number] {
 .inlineBlock {
 	display: inline-block;
 }
+
 /* columns */
 
 .col3{
@@ -171,7 +178,29 @@ input[type=number] {
 	flex:none;
 	float:left;
 }
+.col9{
+	width:75%;
+	flex:none;
+	float:left;
+}
 
+/*anchoring*/
+
+.pin-tl {
+	left:0;
+	top: 0;
+	position:absolute;
+}
+
+.pin-bl {
+	left:0;
+	bottom: 0;
+	position:absolute;
+}
+
+.z100 {
+	z-index: 100
+}
 /*heights*/
 
 .fullHeight {
