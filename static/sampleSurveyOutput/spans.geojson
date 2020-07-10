@@ -1,0 +1,88 @@
+{
+			"type": "FeatureCollection",
+			"features": [{
+				"type": "Feature",
+				"geometry": {
+					"type": "LineString",
+					"coordinates": [
+						[-78.63683641614065, 35.78743367205966],
+						[-78.63685154789381, 35.78696438733452]
+					]
+				},
+				"properties": {
+					"created_at": 1592427435030,
+					"cwheelid": "",
+					"shst_ref_id": "879d13db6c49a2d3f5e08ff149b3e09c",
+					"ref_side": "right",
+					"ref_len": 152.82317092006875,
+					"srv_dist": 153.6,
+					"label": "Parking",
+					"dst_st": 7.3,
+					"dst_end": 59.5,
+					"images": "[{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":34.1}}]"
+				}
+			}, {
+				"type": "Feature",
+				"geometry": {
+					"type": "LineString",
+					"coordinates": [
+						[-78.63683995269666, 35.78732399248805],
+						[-78.63684186591142, 35.7872646576378]
+					]
+				},
+				"properties": {
+					"created_at": 1592427435030,
+					"cwheelid": "",
+					"shst_ref_id": "879d13db6c49a2d3f5e08ff149b3e09c",
+					"ref_side": "right",
+					"ref_len": 152.82317092006875,
+					"srv_dist": 153.6,
+					"label": "Loading",
+					"dst_st": 19.5,
+					"dst_end": 26.1,
+					"images": "[{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":24.5}}]"
+				}
+			}, {
+				"type": "Feature",
+				"geometry": {
+					"type": "LineString",
+					"coordinates": [
+						[-78.63685864990026, 35.78674412917742],
+						[-78.63686717225603, 35.78647981938836]
+					]
+				},
+				"properties": {
+					"created_at": 1592427435030,
+					"cwheelid": "",
+					"shst_ref_id": "879d13db6c49a2d3f5e08ff149b3e09c",
+					"ref_side": "right",
+					"ref_len": 152.82317092006875,
+					"srv_dist": 153.6,
+					"label": "Paint",
+					"dst_st": 84,
+					"dst_end": 113.4,
+					"images": "[{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":93.1}},{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":99.9}}]"
+				}
+			}, {
+				"type": "Feature",
+				"geometry": {
+					"type": "LineString",
+					"coordinates": [
+						[-78.6368697231542, 35.786400706254106],
+						[-78.6368775207547, 35.78615887178655]
+					]
+				},
+				"properties": {
+					"created_at": 1592427435030,
+					"cwheelid": "",
+					"shst_ref_id": "879d13db6c49a2d3f5e08ff149b3e09c",
+					"ref_side": "right",
+					"ref_len": 152.82317092006875,
+					"srv_dist": 153.6,
+					"label": "Curb cut",
+					"dst_st": 122.2,
+					"dst_end": 149.1,
+					"images": "[{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":135.7}}]"
+				}
+			}]
+		}
