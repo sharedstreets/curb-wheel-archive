@@ -8,14 +8,15 @@
 		<link href='static/mapbox-gl.css' rel='stylesheet' />
 		<style>
 			.entry {
-				border: 1px solid #ddd;
+				border: 2px solid #ddd;
 				border-radius:5px;
 			}
 
-			.entry:hover {
-				border: 1px solid steelblue;
+			.entry:hover,
+			.rule:hover {
+				border: 2px solid steelblue;
 			}
-			.property {
+			.property:not(:first-child) {
 				border-top:1px solid #eee;
 			}
 
@@ -30,6 +31,7 @@
 			    font-size: 1em;
 			    border:1px solid #aaa;
 			}
+
 			input {
 				padding:13px;
 				border: none;
@@ -41,12 +43,13 @@
 
 			input:focus {
 				border:1px solid steelblue;
+				border-right:none;
 				outline:none;
 				background:#fafafa;
 				padding:12px;
 			}
 			.rule {
-				border: 1px solid #ddd;
+				border: 2px solid #ddd;
 				border-radius:5px;				
 			}
 
@@ -70,285 +73,20 @@
 	<script src='static/mapbox-gl.js'></script>
 	<script src='static/digitizer.js'></script>
 	<script src='static/autocomplete.js'></script>
+	<script src="static/d3.v4.min.js"></script>
 
 	<script>
 
-		mapboxgl.accessToken = "pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ";
+		var surveyUrl = location.search.replace('?survey=') || 'static/sampleSurveyOutput/spans.geojson';
 
-		var map = new mapboxgl.Map({
-			container: 'map',
-			style: 'mapbox://styles/mapbox/light-v9'
-		})
-		.on('load', () => {
-
-			data.features.forEach((d,i)=>{
-				d.properties.id = i;
-				d.properties.images = JSON.parse(d.properties.images);
-				d.output = {
-					regulations:[],
-					location:{}
-				}
-				d.output.regulations = [];
-				d.output.location = {};
+		d3.json(surveyUrl, (e,r)=>{
+			if (e) alert('Error importing the survey. Ensure the url is valid, preceded by "?survey=" in the url of this page.')
+			app.state.data = r;
+			app.init.map();
+			app.init.ui();
+		})	
 
 
-				app.constants.ui.entryParams
-					.forEach(param=>{
-						d.output.location[param.param] = d.properties[param.inputProp]
-					})
-			})
-
-			map.fitBounds(turf.bbox(data), {duration:200, padding:100});
-			map
-				// .addLayer({
-				// 	id: 'spans', 
-				// 	type: 'fill-extrusion', 
-				// 	source: {
-				// 		type:'geojson',
-				// 		data: data
-				// 	},
-				// 	paint: {
-				// 		'fill-extrusion-color':'red',
-				// 		'fill-extrusion-base': 2,
-				// 		'fill-extrusion-height':10,
-				// 		// 'line-width':5,
-				// 		'fill-extrusion-opacity':0.2
-				// 	}
-				// })
-				.addLayer({
-					id: 'spans', 
-					type: 'line', 
-					source: {
-						type:'geojson',
-						data: data
-					},
-					layout: {
-						'line-cap':'round'
-					},
-					paint: {
-						'line-color': [
-							'match',
-							['get', 'id'],
-							0, 'steelblue',
-							'#ccc'
-						],
-						'line-width':{
-							base:2,
-							stops: [[6, 1], [22, 80]]
-						},
-						'line-opacity':0.75,
-						'line-offset': {
-							base:2,
-							stops: [[12, 3], [22, 100]]
-						}
-					}
-				})
-
-			var entries = 
-				d3.select('#dataPanel')
-					.selectAll('.entry')
-					.data(data.features, d=>d.id)
-					.enter()
-					.append('div')
-					.attr('class', 'entry m20')
-					.on('mouseenter', (d,i)=>{
-
-						app.state.activeFeatureIndex = i;
-						var rule = [
-							'match',
-							['get', 'id'],
-							app.state.activeFeatureIndex, 'steelblue',
-							'#ccc'
-						]
-
-						map.setPaintProperty('spans', 'line-color', rule)
-					})
-
-				entries
-					.append('div')
-					.text(d => d.properties.label)
-					.attr('class', 'm10 blue strong')
-
-
-
-				var params = 
-					entries
-						.selectAll('.property')
-						.data((d) => Object.keys(d.output.location)
-							.map(key=>{return {param: key, value: d.output.location[key]}})
-						)
-						.enter()
-						.append('div')
-						.attr('class', 'property')
-						.classed('hidden', (d,i)=>app.constants.ui.entryParams[i].defaultHidden)
-
-				params
-					.each(app.ui.entry.appendProperty)
-
-				entries
-					.each(prepopulateProperties)
-					.each(app.ui.entry.onChange)
-
-				var regulations = 
-				entries
-					.append('div')
-					.attr('class', 'property')
-
-				regulations
-					.append('div')
-					.attr('class', 'mr10 inlineBlock quiet p10')
-					.text('Regulation');
-
-				regulations
-					.append('div')
-					.text('Add')
-					.attr('class', 'fr clickable p10')
-					.on('click', (d,i) => {
-
-						d.output.regulations.push({
-							rule: {
-								activity: 'standing',
-								// priorityCategory: null, 
-								maxStay: 5, 
-								payment: false,
-								userClasses: [],
-								userSubClasses: [],
-								daysOfWeek: [],
-								timesOfDay: []
-							},
-
-							timeSpans: [
-							]
-						})
-
-						app.ui.entry
-							.updateRegulation(entries)
-							.each(app.ui.entry.onChange)
-					})
-
-				regulations
-					.append('div')
-					.attr('class', 'rules')
-
-
-
-
-		})
-
-
-
-
-		function prepopulateProperties(d,i){
-			console.log(d)
-			d3.select(this)
-				.selectAll('.property')
-				.select('input, select')
-				.property('value', d=>d.value)
-		};
-
-		// function appendImages(d,i) {
-
-		// 	d3.select(this)
-		// 		.append('div')
-		// 		.attr('class', 'images p10 property')
-		// 		.selectAll('img')
-		// 		.data(d.properties.images)
-		// 		.enter()
-		// 		.append('div')
-		// 		.style('background-image', d=>`url(${d.url})`)
-		// 		.attr('class', 'inlineBlock image mr10')
-		// }
-
-		var data = {
-			"type": "FeatureCollection",
-			"features": [{
-				"type": "Feature",
-				"geometry": {
-					"type": "LineString",
-					"coordinates": [
-						[-78.63683641614065, 35.78743367205966],
-						[-78.63685154789381, 35.78696438733452]
-					]
-				},
-				"properties": {
-					"created_at": 1592427435030,
-					"cwheelid": "",
-					"shst_ref_id": "879d13db6c49a2d3f5e08ff149b3e09c",
-					"ref_side": "right",
-					"ref_len": 152.82317092006875,
-					"srv_dist": 153.6,
-					"label": "Parking",
-					"dst_st": 7.3,
-					"dst_end": 59.5,
-					"images": "[{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":34.1}}]"
-				}
-			}, {
-				"type": "Feature",
-				"geometry": {
-					"type": "LineString",
-					"coordinates": [
-						[-78.63683995269666, 35.78732399248805],
-						[-78.63684186591142, 35.7872646576378]
-					]
-				},
-				"properties": {
-					"created_at": 1592427435030,
-					"cwheelid": "",
-					"shst_ref_id": "879d13db6c49a2d3f5e08ff149b3e09c",
-					"ref_side": "right",
-					"ref_len": 152.82317092006875,
-					"srv_dist": 153.6,
-					"label": "Loading",
-					"dst_st": 19.5,
-					"dst_end": 26.1,
-					"images": "[{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":24.5}}]"
-				}
-			}, {
-				"type": "Feature",
-				"geometry": {
-					"type": "LineString",
-					"coordinates": [
-						[-78.63685864990026, 35.78674412917742],
-						[-78.63686717225603, 35.78647981938836]
-					]
-				},
-				"properties": {
-					"created_at": 1592427435030,
-					"cwheelid": "",
-					"shst_ref_id": "879d13db6c49a2d3f5e08ff149b3e09c",
-					"ref_side": "right",
-					"ref_len": 152.82317092006875,
-					"srv_dist": 153.6,
-					"label": "Paint",
-					"dst_st": 84,
-					"dst_end": 113.4,
-					"images": "[{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":93.1}},{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":99.9}}]"
-				}
-			}, {
-				"type": "Feature",
-				"geometry": {
-					"type": "LineString",
-					"coordinates": [
-						[-78.6368697231542, 35.786400706254106],
-						[-78.6368775207547, 35.78615887178655]
-					]
-				},
-				"properties": {
-					"created_at": 1592427435030,
-					"cwheelid": "",
-					"shst_ref_id": "879d13db6c49a2d3f5e08ff149b3e09c",
-					"ref_side": "right",
-					"ref_len": 152.82317092006875,
-					"srv_dist": 153.6,
-					"label": "Curb cut",
-					"dst_st": 122.2,
-					"dst_end": 149.1,
-					"images": "[{\"url\":\"http://placekitten.com/500/600\",\"geometry\":{\"type\":\"Position\",\"distance\":135.7}}]"
-				}
-			}]
-		}
 	</script>
-	<script src="static/d3.v4.min.js"></script>
-
 	<script src='static/turf.min.js'></script>
 </html>

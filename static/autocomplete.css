@@ -25,11 +25,12 @@ input:focus + .autocomplete-items,
 .autocomplete-items:hover {
   opacity:1;
   pointer-events:all;
-}
-.autocomplete-items {
-  position: absolute;
   border: 1px solid steelblue;
   border-top: none;
+}
+
+.autocomplete-items {
+  position: absolute;
   z-index: 99;
   /*position the autocomplete items to be the same width as the container:*/
   top: 100%;
@@ -43,23 +44,26 @@ input:focus + .autocomplete-items,
 .autocomplete-items div {
   padding: 8px 10px;
   cursor: pointer;
-  background-color: #fff;
+  background-color: #fafafa;
   border-bottom: 1px solid #eee;
   text-align:right;
-  color:#666;
+  color:#999;
 }
 
-.autocomplete-active {
+.autocomplete-items div.autocomplete-active {
   /*when navigating through the items using the arrow keys:*/
-  background-color: #abcdef !important;
-  color: #ffffff;
+  background-color: #fff !important;
+  color:black;
 }
 
+/*apply inactive styling to "active" choices, when mouse is hovering something else*/
 .autocomplete-items:hover .autocomplete-active {
-  background: white !important;
+  background: #fafafa !important;
+  color:#999;
 }
 
 .autocomplete-items div:hover {
   /*when hovering an item:*/
-  background-color: #abcdef !important;
+  background-color: #fff !important;
+  color:black;
 }

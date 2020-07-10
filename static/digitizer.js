@@ -49,7 +49,7 @@ var app = {
 							.attr('class', 'fr')
 							.attr('onclick', 'this.setSelectionRange(this.value.length, this.value.length)')
 							.attr('placeholder', d.placeholder)
-							// .on('change', onChange)
+
 
 					if (validate.oneOf) {
 
@@ -96,7 +96,7 @@ var app = {
 
 				entry.selectAll('input, select')
 					.on('change', c)
-
+					.on('keyup', c)
 				function c(data){
 
 					var prop = d3.select(this).attr('prop')
@@ -104,15 +104,15 @@ var app = {
 
 					var target = d;
 					var subdirectory = app.constants.validate[prop].output
-					console.log(d, prop, subdirectory)
 					for (item of subdirectory) target = target[item === '_index' ? i : item]
 
+					// apply transform function if there is one
 					var tfFn = app.constants.validate[prop].transform;
 					target[prop] = tfFn ? tfFn(value) : value;
 
 
 					// propagations
-					var propagationEntry = app.constants.ui.eP[prop]; 
+					var propagationEntry = app.constants.ui.entryPropagations[prop]; 
 					if (propagationEntry) {
 						
 						var propagatingRule = propagationEntry.propagatingValues[value] || false;
@@ -153,13 +153,9 @@ var app = {
 
 				var props = rules
 					.selectAll('.property')
-					// .data(app.constants.ui.regulationParams)
-					.data((d) => Object.keys(d.rule)
-						.map(key=>{
-							return {param: key, value: d.rule[key]
-							}
-						})
-					)
+					.data(d=>app.constants.ui.regulationParams.map(obj=>{
+						return {param: obj.param, value: d.rule[obj.param], placeholder: obj.placeholder}
+					}))
 					.enter()
 					.append('div')
 					.attr('class', 'property')
@@ -174,7 +170,7 @@ var app = {
 
 		ui: {
 
-			eP: {
+			entryPropagations: {
 				assetType: {
 					destinationProp: 'assetSubtype',
 					propagatingValues: {
@@ -212,45 +208,6 @@ var app = {
 					}					
 				}
 			},
-
-			entryPropagations: [{
-
-				originProp: 'assetType',
-				destinationProp: 'assetSubtype',
-				propagatingValues: {
-
-					'pavement marking': {
-						placeholder: 'Marking type',
-						values: [
-							'ramp', 
-							'driveway', 
-							'street'
-						]
-					},
-
-					'curb cut': {
-						placeholder: 'Cut type',
-						values: [
-							'bike', 
-							'bus', 
-							'taxi', 
-							'arrow', 
-							'diagonal lines', 
-							'zigzag', 
-							'parallel parking', 
-							'perpendicular parking', 
-							'yellow', 
-							'red', 
-							'blue', 
-							'ISA'
-						]
-					},
-
-					'curb paint': {
-						placeholder: 'Paint color'
-					},
-				}
-			}],
 
 			entryParams: [
 				{
@@ -297,7 +254,7 @@ var app = {
 					placeholder: 'Comma-delimited values'
 				},
 				{
-					param: 'userSubclasses',
+					param: 'userSubClasses',
 					placeholder: 'Comma-delimited values'
 				},
 				{
@@ -312,7 +269,7 @@ var app = {
 				},
 				{
 					param: 'timesOfDay',
-					placeholder: 'HH:MM-HH:MM, comma-separated'				
+					placeholder: 'Comma-delimited, each in HH:MM-HH:MM'				
 				}
 			]
 		},
@@ -334,12 +291,14 @@ var app = {
 
 			shstLocationStart: {
 				type: 'number',
-				output: ['output', 'location']
+				output: ['output', 'location'],
+				transform: (input) => parseFloat(input)
 			},	
 
 			shstLocationEnd: {
 				type: 'number',
-				output: ['output', 'location']
+				output: ['output', 'location'],
+				transform: (input) => parseFloat(input)
 			},	
 
 			assetType: {
@@ -479,25 +438,254 @@ var app = {
 	},
 
 	io: {
+
 		export: () =>{
 
-			var output = []
-			d3.selectAll('.entry')
-				.each(scrape)
+			app.state.data.features = app.state.data.features.map(ft => {
 
-			function scrape(d,i,j){
+				ft = {
+					geometry: ft.geometry,
+					properties: ft.output
+				}
 
-				output[i] = {};
+				return ft
+			})
 
-				d3.select(this)
-					.selectAll('.property')
-					.attr('f', (d)=>{
-						var value = this.select('input').property('value')
-						output[i][d.param] = value
+			var element = document.createElement('a');
+
+			const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+			var url = window.URL.createObjectURL(blob);
+			
+			element.setAttribute('href', url);
+			element.setAttribute('download', 'curblr_'+Date.now()+'.json');
+
+			element.style.display = 'none';
+			document.body.appendChild(element);
+
+			element.click();
+		    document.body.removeChild(element);
+		}
+
+	},
+
+
+	init: {
+
+		map: () => {
+
+			mapboxgl.accessToken = "pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ";
+
+			var map = new mapboxgl.Map({
+				container: 'map',
+				style: 'mapbox://styles/mapbox/light-v9'
+			})
+			.on('load', () => {
+
+				map.fitBounds(turf.bbox(app.state.data), {duration:200, padding:100});
+				map
+					// .addLayer({
+					// 	id: 'spans', 
+					// 	type: 'fill-extrusion', 
+					// 	source: {
+					// 		type:'geojson',
+					// 		data: data
+					// 	},
+					// 	paint: {
+					// 		'fill-extrusion-color':'red',
+					// 		'fill-extrusion-base': 2,
+					// 		'fill-extrusion-height':10,
+					// 		// 'line-width':5,
+					// 		'fill-extrusion-opacity':0.2
+					// 	}
+					// })
+					.addLayer({
+						id: 'spans', 
+						type: 'line', 
+						source: {
+							type:'geojson',
+							data: app.state.data
+						},
+						layout: {
+							'line-cap':'round'
+						},
+						paint: {
+							'line-color': [
+								'match',
+								['get', 'id'],
+								0, 'steelblue',
+								'#ccc'
+							],
+							'line-width':{
+								base:2,
+								stops: [[6, 1], [22, 80]]
+							},
+							'line-opacity':0.75,
+							'line-offset': {
+								base:2,
+								stops: [[12, 3], [22, 100]]
+							}
+						}
 					})
-			}
+			})
 
-			console.log(output)
+			app.ui.map = map;
+		},
+
+		ui: () =>{
+
+			// prep data
+			app.state.data.features.forEach((d,i)=>{
+
+				d.properties.id = i;
+				d.properties.images = JSON.parse(d.properties.images);
+				
+				//create separate object for curblr properties
+				d.output = {
+					regulations:[],
+					location:{}
+				}
+
+				// extract survey values into curblr
+				app.constants.ui.entryParams
+					.forEach(param=>{
+						d.output.location[param.param] = d.properties[param.inputProp]
+					})
+
+			})
+
+			d3.select('#map')
+				.append('div')
+				.attr('class', 'button pin-tl z100 inlineBlock p10 strong m10')
+				.text('Export CurbLR')
+				.attr('onclick', 'app.io.export()')
+
+
+			var entries = 
+
+				d3.select('#dataPanel')
+					.selectAll('.entry')
+					.data(app.state.data.features, d=>d.id)
+					.enter()
+					.append('div')
+					.attr('class', 'entry m20')
+					.on('mouseenter', (d,i) => {
+
+						app.state.activeFeatureIndex = i;
+
+						var makeRule = (active, inactive) =>{
+							return [
+								'match',
+								['get', 'id'],
+								app.state.activeFeatureIndex, active,
+								inactive
+							]
+						}
+
+						app.ui.map.setPaintProperty('spans', 'line-color', makeRule('steelblue', '#ccc'))
+							// .setPaintProperty('spans', 'line-width', makeRule(
+							// 	80,
+							// 	['interpolate', ['exponential', 2], ['zoom'], 6,1,22,80],
+							// ))
+					})
+
+
+
+				entries
+					.append('div')
+					.text(d => d.properties.label)
+					.attr('class', 'm10 blue strong')
+
+
+				var params = 
+					entries
+						.selectAll('.property')
+						.data(d=>app.constants.ui.entryParams.map(obj=>{
+							var param = obj.param
+							return {
+								param: param, 
+								value: d.output.location[param], 
+								placeholder:obj.placeholder, 
+								hidden: obj.defaultHidden
+							}
+						}))
+						.enter()
+						.append('div')
+						.attr('class', 'property')
+						.classed('hidden', d=>d.hidden)
+
+				params
+					.each(app.ui.entry.appendProperty)
+
+				entries
+					.each(prepopulateProperties)
+					.each(app.ui.entry.onChange)
+
+				function prepopulateProperties(d,i){
+						d3.select(this)
+						.selectAll('.property')
+						.select('input, select')
+						.property('value', d=>d.value)
+				};
+
+
+				var regulations = 
+				entries
+					.append('div')
+					.attr('class', 'property')
+
+				regulations
+					.append('div')
+					.attr('class', 'mr10 inlineBlock quiet p10')
+					.text('regulations');
+
+				regulations
+					.append('div')
+					.text('Add')
+					.attr('class', 'fr clickable p10')
+					.on('click', (d,i) => {
+
+						d.output.regulations.push({
+							rule: {
+								activity: 'standing',
+								// priorityCategory: null, 
+								maxStay: 5, 
+								payment: false,
+								userClasses: [],
+								userSubClasses: [],
+								daysOfWeek: [],
+								timesOfDay: []
+							},
+
+							timeSpans: [
+							]
+						})
+
+						app.ui.entry
+							.updateRegulation(entries)
+							.each(app.ui.entry.onChange)
+					})
+
+				regulations
+					.append('div')
+					.attr('class', 'rules')
+
+				var images = 
+				entries
+					.append('div')
+					.attr('class', 'images p10 property')
+
+				images
+					.append('div')
+					.attr('class', 'mr10 quiet mb10')
+					.text('images');
+				images
+					.selectAll('img')
+					.data(d=>d.properties.images)
+					.enter()
+					.append('div')
+					.style('background-image', d=>`url(${d.url})`)
+					.attr('class', 'inlineBlock image mr10')
+			
 		}
 	},
 
@@ -513,6 +701,7 @@ var app = {
 
 				var arrayed = listString.split(', ')
 				var lastItem = arrayed[arrayed.length-1] 
+
 				return lastItem
 			},
 
