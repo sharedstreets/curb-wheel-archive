@@ -439,7 +439,7 @@ var app = {
 
 	io: {
 
-		export: () =>{
+		export: () => {
 
 			app.state.data.features = app.state.data.features.map(ft => {
 
@@ -453,7 +453,7 @@ var app = {
 
 			var element = document.createElement('a');
 
-			const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+			const blob = new Blob([JSON.stringify(app.state.data)], {type: "application/json"});
 			var url = window.URL.createObjectURL(blob);
 			
 			element.setAttribute('href', url);
