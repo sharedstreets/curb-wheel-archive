@@ -8,7 +8,7 @@ app.ui.map = new mapboxgl.Map({
 });
 
 app.ui.map
-	.fitBounds([bounds.slice(0, 2), bounds.slice(2, 4)])
+	.fitBounds([bounds.slice(0,2), bounds.slice(2,4)])
 	.on("load", () => {
 		app.ui.map
 			.addLayer({
