@@ -3,13 +3,14 @@ mapboxgl.accessToken =
 
 app.ui.map = new mapboxgl.Map({
 	container: "map",
-	style: "http://[::]:8080/styles/basic-preview/style.json",
+	style: app.constants.mapStyle.fullStyle,
 	hash: true,
 });
 
 app.ui.map
 	.fitBounds([bounds.slice(0,2), bounds.slice(2,4)])
 	.on("load", () => {
+
 		app.ui.map
 			.addLayer({
 				id: "streets",
@@ -23,6 +24,19 @@ app.ui.map
 					"line-opacity": 0.2,
 					"line-color": "steelblue",
 				},
+			})
+			.addLayer({
+				id: "surveyedStreets",
+				type: "line",
+				filter:['in', 'forward', 'none'],
+				source: 'streets',
+				paint: {
+					"line-width": 16,
+					"line-color": "steelblue",
+				},
+				layout: {
+					'line-cap': 'round'
+				}
 			})
 			.addLayer({
 				id: "arrows",
@@ -71,6 +85,7 @@ app.ui.map
 				},
 			})
 			.on("click", "streets", (e) => {
+				console.log(e.features)
 				if (app.state.mode === "selectStreet") {
 					var edge = e.features[0].geometry.coordinates;
 					app.state.street = e.features[0].properties;
@@ -137,3 +152,4 @@ app.ui.map.switch = {
 		);
 	},
 };
+
