@@ -2,10 +2,12 @@
 
 The curb wheel is an open source data collection tool that can be used to map a city's curb assets and regulations and create a standardized data ([CurbLR](https://www.curblr.org/)) feed. It combines the precision of a measuring wheel with the efficiency of a smartphone app.
 
-The curb wheel is built from a standard digital measuring wheel used by surveyors, which is hardwired to a Raspberry Pi computing device. This turns the wheel into an access point that a user can connect to through their smartphone or computer in order to access a curb surveying app. See the [parts list](/PARTS.md) and [set up page](/SETUP.md) for instructions on how to build your own curb wheel.
+The curb wheel is built from a standard digital measuring wheel used by surveyors, which is hardwired to a Raspberry Pi computing device. This turns the wheel into an access point that a user can connect to through their smartphone or computer in order to access a curb surveying app. After completing street surveying with the wheel and the app, users can process the data in a digitizer web app, producing a CurbLR feed.
 
-![](/images/pi_parity_2.JPG)
-*Initial prototype of the wheel*
+See the [parts list](/PARTS.md) and [set up page](/SETUP.md) for instructions on how to build your own curb wheel.
+
+![](/images/wheel_app_digitizer.png)
+*Initial prototype of the wheel, app, and digitizer*
 
 ## How it works
 
