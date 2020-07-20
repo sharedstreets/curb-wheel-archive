@@ -77,10 +77,8 @@ Once this is set up properly, write the file to the microSD by selecting 'Flash!
 
 5. Plug your Pi into a power source (such as a power bank that you would use to recharge your phone, or a charging cable plugged into the wall) using the microUSB port labelled "PWR in". If you're using a power bank, make sure it's turned on. You should then see a green blinking light on your Pi. When the light stops blinking, you're ready to move to the next step.
 
-6. Select your Wifi network preferences using the device you would like to track your measurements on. For testing this may be your computer, to use outside, it's likely going to be your phone. Select the WiFi network "CurbWheel-AP". The password is `curbwheel`.
+6. Check to make sure the CurbWheel booted up correctly and is broadcasting a wifi signal. It should appear as CurbWheel-AP. The password is `curbwheel`.
 
-7. Open your preferred browser and type in the url `raspberrypi.local:8081`. You should see the following screen:
+7. Open your preferred browser and type in the url `raspberrypi.local:8081/admin`. (`http://127.0.0.1:8081/admin` will also work). You should see an admin interface.
 
-<img src="images/CurbWheelTestScreen.jpg" width="300">
-
-8. Walk around with your wheel and test out its measuring capabilities.
+8. Follow the [rest of the instructions](https://docs.google.com/presentation/d/17yf7CXPp_n2dldiCTWfH6H_lpq4mqzZ6kTNyTk-0-zw/edit#slide=id.g8c69025b57_0_7) for adding local map data and surveying streets with the CurbWheel.
