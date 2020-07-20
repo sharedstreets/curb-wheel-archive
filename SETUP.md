@@ -63,9 +63,10 @@ When plugged in, the connector should look like this:
 
 1. Download the <a href="https://www.balena.io/etcher/" target="_blank">Etcher software app</a> for your computer and install it. You will use this to set up the microSD card.'
 
-2. Download the <a href="https://drive.google.com/file/d/1yRe9xghKHFwLpw2stX3NCof64VD4D993/view?usp=sharing" target="_blank">zip file</a> to install on your microSD. Unzip the file if it does not automatically unzip once downloaded.
+2. Download the <a href="https://curblr-www.s3.amazonaws.com/wheel/images/curbwheel_image_r8.img.gz
+" target="_blank">latest version of the software (currently version 8)</a> to install on your microSD. Unzip the file if it does not automatically unzip once downloaded.
 
-3. Insert your mircoSD into your card reader and open Etcher.  Select the unzipped file as the image. Select your microSD card as the target. <i> It is important to point this at the microSD card as this could rewrite your hard drive if the wrong location is selected. </i>
+3. Insert your microSD into your card reader and open Etcher.  Select the unzipped file as the image. Select your microSD card as the target. <i> It is important to point this at the microSD card as this could rewrite your hard drive if the wrong location is selected. </i>
 
 <img src="images/etcher_example.png" width="600">
 
