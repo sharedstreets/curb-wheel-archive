@@ -48,11 +48,11 @@ While running the simulator, the links are:
 
 It's possible to update the code on a CurbWheel via Github. But since many CurbWheel users aren't familiar with Terminal, we've been creating `.img` files that can be flashed onto the SD card using Etcher or similar software. Steps for creating a software image:
 
-1. Pull new copy of git repo on your laptop / edit files local
+1. Pull new copy of git repo on your laptop / edit files locally so that you've got the code that you want to push to the Pi and make an image of.
 
-2. Update github directory on wheel by running upgrade script on laptop. To do this, connect to wheel using CurbWheel-AP wifi network. Make sure you're in the Github curb wheel directory. Then, copy new directory from laptop oer to Pi via ssh (first time running will prompt for pi password). You don't need to ssh in, that's part of the following command: `sh upgrade_wheel.sh`
+2. Update github directory on wheel by running upgrade script on laptop. To do this, connect to wheel using CurbWheel-AP wifi network. Make sure you're in the Github curb wheel directory. Then, copy new directory from laptop oer to Pi via ssh (first time running will prompt for pi password) - do that through the following command, which handles the ssh connection and moves the code: `sh upgrade_wheel.sh`
 
-3. Flash image using dd. To do this, insert the SD card on mac and find drive (`diskutil list`). Next, `sudo dd if=/dev/disk2 | gzip > ~/Desktop/curbwheel_image_r8.img.gz` (or whatever the image should be named)
+3. The Pi now contains the software that you want to image for distribution. Flash image using `dd`. To do this, insert the SD card on mac and find drive (`diskutil list`). Next, `sudo dd if=/dev/disk2 | gzip > ~/Desktop/curbwheel_image_r8.img.gz` (or whatever the image should be named)
 
 4. Copy image file to S3 bucket and set permissions to be publically accessible (for distribution). Update docs with new link.
 
