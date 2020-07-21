@@ -49,11 +49,11 @@ While running the simulator, the links are:
 It's possible to update the code on a CurbWheel via Github. But since many CurbWheel users aren't familiar with Terminal, we've been creating `.img` files that can be flashed onto the SD card using Etcher or similar software. 
 
 Steps for creating a software image:
-(*Note: This workflow assumes you have already flashed your Pi with a previous software image (e.g. r8). It's possible to also start from scratch with a new Pi, install Raspian, and then proceed with these instructions... but flashing with an image is faster, doesn't require peripherals, and takes care of network settings for you. We highly recommend setting up the Pi by flashing it with an image.*)
+(*Note: This workflow assumes you have already flashed your Pi with a previous curb wheel image (e.g. r8). It's possible to also start from scratch with a new Pi, install Raspbian, and then proceed with these instructions... but flashing with an image is faster, doesn't require peripherals, and takes care of network settings for you. We highly recommend setting up the Pi by flashing it with an image.*)
 
 1. Pull new copy of git repo on your laptop / edit files locally so that you've got the code that you want to push to the Pi and make an image of.
 
-2. Update github directory on wheel by running upgrade script on laptop. To do this, connect to wheel using CurbWheel-AP wifi network. Make sure you're in the Github curb wheel directory. Then, copy new directory from laptop oer to Pi via ssh (first time running will prompt for pi password) - do that through the following command, which handles the ssh connection and moves the code: `sh upgrade_wheel.sh`
+2. Update github directory on wheel by running upgrade script on laptop. To do this, connect to wheel using CurbWheel-AP wifi network. Make sure you're in the Github curb wheel directory. Then, copy new directory from laptop over to Pi via ssh (first time running will prompt for pi password) - do that through the following command, which handles the ssh connection and moves the code: `sh upgrade_wheel.sh`
 
 3. The Pi now contains the software that you want to image for distribution. Flash image using `dd`. To do this, insert the SD card on mac and find drive (`diskutil list`). Next, `sudo dd if=/dev/disk2 | gzip > ~/Desktop/curbwheel_image_r8.img.gz` (or whatever the image should be named)
 
