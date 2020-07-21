@@ -46,7 +46,10 @@ While running the simulator, the links are:
 
 ### Creating a software image
 
-It's possible to update the code on a CurbWheel via Github. But since many CurbWheel users aren't familiar with Terminal, we've been creating `.img` files that can be flashed onto the SD card using Etcher or similar software. Steps for creating a software image:
+It's possible to update the code on a CurbWheel via Github. But since many CurbWheel users aren't familiar with Terminal, we've been creating `.img` files that can be flashed onto the SD card using Etcher or similar software. 
+
+Steps for creating a software image:
+(*Note: This workflow assumes you have already flashed your Pi with a previous software image (e.g. r8). It's possible to also start from scratch with a new Pi, install Raspian, and then proceed with these instructions... but flashing with an image is faster, doesn't require peripherals, and takes care of network settings for you. We highly recommend setting up the Pi by flashing it with an image.*)
 
 1. Pull new copy of git repo on your laptop / edit files locally so that you've got the code that you want to push to the Pi and make an image of.
 
