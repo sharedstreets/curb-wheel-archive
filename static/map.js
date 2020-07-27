@@ -3,7 +3,7 @@ mapboxgl.accessToken =
 
 app.ui.map = new mapboxgl.Map({
 	container: "map",
-	style: "http://[::]:8080/styles/basic-preview/style.json",
+	style: app.constants.mapStyle.fullStyle,
 	hash: true,
 });
 

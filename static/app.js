@@ -690,7 +690,7 @@ constants: {
 			"sources": {
 				"openmaptiles": {
 					"type": "vector",
-					"url": "http://[::]:8080/data/v3.json"
+					"url": "/static/v3.json"
 				}
 			},
 			"glyphs": "http://[::]:8080/fonts/{fontstack}/{range}.pbf",
