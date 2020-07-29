@@ -168,6 +168,13 @@ var app = {
 	},
 	constants: {
 
+		properties: [
+			'label',
+			'sideOfStreet',
+			'assetType',
+			'assetSubtype'
+		],
+
 		ui: {
 
 			entryPropagations: {
@@ -553,139 +560,23 @@ var app = {
 
 			})
 
-			d3.select('#map')
-				.append('div')
-				.attr('class', 'button pin-tl z100 inlineBlock p10 strong m10')
-				.text('Export CurbLR')
-				.attr('onclick', 'app.io.export()')
+			var data = [
+				['', 'Ford', 'Tesla', 'Toyota', 'Honda'],
+				['2017', 10, 11, 12, 13],
+				['2018', 20, 11, 14, 13],
+				['2019', 30, 15, 12, 13]
+			];
 
-
-			var entries = 
-
-				d3.select('#dataPanel')
-					.selectAll('.entry')
-					.data(app.state.data.features, d=>d.id)
-					.enter()
-					.append('div')
-					.attr('class', 'entry m20')
-					.on('mouseenter', (d,i) => {
-
-						app.state.activeFeatureIndex = i;
-
-						var makeRule = (active, inactive) =>{
-							return [
-								'match',
-								['get', 'id'],
-								app.state.activeFeatureIndex, active,
-								inactive
-							]
-						}
-
-						app.ui.map.setPaintProperty('spans', 'line-color', makeRule('steelblue', '#ccc'))
-							// .setPaintProperty('spans', 'line-width', makeRule(
-							// 	80,
-							// 	['interpolate', ['exponential', 2], ['zoom'], 6,1,22,80],
-							// ))
-					})
-
-
-
-				entries
-					.append('div')
-					.text(d => d.properties.label)
-					.attr('class', 'm10 blue strong')
-
-
-				var params = 
-					entries
-						.selectAll('.property')
-						.data(d=>app.constants.ui.entryParams.map(obj=>{
-							var param = obj.param
-							return {
-								param: param, 
-								value: d.output.location[param], 
-								placeholder:obj.placeholder, 
-								hidden: obj.defaultHidden
-							}
-						}))
-						.enter()
-						.append('div')
-						.attr('class', 'property')
-						.classed('hidden', d=>d.hidden)
-
-				params
-					.each(app.ui.entry.appendProperty)
-
-				entries
-					.each(prepopulateProperties)
-					.each(app.ui.entry.onChange)
-
-				function prepopulateProperties(d,i){
-						d3.select(this)
-						.selectAll('.property')
-						.select('input, select')
-						.property('value', d=>d.value)
-				};
-
-
-				var regulations = 
-				entries
-					.append('div')
-					.attr('class', 'property')
-
-				regulations
-					.append('div')
-					.attr('class', 'mr10 inlineBlock quiet p10')
-					.text('regulations');
-
-				regulations
-					.append('div')
-					.text('Add')
-					.attr('class', 'fr clickable p10')
-					.on('click', (d,i) => {
-
-						d.output.regulations.push({
-							rule: {
-								activity: 'standing',
-								// priorityCategory: null, 
-								maxStay: 5, 
-								payment: false,
-								userClasses: [],
-								userSubClasses: [],
-								daysOfWeek: [],
-								timesOfDay: []
-							},
-
-							timeSpans: [
-							]
-						})
-
-						app.ui.entry
-							.updateRegulation(entries)
-							.each(app.ui.entry.onChange)
-					})
-
-				regulations
-					.append('div')
-					.attr('class', 'rules')
-
-				var images = 
-				entries
-					.append('div')
-					.attr('class', 'images p10 property')
-
-				images
-					.append('div')
-					.attr('class', 'mr10 quiet mb10')
-					.text('images');
-				images
-					.selectAll('img')
-					.data(d=>d.properties.images)
-					.enter()
-					.append('div')
-					.style('background-image', d=>`url(${d.url})`)
-					.attr('class', 'inlineBlock image mr10')
-			
+			var container = document.getElementById('spreadsheet');
+			var hot = new Handsontable(container, {
+				data: data,
+				rowHeaders: true,
+				colHeaders: true,
+				// filters: true,
+				dropdownMenu: true,
+				stretchH:'all'
+			});
+		
 		}
 	},
 

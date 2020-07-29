@@ -7,6 +7,11 @@
 		<link rel="stylesheet" href='static/autocomplete.css'>
 		<link href='static/mapbox-gl.css' rel='stylesheet' />
 		<style>
+
+			#spreadsheet {
+				width:100%;
+				height:100%;
+			}
 			.entry {
 				border: 2px solid #ddd;
 				border-radius:5px;
@@ -68,8 +73,12 @@
 	</head>
 	<body>
 		<div class='col6 fullHeight' id='map'></div>
-		<div class='col6 fullHeight scroll' id='dataPanel'></div>
+		<div class='col6 fullHeight scroll' id='dataPanel'>
+			<div id='spreadsheet'></div>
+		</div>
 	</body>
+	<script src="https://cdn.jsdelivr.net/npm/handsontable@7.4.2/dist/handsontable.full.min.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/handsontable@7.4.2/dist/handsontable.full.min.css" rel="stylesheet" media="screen">
 	<script src='static/mapbox-gl.js'></script>
 	<script src='static/digitizer.js'></script>
 	<script src='static/autocomplete.js'></script>
