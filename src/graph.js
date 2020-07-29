@@ -113,7 +113,8 @@ Graph.prototype.extract = async function (pbf) {
                 !(
                   item.tags.service === "parking" ||
                   item.tags.service === "driveway" ||
-                  item.tags.service === "drive-through"
+                  item.tags.service === "drive-through" ||
+                  item.tags.service === "parking_aisle"
                 )) &&
               item.refs.length >= 2
             ) {
