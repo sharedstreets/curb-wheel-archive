@@ -98,7 +98,7 @@ Graph.prototype.extract = async function (pbf) {
             } else if (
               item.type === "way" &&
               item.tags.highway && // must have a highway tag
-              // must be one of the following highway types
+              // must be one of the following highway types. service roads are only included if they have a name (SF has lots of residential streets mapped as named alleys)
               (item.tags.highway === "motorway" ||
                 item.tags.highway === "trunk" ||
                 item.tags.highway === "primary" ||
@@ -107,15 +107,18 @@ Graph.prototype.extract = async function (pbf) {
                 item.tags.highway === "unclassified" ||
                 item.tags.highway === "residential" ||
                 item.tags.highway === "living_street" ||
-                item.tags.highway === "service") &&
+                (item.tags.highway === "service" && item.tags.name)) &&
+
+              // we removed unnamed service roads bc they were cluttering the graph and causing confusion, and are rarely needed for mapping. if you want to add service roads back in, remove the item.tags.name argument above and uncomment out the code below:
+
               // filter the following special service road types
-              (!item.tags.service ||
-                !(
-                  item.tags.service === "parking" ||
-                  item.tags.service === "driveway" ||
-                  item.tags.service === "drive-through" ||
-                  item.tags.service === "parking_aisle"
-                )) &&
+              // (!item.tags.service ||
+              //   !(
+              //     item.tags.service === "parking" ||
+              //     item.tags.service === "driveway" ||
+              //     item.tags.service === "drive-through" ||
+              //     item.tags.service === "parking_aisle"
+              //   )) &&
               item.refs.length >= 2
             ) {
               ways.push(item);
