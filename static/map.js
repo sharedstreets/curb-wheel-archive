@@ -3,7 +3,7 @@ mapboxgl.accessToken =
 
 app.ui.map = new mapboxgl.Map({
 	container: "map",
-	style: "http://10.3.141.1:8080/styles/basic-preview/style.json",
+	style: location.hostname === 'localhost'? app.constants.mapStyle.fullStyle : `http://10.3.141.1:8080/styles/basic-preview/style.json`,
 	hash: true,
 });
 
@@ -83,6 +83,24 @@ app.ui.map
 				paint: {
 					"circle-color": "steelblue",
 				},
+			})
+			.addLayer({
+				id: 'pois', 
+				minzoom:16,
+				source: 'openmaptiles', 
+				'source-layer': 'poi', 
+				type: 'symbol', 
+				layout: {
+					'text-field': '{name:latin}',
+					"text-font": ["Noto Sans Regular"],
+					'text-size': {
+						stops: [[16,12], [22,30]]
+					},
+					'text-max-width':6
+				},
+				paint: {
+					'text-color': 'steelblue'
+				}
 			})
 			.on("click", "streets", (e) => {
 				console.log(e.features)
