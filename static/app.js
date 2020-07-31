@@ -1619,7 +1619,8 @@ constants: {
 				"source": "openmaptiles",
 				"source-layer": "place",
 				"type": "symbol"
-			}],
+			}
+			],
 			"id": "basic-preview"
 		}
 	},

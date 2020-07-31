@@ -560,23 +560,84 @@ var app = {
 
 			})
 
-			var data = [
-				['', 'Ford', 'Tesla', 'Toyota', 'Honda'],
-				['2017', 10, 11, 12, 13],
-				['2018', 20, 11, 14, 13],
-				['2019', 30, 15, 12, 13]
-			];
+			var data = app.state.data.features
+					.map(f=>[f.properties.label, f.properties.ref_side])
+			
+
+			console.log(data)
 
 			var container = document.getElementById('spreadsheet');
 			var hot = new Handsontable(container, {
 				data: data,
 				rowHeaders: true,
-				colHeaders: true,
-				// filters: true,
+				colHeaders: app.constants.properties,
+				filters: true,
+				columnSorting: true,
+
+				beforeAutofill: (start, end, data) =>{
+					console.log(start, end, data)
+				},
+
+				columns:[
+					{},
+					{
+						type: 'dropdown',
+						source: app.constants.validate.sideOfStreet.oneOf,
+						strict: true,
+						// filter:false,
+						visibleRows: 4
+					},
+					{
+						type: 'autocomplete',
+						source: app.constants.validate.assetType.oneOf,
+						strict: true,
+						visibleRows: 20,
+						afterSelection: ()=>{alert('foo')}
+					},					
+					{
+						type: 'autocomplete',
+						// source: app.constants.validate.assetSubType.oneOf,
+						strict: true,
+						visibleRows: 20,
+						placeholder: 'N/A',
+						// renderer: conditionalRenderer
+					},					
+				],
+
 				dropdownMenu: true,
-				stretchH:'all'
+				afterChange: (changes) => {
+					console.log(changes)
+				},
+
+				afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
+
+					console.log(hot.toPhysicalRow(row), row)
+					app.ui.map
+						.setPaintProperty('spans', 'line-color',
+							[
+								'match',
+								['get', 'id'],
+								hot.toPhysicalRow(row), 'steelblue',
+								'#ccc'
+							]
+						)
+				},
+				stretchH:'all',
+				licenseKey: 'non-commercial-and-evaluation'
+
 			});
 		
+
+			function conditionalRenderer(instance, td, row, col, prop, value, cellProperties) {
+				console.log(instance, td, row, col, prop, value, cellProperties)
+				Handsontable.renderers.TextRenderer.apply(this, arguments);
+
+				if (instance.getDataAtCell(row, 2) == "fence") {
+				td.innerHTML = "";
+				td.style = "background: lightgray;"
+				}
+				return td;
+			}
 		}
 	},
 
