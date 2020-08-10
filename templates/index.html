@@ -83,11 +83,15 @@
 		<input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
 		<input type='submit' id ='imageSubmit' value='Upload!' />
 		</form>
-		<iframe name="hiddenIframe" class='hidden' onload='app.io.iframeOnload()'></iframe>
+		<iframe name="hiddenIframe" id='hidden-iframe' class='hidden'></iframe>
 	</body>
 	<script src="static/d3.v4.min.js"></script>
 	<script src='static/app.js'></script>
 	<script src='static/turf.min.js'></script>
 	<script src='static/map.js'></script>
-
+	<script>
+		// add iframe listener after app.js has loaded
+		var hiddenIframe = document.getElementById('hidden-iframe');
+		hiddenIframe.addEventListener('load', app.io.iframeOnload);
+	</script>
 </html>
