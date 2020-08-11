@@ -8,11 +8,14 @@
 		<link href='static/mapbox-gl.css' rel='stylesheet' />
 		<style>
 
+			body {
+				
+			}
 			#spreadsheet {
 				width:100%;
 				height:100%;
 			}
-			.entry {
+/*			.entry {
 				border: 2px solid #ddd;
 				border-radius:5px;
 			}
@@ -29,9 +32,9 @@
 				width:200px;
 				height:300px;
 				background-size: cover;
-			}
+			}*/
 
-			select {
+/*			select {
 				padding: 2px;
 			    font-size: 1em;
 			    border:1px solid #aaa;
@@ -61,7 +64,7 @@
 			.clickable {
 				color: steelblue;
 				cursor:pointer;
-			}
+			}*/
 
 			.half {
 				width:50%;
@@ -72,6 +75,80 @@
 			.ht_master tr > td {
 				padding:0px;
 			}
+
+			.handsontable.as-you-type-demo tr:first-child th {
+			  vertical-align: bottom;
+			}
+
+			.handsontable.as-you-type-demo th > div.filterHeader {
+			  border-top: 1px solid #CCC;
+			}
+
+			.handsontable.as-you-type-demo th > div.filterHeader > input {
+			  width: calc(100% - 10px);
+			  box-shadow: none;
+			  border: 1px solid #CCC;
+			  margin-top: 1px;
+			}
+
+			#externalFilter {
+			  display: none;
+			  margin-left: 10px;
+			  -ms-user-select: none; /* Internet Explorer/Edge */
+			  user-select: none;
+			  margin-bottom: 50px;
+			}
+
+			#externalFilter > .button-holder {
+			  position: relative;
+			}
+
+			#externalFilter > .button-holder .buttons {
+			  left: 5px;
+			}
+
+			#externalFilter > .demo-columnChoose,
+			#externalFilter > .demo-columnChoose > select,
+			#externalFilter > .demo-filterSelect {
+			  width: 200px;
+			}
+
+			#externalFilter > .demo-columnChoose > select {
+			  display: block;
+			  margin: 2px 0px 10px 0px;
+			}
+
+			#externalFilter > .demo-filterSelect {
+			  border: 1px solid #cccccc;
+			  max-height: 200px;
+			  overflow: auto;
+			}
+
+			#externalFilter > .demo-filterSelect > .demo-controllers {
+			  font-weight: bold;
+			  border-bottom: 1px solid #cccccc;
+			  background-color: rgb(243, 243, 243);
+			  padding: 2px 0px;
+			}
+
+			#externalFilter > .demo-filterSelect > .demo-controllers {
+			  padding: 5px;
+			}
+
+			#externalFilter > .demo-filterSelect > .demo-items {
+			  padding: 5px;
+			}
+
+			#externalFilter > .demo-filterSelect > .demo-items > .demo-item > label:before {
+			  content: ' ';
+			  white-space: pre;
+			}
+
+			#externalFilter > .button-holder {
+			  margin-top: 10px;
+			}
+
+
 		</style>
 	</head>
 	<body>
@@ -82,9 +159,11 @@
 	</body>
 	<script src="https://cdn.jsdelivr.net/npm/handsontable@7.4.2/dist/handsontable.full.min.js"></script>
 	<link href="https://cdn.jsdelivr.net/npm/handsontable@7.4.2/dist/handsontable.full.min.css" rel="stylesheet" media="screen">
+<!-- 	<link type="text/css" rel="stylesheet" href="https://handsontable.com/docs/7.4.2/styles/main.css">
+	<link type="text/css" rel="stylesheet" href="https://handsontable.com/docs/7.4.2/components/handsontable/dist/handsontable.full.min.css" data-jsfiddle="common"> -->
 	<script src='static/mapbox-gl.js'></script>
 	<script src='static/digitizer.js'></script>
-	<script src='static/autocomplete.js'></script>
+	<!-- <script src='static/autocomplete.js'></script> -->
 	<script src="static/d3.v4.min.js"></script>
 
 	<script>

@@ -563,20 +563,59 @@ var app = {
 			var data = app.state.data.features
 					.map(f=>[f.properties.label, f.properties.ref_side])
 			
+			// BUILD FILTERS
 
-			console.log(data)
+			// Event for `keydown` event. Add condition after delay of 200 ms which is counted from time of last pressed key.
+			var debounceFn = Handsontable.helper.debounce(function (colIndex, event) {
+				var filtersPlugin = hot.getPlugin('filters');
 
-			var container = document.getElementById('spreadsheet');
-			var hot = new Handsontable(container, {
+				filtersPlugin.removeConditions(colIndex);
+				filtersPlugin.addCondition(colIndex, 'contains', [event.target.value]);
+				filtersPlugin.filter();
+				}, 200);
+
+				var addEventListeners = function (input, colIndex) {
+				input.addEventListener('keydown', function(event) {
+				debounceFn(colIndex, event);
+				});
+			};
+
+			// Build elements which will be displayed in header.
+			var getInitializedElements = function(colIndex) {
+				var div = document.createElement('div');
+				var input = document.createElement('input');
+
+				div.className = 'filterHeader';
+
+				addEventListeners(input, colIndex);
+
+				div.appendChild(input);
+
+				return div;
+			};
+
+			// Add elements to header on `afterGetColHeader` hook.
+			var addInput = function(col, TH) {
+				// Hooks can return value other than number (for example `columnSorting` plugin use this).
+				if (typeof col !== 'number') return col;
+				if (col >= 0 && TH.childElementCount < 2) TH.appendChild(getInitializedElements(col));
+			};
+
+			// Deselect column after click on input.
+			var doNotSelectColumn = function (event, coords) {
+				if (coords.row === -1 && event.target.nodeName === 'INPUT') {
+					event.stopImmediatePropagation();
+					this.deselectCell();
+				}
+			};
+
+			var hot = new Handsontable(document.getElementById('spreadsheet'), {
 				data: data,
 				rowHeaders: true,
 				colHeaders: app.constants.properties,
 				filters: true,
 				columnSorting: true,
 
-				beforeAutofill: (start, end, data) =>{
-					console.log(start, end, data)
-				},
 
 				columns:[
 					{},
@@ -596,6 +635,7 @@ var app = {
 					},					
 					{
 						type: 'autocomplete',
+						readOnly: true,
 						// source: app.constants.validate.assetSubType.oneOf,
 						strict: true,
 						visibleRows: 20,
@@ -604,14 +644,55 @@ var app = {
 					},					
 				],
 
-				dropdownMenu: true,
+				// dropdownMenu: true,
+				afterGetColHeader: addInput,
+    			beforeOnCellMouseDown: doNotSelectColumn,
 				afterChange: (changes) => {
-					console.log(changes)
+
+					if (changes) {
+
+						for (change of changes) {
+
+							var propIndex = change[1];
+
+							//propagate assetType to assetSubType
+							if (propIndex === 2) {
+
+								var newValue = change[3];
+								var propagatingRule = app.constants.ui.entryPropagations.assetType.propagatingValues[newValue]
+								
+								var newSettings = {
+									row: change[0], 
+									column: propIndex+1, 
+									readOnly:!propagatingRule, 
+									type: 'autocomplete', 
+									source: []
+								}
+
+								if (propagatingRule) {
+									newSettings.source = propagatingRule.values || [];
+									newSettings.placeholder = propagatingRule.placeholder;
+								}
+								
+								console.log(newSettings)
+								hot.updateSettings({
+									cells: //[newSettings]
+									(row, column, prop) => {
+										
+										var propagationTarget = row === change[0] && column === propIndex+1
+										if (propagationTarget) return newSettings
+									}
+								})
+								
+							}
+						}
+					}
+
 				},
 
 				afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
 
-					console.log(hot.toPhysicalRow(row), row)
+					// console.log(hot.toPhysicalRow(row), row)
 					app.ui.map
 						.setPaintProperty('spans', 'line-color',
 							[
@@ -638,6 +719,8 @@ var app = {
 				}
 				return td;
 			}
+
+			
 		}
 	},
 
