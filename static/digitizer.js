@@ -609,116 +609,118 @@ var app = {
 				}
 			};
 
-			var hot = new Handsontable(document.getElementById('spreadsheet'), {
-				data: data,
-				rowHeaders: true,
-				colHeaders: app.constants.properties,
-				filters: true,
-				columnSorting: true,
+			var featuresList = new Handsontable(
+				document.getElementById('featuresList'), 
+				{
+				
+					data: data,
+					rowHeaders: true,
+					colHeaders: app.constants.properties,
+					filters: true,
+					columnSorting: true,
 
+					columns:[
+						{},
+						{
+							type: 'dropdown',
+							source: app.constants.validate.sideOfStreet.oneOf,
+							strict: true,
+							// filter:false,
+							visibleRows: 4
+						},
+						{
+							type: 'autocomplete',
+							source: app.constants.validate.assetType.oneOf,
+							strict: true,
+							visibleRows: 20,
+							afterSelection: ()=>{alert('foo')}
+						},					
+						{
+							type: 'autocomplete',
+							readOnly: true,
+							// source: app.constants.validate.assetSubType.oneOf,
+							strict: true,
+							visibleRows: 20,
+							placeholder: 'N/A',
+							// renderer: conditionalRenderer
+						},					
+					],
 
-				columns:[
-					{},
-					{
-						type: 'dropdown',
-						source: app.constants.validate.sideOfStreet.oneOf,
-						strict: true,
-						// filter:false,
-						visibleRows: 4
-					},
-					{
-						type: 'autocomplete',
-						source: app.constants.validate.assetType.oneOf,
-						strict: true,
-						visibleRows: 20,
-						afterSelection: ()=>{alert('foo')}
-					},					
-					{
-						type: 'autocomplete',
-						readOnly: true,
-						// source: app.constants.validate.assetSubType.oneOf,
-						strict: true,
-						visibleRows: 20,
-						placeholder: 'N/A',
-						// renderer: conditionalRenderer
-					},					
-				],
+					// dropdownMenu: true,
+					afterGetColHeader: addInput,
+					beforeOnCellMouseDown: doNotSelectColumn,
+					afterChange: (changes) => {
 
-				// dropdownMenu: true,
-				afterGetColHeader: addInput,
-    			beforeOnCellMouseDown: doNotSelectColumn,
-				afterChange: (changes) => {
+						if (changes) {
 
-					if (changes) {
+							for (change of changes) {
 
-						for (change of changes) {
+								var propIndex = change[1];
 
-							var propIndex = change[1];
+								//propagate assetType to assetSubType
+								if (propIndex === 2) {
 
-							//propagate assetType to assetSubType
-							if (propIndex === 2) {
-
-								var newValue = change[3];
-								var propagatingRule = app.constants.ui.entryPropagations.assetType.propagatingValues[newValue]
-								
-								var newSettings = {
-									row: change[0], 
-									column: propIndex+1, 
-									readOnly:!propagatingRule, 
-									type: 'autocomplete', 
-									source: []
-								}
-
-								if (propagatingRule) {
-									newSettings.source = propagatingRule.values || [];
-									newSettings.placeholder = propagatingRule.placeholder;
-								}
-								
-								console.log(newSettings)
-								hot.updateSettings({
-									cells: //[newSettings]
-									(row, column, prop) => {
-										
-										var propagationTarget = row === change[0] && column === propIndex+1
-										if (propagationTarget) return newSettings
+									var newValue = change[3];
+									var propagatingRule = app.constants.ui.entryPropagations.assetType.propagatingValues[newValue]
+									
+									var newSettings = {
+										row: change[0], 
+										column: propIndex+1, 
+										readOnly:!propagatingRule, 
+										type: 'autocomplete', 
+										source: []
 									}
-								})
-								
+
+									if (propagatingRule) {
+										newSettings.source = propagatingRule.values || [];
+										newSettings.placeholder = propagatingRule.placeholder;
+									}
+									
+									console.log(newSettings)
+									featuresList.updateSettings({
+										cells: //[newSettings]
+										(row, column, prop) => {
+											
+											var propagationTarget = row === change[0] && column === propIndex+1
+											if (propagationTarget) return newSettings
+										}
+									})
+									
+								}
 							}
 						}
-					}
 
-				},
+					},
 
-				afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
+					afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
 
-					// console.log(hot.toPhysicalRow(row), row)
-					app.ui.map
-						.setPaintProperty('spans', 'line-color',
-							[
-								'match',
-								['get', 'id'],
-								hot.toPhysicalRow(row), 'steelblue',
-								'#ccc'
-							]
-						)
-				},
-				stretchH:'all',
-				licenseKey: 'non-commercial-and-evaluation'
+						app.ui.map
+							.setPaintProperty('spans', 'line-color',
+								[
+									'match',
+									['get', 'id'],
+									featuresList.toPhysicalRow(row), 'steelblue',
+									'#ccc'
+								]
+							)
+					},
 
-			});
-		
-
-			function conditionalRenderer(instance, td, row, col, prop, value, cellProperties) {
-				console.log(instance, td, row, col, prop, value, cellProperties)
-				Handsontable.renderers.TextRenderer.apply(this, arguments);
-
-				if (instance.getDataAtCell(row, 2) == "fence") {
-				td.innerHTML = "";
-				td.style = "background: lightgray;"
+					stretchH:'all',
+					licenseKey: 'non-commercial-and-evaluation'
 				}
-				return td;
-			}
+			);
+		
+			var featuresList = new Handsontable(
+
+				document.getElementById('regulationsList'), 
+				{
+					rowHeaders: true,
+					colHeaders: app.constants.ui.regulationParams.map(p=>p.param),
+
+					stretchH:'all',
+					licenseKey: 'non-commercial-and-evaluation'
+				}
+			)
 
 			
 		}
