@@ -170,6 +170,7 @@ input[type=number] {
 
 .col4{
 	width:33.333333333%;
+	float:left;
 	flex:none;
 }
 
@@ -178,6 +179,12 @@ input[type=number] {
 	flex:none;
 	float:left;
 }
+.col8{
+	width:66.6666666%;
+	flex:none;
+	float:left;
+}
+
 .col9{
 	width:75%;
 	flex:none;
@@ -205,4 +212,7 @@ input[type=number] {
 
 .fullHeight {
 	height:100%;
+}
+.halfHeight {
+	height:50%;
 }

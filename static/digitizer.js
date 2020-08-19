@@ -267,11 +267,14 @@ var app = {
 				{
 					param: 'payment'
 				},
+				{
+					param: 'timeSpanTemplate'
+				}
+			],
 
-
+			timeSpanParams: [
 				{
 					param: 'daysOfWeek',
-					// inputType: 'text',
 					placeholder: 'Comma-delimited values'
 				},
 				{
@@ -299,13 +302,13 @@ var app = {
 			shstLocationStart: {
 				type: 'number',
 				output: ['output', 'location'],
-				transform: (input) => parseFloat(input)
+				transform: input => parseFloat(input)
 			},	
 
 			shstLocationEnd: {
 				type: 'number',
 				output: ['output', 'location'],
-				transform: (input) => parseFloat(input)
+				transform: input => parseFloat(input)
 			},	
 
 			assetType: {
@@ -392,9 +395,7 @@ var app = {
 				],
 				output: ['rule'],
 				allowCustomValues: true,
-				transform: (input) =>{
-					return input.split(', ')
-				}
+				transform: input => input.split(', ')
 			},
 
 			userSubClasses: {
@@ -402,9 +403,7 @@ var app = {
 				arrayMemberType: 'string',
 				allowCustomValues: true,
 				output: ['rule'],
-				transform: (input) =>{
-					return input.split(', ')
-				}
+				transform: input => input.split(', ')
 			},
 
 			daysOfWeek: {
@@ -413,9 +412,7 @@ var app = {
 				allowCustomValues: false,
 				inputType: 'text',
 				oneOf: ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'],
-				transform: (input) =>{
-					return input.split(', ')
-				},
+				transform: input => input.split(', '),
 				output: ['rule']
 			},
 
@@ -567,24 +564,22 @@ var app = {
 
 			// Event for `keydown` event. Add condition after delay of 200 ms which is counted from time of last pressed key.
 			var debounceFn = Handsontable.helper.debounce(function (colIndex, event) {
-				var filtersPlugin = hot.getPlugin('filters');
+				var filtersPlugin = featuresList.getPlugin('filters');
 
 				filtersPlugin.removeConditions(colIndex);
 				filtersPlugin.addCondition(colIndex, 'contains', [event.target.value]);
 				filtersPlugin.filter();
 				}, 200);
 
-				var addEventListeners = function (input, colIndex) {
-				input.addEventListener('keydown', function(event) {
-				debounceFn(colIndex, event);
-				});
-			};
+				var addEventListeners =  (input, colIndex) => {
+					input.addEventListener('keydown', event => debounceFn(colIndex, event));
+				};
 
 			// Build elements which will be displayed in header.
 			var getInitializedElements = function(colIndex) {
 				var div = document.createElement('div');
 				var input = document.createElement('input');
-
+				input.placeholder = 'Filter'
 				div.className = 'filterHeader';
 
 				addEventListeners(input, colIndex);
@@ -610,15 +605,15 @@ var app = {
 			};
 
 			var featuresList = new Handsontable(
+
 				document.getElementById('featuresList'), 
+
 				{
 				
 					data: data,
 					rowHeaders: true,
-					colHeaders: app.constants.properties,
+					colHeaders: app.constants.properties.concat('regulationsTemplate'),
 					filters: true,
-					columnSorting: true,
-
 					columns:[
 						{},
 						{
@@ -633,73 +628,88 @@ var app = {
 							source: app.constants.validate.assetType.oneOf,
 							strict: true,
 							visibleRows: 20,
-							afterSelection: ()=>{alert('foo')}
 						},					
 						{
 							type: 'autocomplete',
 							readOnly: true,
-							// source: app.constants.validate.assetSubType.oneOf,
-							strict: true,
+							placeholder: 'NA',
 							visibleRows: 20,
-							placeholder: 'N/A',
-							// renderer: conditionalRenderer
-						},					
+						},
+
+						{
+							type: 'text'
+						}
 					],
 
 					// dropdownMenu: true,
 					afterGetColHeader: addInput,
 					beforeOnCellMouseDown: doNotSelectColumn,
+
 					afterChange: (changes) => {
 
 						if (changes) {
+							
+							var assetSubtypeWasChanged = changes
+								.map(change=>change[1])
+								.some(col=>col===2)
 
-							for (change of changes) {
+							//propagate assetType to assetSubType
+							if (assetSubtypeWasChanged) {
 
-								var propIndex = change[1];
+								var data = featuresList.getSourceData();
+								var cellsToClear = []
 
-								//propagate assetType to assetSubType
-								if (propIndex === 2) {
+								featuresList.updateSettings({
 
-									var newValue = change[3];
-									var propagatingRule = app.constants.ui.entryPropagations.assetType.propagatingValues[newValue]
-									
-									var newSettings = {
-										row: change[0], 
-										column: propIndex+1, 
-										readOnly:!propagatingRule, 
-										type: 'autocomplete', 
-										source: []
-									}
+									cells: (row, col, prop) => {
+									    
+										// if currently at assetSubType column
+									    if (col === 3) {
 
-									if (propagatingRule) {
-										newSettings.source = propagatingRule.values || [];
-										newSettings.placeholder = propagatingRule.placeholder;
-									}
-									
-									console.log(newSettings)
-									featuresList.updateSettings({
-										cells: //[newSettings]
-										(row, column, prop) => {
+										    var cellProperties = {}
+											var parentValue = data[row][col-1];
+											var propagatingRule = app.constants.ui.entryPropagations.assetType.propagatingValues[parentValue]
+									    	
+									    	// if assetType is a value that allows subtype (indicated by presence of propagating rule)
+									    	if (propagatingRule){
+												cellProperties = {
+													readOnly:false, 
+													type: propagatingRule.values ? 'autocomplete' : 'text', 
+													source: propagatingRule.values,
+													placeholder: propagatingRule.placeholder
+												}
+									    	}
 											
-											var propagationTarget = row === change[0] && column === propIndex+1
-											if (propagationTarget) return newSettings
-										}
-									})
-									
-								}
+											// if subtype not allowed, clear value
+											else cellsToClear.push([row, col])		
+									    }
+
+									    return cellProperties;
+									}
+								})
+
+								cellsToClear
+									.forEach(
+										array=>featuresList.setDataAtCell(array[0], array[1], undefined)
+									)
+
 							}
+							
 						}
 
 					},
 
 					afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
 
+						app.state.activeFeatureIndex = featuresList.toPhysicalRow(row);
+						d3.select('#featureIndex')
+							.text(`#${app.state.activeFeatureIndex+1}`)
 						app.ui.map
 							.setPaintProperty('spans', 'line-color',
 								[
 									'match',
 									['get', 'id'],
-									featuresList.toPhysicalRow(row), 'steelblue',
+									app.state.activeFeatureIndex, 'steelblue',
 									'#ccc'
 								]
 							)
@@ -710,19 +720,54 @@ var app = {
 				}
 			);
 		
-			var featuresList = new Handsontable(
+			var regulationsList = new Handsontable(
 
 				document.getElementById('regulationsList'), 
 				{
 					rowHeaders: true,
 					colHeaders: app.constants.ui.regulationParams.map(p=>p.param),
-
+					columns: [
+						{
+							type: 'dropdown',
+							source: app.constants.validate.activity.oneOf,
+							strict: true,
+							visibleRows: 15
+						},
+						{
+							type: 'dropdown',
+							source: app.constants.validate.maxStay.oneOf,
+							strict: true,
+							visibleRows: 15
+						},
+						{},
+						{},
+						{
+							type: 'dropdown',
+							source: app.constants.validate.payment.oneOf,
+							strict: true,
+							visibleRows: 15
+						},						
+						{}
+					],
 					stretchH:'all',
 					licenseKey: 'non-commercial-and-evaluation'
 				}
 			)
 
-			
+			var timeSpansList = new Handsontable(
+
+				document.getElementById('timeSpansList'), 
+				{
+					rowHeaders: true,
+					colHeaders: app.constants.ui.timeSpanParams.map(p=>p.param),
+					columns: [
+						{},
+						{}
+					],
+					stretchH:'all',
+					licenseKey: 'non-commercial-and-evaluation'
+				}
+			)
 		}
 	},
 
