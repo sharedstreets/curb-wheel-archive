@@ -257,15 +257,15 @@ var app = {
 					param: 'maxStay'
 				},	
 				{
+					param: 'payment'
+				},
+				{
 					param: 'userClasses',
 					placeholder: 'Comma-delimited values'
 				},
 				{
 					param: 'userSubClasses',
 					placeholder: 'Comma-delimited values'
-				},
-				{
-					param: 'payment'
 				},
 				{
 					param: 'timeSpanTemplate'
@@ -611,6 +611,7 @@ var app = {
 				{
 				
 					data: data,
+					minRows:100,
 					rowHeaders: true,
 					colHeaders: app.constants.properties.concat('regulationsTemplate'),
 					filters: true,
@@ -701,6 +702,11 @@ var app = {
 
 					afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
 
+						d3.select('#regulations')
+							.classed('hidden', false);
+
+						regulationsList.render();
+
 						app.state.activeFeatureIndex = featuresList.toPhysicalRow(row);
 						d3.select('#featureIndex')
 							.text(`#${app.state.activeFeatureIndex+1}`)
@@ -724,6 +730,7 @@ var app = {
 
 				document.getElementById('regulationsList'), 
 				{
+					minRows:100,
 					rowHeaders: true,
 					colHeaders: app.constants.ui.regulationParams.map(p=>p.param),
 					columns: [
@@ -739,31 +746,71 @@ var app = {
 							strict: true,
 							visibleRows: 15
 						},
-						{},
-						{},
 						{
-							type: 'dropdown',
-							source: app.constants.validate.payment.oneOf,
-							strict: true,
-							visibleRows: 15
-						},						
+							type: 'checkbox',
+							width:60
+						},	
+						{},
+						{},					
 						{}
 					],
+
+					afterSelection: () => {
+						d3.select('#timespans')
+							.classed('hidden', false)
+
+						timeSpansList.render();
+
+					},
 					stretchH:'all',
 					licenseKey: 'non-commercial-and-evaluation'
 				}
 			)
 
-			var timeSpansList = new Handsontable(
+			timeSpansList = new Handsontable(
 
 				document.getElementById('timeSpansList'), 
 				{
+					minRows:100,
+					// data: new Array(50)
+					// 	.fill(new Array(13).fill(undefined)),
+					dataSchema: ()=>{
+						
+						var pattern = {}
+						app.constants.validate.daysOfWeek.oneOf
+							.forEach(key=>pattern[key] = null)
+
+						return pattern
+					},
 					rowHeaders: true,
-					colHeaders: app.constants.ui.timeSpanParams.map(p=>p.param),
-					columns: [
-						{},
-						{}
+					colHeaders: true,
+					nestedHeaders:[
+						[
+							{label: 'daysOfWeek', colspan:7},
+							{label: 'timeOfDay', colspan:2},
+							{label: 'timeOfDay', colspan:2},
+							{label: 'timeOfDay', colspan:2}
+						],
+						
+						app.constants.validate.daysOfWeek.oneOf
+							.concat(['start', 'end'])
+							.concat(['start', 'end'])
+							.concat(['start', 'end'])
+						
 					],
+					columns: app.constants.validate.daysOfWeek.oneOf
+						.map(day=>{
+							return {
+								data: day,
+								type: 'checkbox',
+								width:30
+							}
+						})
+						.concat(new Array(6).fill({
+							type: 'time',
+							timeFormat:'HH:mm',
+							correctFormat: true
+						})),
 					stretchH:'all',
 					licenseKey: 'non-commercial-and-evaluation'
 				}
