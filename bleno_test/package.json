@@ -1,0 +1,14 @@
+{
+  "name": "bleno_test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "scripts": {
+    "start": "sudo sh startup.sh && node ./index.js"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "bleno": "^0.5.0"
+  }
+}
