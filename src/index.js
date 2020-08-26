@@ -10,7 +10,8 @@ var currentDevice;
 var poll; 
 
 function onDeviceReady() {
-    // Cordova is now initialized. Have fun!
+    const db = new Database();
+
     idbKeyval.get('connection').then(function(connection){
         console.log(connection)
         if (connection) {
@@ -59,7 +60,7 @@ function onDeviceReady() {
         }
         e.target.classList.add('btn--active');
         if (currentDevice) {
-            ble.disconnect(currentDevice,disconnectCallback);
+            ble.disconnect(currentDevice, disconnectCallback);
         }
         currentDevice = e.target.getAttribute('data-mac-add')
         ble.connect(currentDevice, connectCallback, disconnectCallback);
