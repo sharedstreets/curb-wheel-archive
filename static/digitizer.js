@@ -2,170 +2,555 @@ var app = {
 
 	state: {
 		activeFeatureIndex: 0,
-	},
-
-	ui: {
-
-		entry: {
-
-			appendProperty: function(d,i) {
-
-				var container = d3.select(this)
-
-				// append label
-				container
-					.attr('prop', d.param)
-					.append('div')
-					.attr('class', 'mr10 inlineBlock quiet p10')
-					.text(d.param);
-
-				var validate = app.constants.validate[d.param];
-
-				if (validate.inputType === 'text') appendInput()
-				else if(validate.inputType === 'dropdown') appendDropdown();
-
-				else {
-
-					if (validate.allowCustomValues === false) appendDropdown()
-					else appendInput()
-				}
-
-
-				function appendInput(){
-
-					var validate = app.constants.validate[d.param];
-
-					var textInput = 
-					container
-						.append('div')
-						.attr('class', 'fr')
-						.style('width', '50%')
-							.append('div')
-							.attr('class', 'autocomplete')
-							.style('width', '100%')
-							.append('input')
-							.attr('prop', d.param)
-							.attr('type', validate.type)
-							.attr('class', 'fr')
-							.attr('onclick', 'this.setSelectionRange(this.value.length, this.value.length)')
-							.attr('placeholder', d.placeholder)
-
-
-					if (validate.oneOf) {
-
-						autocomplete(
-
-							textInput.node(), 
-							{
-								values: validate.oneOf,
-								match: 'any',
-								onEnter: app.utils.autocomplete.keepTyping, 
-								inputTransform: app.utils.autocomplete.lastListItem,
-								outputTransform: app.utils.autocomplete.returnFullListString
-							}
-						)
-					}
-
-					return textInput
-				}
-				
-				function appendDropdown(){
-
-					var dropdown = container
-						.append('select')
-						.attr('prop', d.param)
-						.attr('class', 'fr m10')
-
-					dropdown
-						.selectAll('option')
-						.data(validate.oneOf)
-						.enter()
-						.append('option')
-						.attr('value', function(d){return d})
-						.text(d=>d)
-
-					return dropdown
-				}
-
-			},
-
-
-			onChange: function(d,i){
-
-				var entry = d3.select(this)
-
-				entry.selectAll('input, select')
-					.on('change', c)
-					.on('keyup', c)
-				function c(data){
-
-					var prop = d3.select(this).attr('prop')
-					var value = d3.select(this).property('value')
-
-					var target = d;
-					var subdirectory = app.constants.validate[prop].output
-					for (item of subdirectory) target = target[item === '_index' ? i : item]
-
-					// apply transform function if there is one
-					var tfFn = app.constants.validate[prop].transform;
-					target[prop] = tfFn ? tfFn(value) : value;
-
-
-					// propagations
-					var propagationEntry = app.constants.ui.entryPropagations[prop]; 
-					if (propagationEntry) {
-						
-						var propagatingRule = propagationEntry.propagatingValues[value] || false;
-						var destination = entry.select(`div[prop=${propagationEntry.destinationProp}]`)
-						
-						destination
-							.classed('hidden', !propagatingRule)
-
-						if (propagatingRule) {
-
-							var input = destination.select('input')
-								.attr('placeholder', propagatingRule.placeholder)
-								.property('value', '')
-								.node()
-
-
-							autocomplete(input, {
-								values: propagatingRule.values || []
-							})
-							
-							input.focus();
-						}
-					}
-
-
-				}
-			},
-
-			updateRegulation: (entries) =>{
-				
-				var rules = entries
-					.select('.rules')
-					.selectAll('.rule')
-					.data(d=>d.output.regulations)
-					.enter()
-					.append('div')
-					.attr('class', 'rule m10')
-
-				var props = rules
-					.selectAll('.property')
-					.data(d=>app.constants.ui.regulationParams.map(obj=>{
-						return {param: obj.param, value: d.rule[obj.param], placeholder: obj.placeholder}
-					}))
-					.enter()
-					.append('div')
-					.attr('class', 'property')
-					.each(app.ui.entry.appendProperty)
-					.select('input, select')
-
-				return rules
-			}
+		templates: {
+			regulations:{},
+			timeSpans:{}
 		}
 	},
+
+	io: {
+
+		export: () => {
+
+			app.state.data.features = app.state.data.features.map(ft => {
+
+				ft = {
+					geometry: ft.geometry,
+					properties: ft.output
+				}
+
+				return ft
+			})
+
+			var element = document.createElement('a');
+
+			const blob = new Blob([JSON.stringify(app.state.data)], {type: "application/json"});
+			var url = window.URL.createObjectURL(blob);
+			
+			element.setAttribute('href', url);
+			element.setAttribute('download', 'curblr_'+Date.now()+'.json');
+
+			element.style.display = 'none';
+			document.body.appendChild(element);
+
+			element.click();
+		    document.body.removeChild(element);
+		}
+
+	},
+
+
+	init: {
+
+		map: () => {
+
+			mapboxgl.accessToken = "pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ";
+
+			var map = new mapboxgl.Map({
+				container: 'map',
+				style: 'mapbox://styles/mapbox/light-v9'
+			})
+			.on('load', () => {
+
+				map.fitBounds(turf.bbox(app.state.data), {duration:200, padding:100});
+				map
+					// .addLayer({
+					// 	id: 'spans', 
+					// 	type: 'fill-extrusion', 
+					// 	source: {
+					// 		type:'geojson',
+					// 		data: data
+					// 	},
+					// 	paint: {
+					// 		'fill-extrusion-color':'red',
+					// 		'fill-extrusion-base': 2,
+					// 		'fill-extrusion-height':10,
+					// 		// 'line-width':5,
+					// 		'fill-extrusion-opacity':0.2
+					// 	}
+					// })
+					.addLayer({
+						id: 'spans', 
+						type: 'line', 
+						source: {
+							type:'geojson',
+							data: app.state.data
+						},
+						layout: {
+							'line-cap':'round'
+						},
+						paint: {
+							'line-color': [
+								'match',
+								['get', 'id'],
+								0, 'steelblue',
+								'#ccc'
+							],
+							'line-width':{
+								base:1.5,
+								stops: [[6, 1], [22, 80]]
+							},
+							'line-opacity':0.75,
+							'line-offset': {
+								base:2,
+								stops: [[12, 3], [22, 100]]
+							}
+						}
+					})
+			})
+
+			app.ui.map = map;
+		},
+
+		ui: () =>{
+
+			// prep data
+			app.state.data.features.forEach((d,i)=>{
+
+				d.properties.id = i;
+				d.properties.images = JSON.parse(d.properties.images);
+				
+				//create separate object for curblr properties
+				d.output = {
+					regulations:[],
+					location:{}
+				}
+
+				// extract survey values into curblr
+				app.constants.ui.entryParams
+					.forEach(param=>{
+						d.output.location[param.param] = d.properties[param.inputProp]
+					})
+
+			})
+
+			var data = app.state.data.features
+					.map((f,i)=>[f.properties.label, f.properties.ref_side, undefined, undefined, `#${i+1}`])
+			
+			// BUILD FILTERS
+
+			var setupFilter = ()=>{
+
+				// Event for `keydown` event. Add condition after delay of 200 ms which is counted from time of last pressed key.
+				var debounceFn = Handsontable.helper.debounce(function (colIndex, event) {
+					var filtersPlugin = featuresList.getPlugin('filters');
+
+					filtersPlugin.removeConditions(colIndex);
+					filtersPlugin.addCondition(colIndex, 'contains', [event.target.value]);
+					filtersPlugin.filter();
+					}, 200);
+
+					var addEventListeners =  (input, colIndex) => {
+						input.addEventListener('keydown', event => debounceFn(colIndex, event));
+					};
+
+				// Build elements which will be displayed in header.
+				var getInitializedElements = function(colIndex) {
+					var div = document.createElement('div');
+					var input = document.createElement('input');
+					input.placeholder = 'Filter by label'
+					div.className = 'filterHeader';
+
+					addEventListeners(input, colIndex);
+
+					div.appendChild(input);
+
+					return div;
+				};
+
+				document.querySelector('#featureFilter')
+					.appendChild(getInitializedElements(0));
+			}
+
+			setupFilter()
+
+			var featuresList = new Handsontable(
+
+				document.getElementById('featuresList'), 
+
+				{
+				
+					data: data,
+					minRows:10,
+					rowHeaders: true,
+					colHeaders: app.constants.properties.concat('regulationsTemplate'),
+					filters: true,
+					cells: (row, col, prop) => {
+						if (row>=app.state.data.features.length) return {readOnly:true, placeholder: undefined, type:null, source:undefined}
+					},
+
+					columns:[
+						{
+							contextMenu:['filter_by_value']
+						},
+						{
+							type: 'dropdown',
+							source: app.constants.validate.sideOfStreet.oneOf,
+							strict: true,
+							filter:true,
+							visibleRows: 4
+						},
+						{
+							type: 'autocomplete',
+							source: app.constants.validate.assetType.oneOf,
+							filter:true,							
+							strict: true,
+							visibleRows: 20,
+						},					
+						{
+							type: 'autocomplete',
+							readOnly: true,
+							placeholder: 'NA',
+							visibleRows: 20,
+						},
+
+						{
+							type: 'text',
+							className:'htCenter'
+						}
+					],
+
+					afterChange: (changes) => {
+
+						if (changes) {
+							
+							var assetSubtypeWasChanged = changes
+								.map(change=>change[1])
+								.some(col=>col===2)
+
+							//propagate assetType to assetSubType
+							if (assetSubtypeWasChanged) {
+
+								var data = featuresList.getSourceData();
+								var cellsToClear = []
+
+								featuresList.updateSettings({
+
+									cells: (row, col, prop) => {
+
+										var cellProperties = {}
+									    
+										// if currently at assetSubType column
+									    if (col === 3) {
+
+											var parentValue = data[row][col-1];
+											var propagatingRule = app.constants.ui.entryPropagations.assetType.propagatingValues[parentValue]
+									    	
+									    	// if assetType is a value that allows subtype (indicated by presence of propagating rule)
+									    	if (propagatingRule){
+												cellProperties = {
+													readOnly:false, 
+													type: propagatingRule.values ? 'autocomplete' : 'text', 
+													source: propagatingRule.values,
+													placeholder: propagatingRule.placeholder
+												}
+									    	}
+											
+											// if subtype not allowed, clear value
+											else cellsToClear.push([row, col])		
+									    }
+										
+										if (row>=app.state.data.features.length) {
+											cellProperties.readOnly =true; 
+											cellProperties.type = null;
+											cellProperties.placeholder = undefined
+										}
+
+
+									    return cellProperties;
+									}
+								})
+
+								cellsToClear
+									.forEach(
+										array=>featuresList.setDataAtCell(array[0], array[1], undefined)
+									)
+
+							}
+							
+						}
+
+					},
+
+					afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
+						var populateRegulations = column === 4
+						if(populateRegulations) app.setState('activeFeatureIndex', featuresList.toPhysicalRow(row), populateRegulations)
+					},
+
+					stretchH:'all',
+					licenseKey: 'non-commercial-and-evaluation'
+				}
+			);
+		
+			var regulationsList = new Handsontable(
+
+				document.getElementById('regulationsList'), 
+				{
+					dataSchema: ()=>{
+						
+						var pattern = {}
+						app.constants.ui.regulationParams
+							.forEach(key=>pattern[key.param] = null)
+
+						return pattern
+					},
+					minRows:10,
+					rowHeaders: true,
+					colHeaders: app.constants.ui.regulationParams.map(p=>p.param),
+					columns: [
+						{
+							type: 'dropdown',
+							source: app.constants.validate.activity.oneOf,
+							strict: true,
+							visibleRows: 15
+						},
+						{
+							type: 'dropdown',
+							source: app.constants.validate.maxStay.oneOf,
+							strict: true,
+							visibleRows: 15
+						},
+						{
+							type: 'checkbox',
+							width:60
+						},	
+						{},
+						{},					
+						{}
+					],
+					afterSetDataAtCell: () =>{
+
+							setTimeout(()=>{
+								var templateIndex = app.ui.featuresList.getSourceDataAtCell(app.state.activeFeatureIndex, 4);
+								app.state.templates.regulations[templateIndex] = regulationsList.getSourceData()
+							},1)
+						
+					},
+
+					afterSelection: (row, column) => {
+						var populateTimeSpans = column === 5
+						if(populateTimeSpans) app.setState('activeRegulationIndex', app.ui.regulationsList.getSourceDataAtCell(row, 5), populateTimeSpans)
+					},
+
+					stretchH:'all',
+					licenseKey: 'non-commercial-and-evaluation'
+				}
+			)
+
+			var timeSpansList = new Handsontable(
+
+				document.getElementById('timeSpansList'), 
+				{
+					minRows:10,
+					dataSchema: ()=>{
+						
+						var pattern = {}
+						app.constants.validate.daysOfWeek.oneOf
+							.forEach(key=>pattern[key] = null)
+
+						return pattern
+					},
+					rowHeaders: true,
+					colHeaders: true,
+					nestedHeaders:[
+						[	
+							{label: 'timeOfDay', colspan:6},
+							{label: 'Occurring each', colspan:17}
+						],
+
+						[
+							{label: 'span', colspan:2},
+							{label: 'span', colspan:2},
+							{label: 'span', colspan:2},
+							{label: 'week', colspan:7},
+							{label: 'month', colspan:6},
+							{label: 'date range', colspan:2},
+							{label: 'event', colspan:2},
+						],
+						
+						['start', 'end']
+							.concat(['start', 'end'])
+							.concat(['start', 'end'])						
+							.concat(app.constants.validate.daysOfWeek.oneOf)
+							.concat(app.constants.validate.occurrencesInMonth.oneOf)
+							.concat(['from', 'to'])
+							.concat(['apply', 'event'])
+						
+					],
+					columns: new Array(6).fill({
+							type: 'time',
+							timeFormat:'HH:mm',
+							correctFormat: true,
+							width:80
+						})
+						.concat(
+							app.constants.validate.daysOfWeek.oneOf
+								.map(day=>{
+									return {
+										data: day,
+										type: 'checkbox',
+										width:50
+									}
+								})
+						)
+						.concat(app.constants.validate.occurrencesInMonth.oneOf
+							.map(occurrence=>{
+								return {
+									data: occurrence,
+									type: 'checkbox',
+									width:50
+								}
+							})
+						)
+						.concat(['from', 'to']
+							.map(endpoint=>{
+								return {
+									data: endpoint,
+									type: 'text',
+									width:80
+								}
+							})
+						)
+						.concat(['apply', 'event']
+							.map(item=>{
+								return {
+									data: item,
+									type: 'text',
+									width:80
+								}
+							})
+						),
+					collapsibleColumns: app.constants.timeSpansCollapsingScheme,
+					stretchH:'all',
+					licenseKey: 'non-commercial-and-evaluation',
+
+					afterSetDataAtCell: () =>{
+
+							setTimeout(()=>{
+								var templateIndex = app.ui.regulationsList.getSourceDataAtCell(app.state.activeFeatureIndex, 5);
+								app.state.templates.timeSpans[templateIndex] = timeSpansList.getSourceData()
+							}, 1)
+						
+					}
+				}
+			)
+
+			app.constants.timeSpansCollapsingScheme
+				.forEach(item =>timeSpansList.getPlugin('collapsibleColumns').collapseSection(item))
+
+			app.ui.featuresList = featuresList;
+			app.ui.regulationsList = regulationsList;
+			app.ui.timeSpansList = timeSpansList;
+		}
+	},
+
+
+	utils: {
+
+		autocomplete: {
+
+			// return the last item in a comma-delimited list, for autocomplete input
+			lastListItem: (listString)=>{
+
+				var lastItemStart = listString.lastIndexOf(', ')
+				if (lastItemStart ===-1) return listString
+
+				var arrayed = listString.split(', ')
+				var lastItem = arrayed[arrayed.length-1] 
+
+				return lastItem
+			},
+
+			// returns a transformed value from an autocomplete selection
+
+			returnFullListString: (listString, matchedItem) =>{
+
+				var lastItemStart = listString.lastIndexOf(', ')
+				if (lastItemStart ===-1) return matchedItem
+
+				var arrayed = listString.split(', ')
+				arrayed[arrayed.length-1] = matchedItem
+
+				return arrayed.join(', ')
+			},
+
+			// empty function to keep typing stringed arrays when pressing enter button 
+
+			keepTyping: (input) =>{
+				// input.value += ', '
+			}
+
+		}
+	},
+
+	setState: (key, value, updatePanel) => {
+
+		if (key === 'activeFeatureIndex') {
+
+			if (updatePanel === true) {
+
+				d3.select('#regulations')
+					.classed('invisible', false);
+				var regulationTemplateName = app.ui.featuresList.getSourceDataAtCell(value, 4)
+				var regulationTemplate = app.state.templates.regulations[regulationTemplateName];
+				regulationTemplate = regulationTemplate ? regulationTemplate.map(row=>Object.values(row)) : []
+				app.ui.regulationsList.loadData(regulationTemplate)
+				
+				app.ui.regulationsList.render();
+			}
+
+
+			d3.select('#featureIndex')
+				.text(regulationTemplateName);
+
+			app.ui.map
+				.setPaintProperty('spans', 'line-color',
+					[
+						'match',
+						['get', 'id'],
+						value, 'steelblue',
+						'#ccc'
+					]
+				);
+
+			var images = d3.selectAll('#images')
+				.selectAll('img')
+				.data(
+					app.state.data.features[value]
+						.properties.images.map(img=>img.url)
+				)
+
+			images
+				.enter()
+				.append('img')
+				.attr('src', d=>d)
+				.attr('class','inlineBlock mr10 image');
+
+			images
+				.exit()
+				.remove()
+		}
+
+		else if (key === 'activeRegulationIndex') {
+
+			if (updatePanel === true) {
+				d3.select('#timespans')
+					.classed('invisible', false)
+
+				var timeSpanTemplate = app.state.templates.timeSpans[value];
+				timeSpanTemplate = timeSpanTemplate ? timeSpanTemplate.map(row=>Object.values(row)) : []
+				app.ui.timeSpansList.loadData(timeSpanTemplate)		
+				app.ui.timeSpansList.render();
+
+				d3.select('#timeSpanTemplate')
+					.text(value);
+			}
+		}
+
+		app.state[key] = value;
+	},
+
+	ui:{},
 	constants: {
 
 		properties: [
@@ -415,7 +800,15 @@ var app = {
 				transform: input => input.split(', '),
 				output: ['rule']
 			},
-
+			occurrencesInMonth: {
+				type: 'array',
+				arrayMemberType:'string',
+				allowCustomValues: false,
+				inputType: 'text',
+				oneOf: ['1st', '2nd', '3rd', '4th', '5th', 'last'],
+				transform: input => input.split(', '),
+				output: ['rule']
+			},
 			timesOfDay: {
 				type: 'array',
 				arrayMemberType:'string',
@@ -436,425 +829,14 @@ var app = {
 			}
 		},
 
+		timeSpansCollapsingScheme: [
+			{row: -3, col: 0, collapsible: true},
+			{row: -3, col: 6, collapsible: true}
+		],
 		regulation: {
 
 		}
 	},
-
-	io: {
-
-		export: () => {
-
-			app.state.data.features = app.state.data.features.map(ft => {
-
-				ft = {
-					geometry: ft.geometry,
-					properties: ft.output
-				}
-
-				return ft
-			})
-
-			var element = document.createElement('a');
-
-			const blob = new Blob([JSON.stringify(app.state.data)], {type: "application/json"});
-			var url = window.URL.createObjectURL(blob);
-			
-			element.setAttribute('href', url);
-			element.setAttribute('download', 'curblr_'+Date.now()+'.json');
-
-			element.style.display = 'none';
-			document.body.appendChild(element);
-
-			element.click();
-		    document.body.removeChild(element);
-		}
-
-	},
-
-
-	init: {
-
-		map: () => {
-
-			mapboxgl.accessToken = "pk.eyJ1IjoibW9yZ2FuaGVybG9ja2VyIiwiYSI6Ii1zLU4xOWMifQ.FubD68OEerk74AYCLduMZQ";
-
-			var map = new mapboxgl.Map({
-				container: 'map',
-				style: 'mapbox://styles/mapbox/light-v9'
-			})
-			.on('load', () => {
-
-				map.fitBounds(turf.bbox(app.state.data), {duration:200, padding:100});
-				map
-					// .addLayer({
-					// 	id: 'spans', 
-					// 	type: 'fill-extrusion', 
-					// 	source: {
-					// 		type:'geojson',
-					// 		data: data
-					// 	},
-					// 	paint: {
-					// 		'fill-extrusion-color':'red',
-					// 		'fill-extrusion-base': 2,
-					// 		'fill-extrusion-height':10,
-					// 		// 'line-width':5,
-					// 		'fill-extrusion-opacity':0.2
-					// 	}
-					// })
-					.addLayer({
-						id: 'spans', 
-						type: 'line', 
-						source: {
-							type:'geojson',
-							data: app.state.data
-						},
-						layout: {
-							'line-cap':'round'
-						},
-						paint: {
-							'line-color': [
-								'match',
-								['get', 'id'],
-								0, 'steelblue',
-								'#ccc'
-							],
-							'line-width':{
-								base:2,
-								stops: [[6, 1], [22, 80]]
-							},
-							'line-opacity':0.75,
-							'line-offset': {
-								base:2,
-								stops: [[12, 3], [22, 100]]
-							}
-						}
-					})
-			})
-
-			app.ui.map = map;
-		},
-
-		ui: () =>{
-
-			// prep data
-			app.state.data.features.forEach((d,i)=>{
-
-				d.properties.id = i;
-				d.properties.images = JSON.parse(d.properties.images);
-				
-				//create separate object for curblr properties
-				d.output = {
-					regulations:[],
-					location:{}
-				}
-
-				// extract survey values into curblr
-				app.constants.ui.entryParams
-					.forEach(param=>{
-						d.output.location[param.param] = d.properties[param.inputProp]
-					})
-
-			})
-
-			var data = app.state.data.features
-					.map(f=>[f.properties.label, f.properties.ref_side])
-			
-			// BUILD FILTERS
-
-			// Event for `keydown` event. Add condition after delay of 200 ms which is counted from time of last pressed key.
-			var debounceFn = Handsontable.helper.debounce(function (colIndex, event) {
-				var filtersPlugin = featuresList.getPlugin('filters');
-
-				filtersPlugin.removeConditions(colIndex);
-				filtersPlugin.addCondition(colIndex, 'contains', [event.target.value]);
-				filtersPlugin.filter();
-				}, 200);
-
-				var addEventListeners =  (input, colIndex) => {
-					input.addEventListener('keydown', event => debounceFn(colIndex, event));
-				};
-
-			// Build elements which will be displayed in header.
-			var getInitializedElements = function(colIndex) {
-				var div = document.createElement('div');
-				var input = document.createElement('input');
-				input.placeholder = 'Filter'
-				div.className = 'filterHeader';
-
-				addEventListeners(input, colIndex);
-
-				div.appendChild(input);
-
-				return div;
-			};
-
-			// Add elements to header on `afterGetColHeader` hook.
-			var addInput = function(col, TH) {
-				// Hooks can return value other than number (for example `columnSorting` plugin use this).
-				if (typeof col !== 'number') return col;
-				if (col >= 0 && TH.childElementCount < 2) TH.appendChild(getInitializedElements(col));
-			};
-
-			// Deselect column after click on input.
-			var doNotSelectColumn = function (event, coords) {
-				if (coords.row === -1 && event.target.nodeName === 'INPUT') {
-					event.stopImmediatePropagation();
-					this.deselectCell();
-				}
-			};
-
-			var featuresList = new Handsontable(
-
-				document.getElementById('featuresList'), 
-
-				{
-				
-					data: data,
-					minRows:100,
-					rowHeaders: true,
-					colHeaders: app.constants.properties.concat('regulationsTemplate'),
-					filters: true,
-					columns:[
-						{},
-						{
-							type: 'dropdown',
-							source: app.constants.validate.sideOfStreet.oneOf,
-							strict: true,
-							// filter:false,
-							visibleRows: 4
-						},
-						{
-							type: 'autocomplete',
-							source: app.constants.validate.assetType.oneOf,
-							strict: true,
-							visibleRows: 20,
-						},					
-						{
-							type: 'autocomplete',
-							readOnly: true,
-							placeholder: 'NA',
-							visibleRows: 20,
-						},
-
-						{
-							type: 'text'
-						}
-					],
-
-					// dropdownMenu: true,
-					afterGetColHeader: addInput,
-					beforeOnCellMouseDown: doNotSelectColumn,
-
-					afterChange: (changes) => {
-
-						if (changes) {
-							
-							var assetSubtypeWasChanged = changes
-								.map(change=>change[1])
-								.some(col=>col===2)
-
-							//propagate assetType to assetSubType
-							if (assetSubtypeWasChanged) {
-
-								var data = featuresList.getSourceData();
-								var cellsToClear = []
-
-								featuresList.updateSettings({
-
-									cells: (row, col, prop) => {
-									    
-										// if currently at assetSubType column
-									    if (col === 3) {
-
-										    var cellProperties = {}
-											var parentValue = data[row][col-1];
-											var propagatingRule = app.constants.ui.entryPropagations.assetType.propagatingValues[parentValue]
-									    	
-									    	// if assetType is a value that allows subtype (indicated by presence of propagating rule)
-									    	if (propagatingRule){
-												cellProperties = {
-													readOnly:false, 
-													type: propagatingRule.values ? 'autocomplete' : 'text', 
-													source: propagatingRule.values,
-													placeholder: propagatingRule.placeholder
-												}
-									    	}
-											
-											// if subtype not allowed, clear value
-											else cellsToClear.push([row, col])		
-									    }
-
-									    return cellProperties;
-									}
-								})
-
-								cellsToClear
-									.forEach(
-										array=>featuresList.setDataAtCell(array[0], array[1], undefined)
-									)
-
-							}
-							
-						}
-
-					},
-
-					afterSelection: (row, column, row2, column2, preventScrolling, selectionLayerLevel) => {
-
-						d3.select('#regulations')
-							.classed('hidden', false);
-
-						regulationsList.render();
-
-						app.state.activeFeatureIndex = featuresList.toPhysicalRow(row);
-						d3.select('#featureIndex')
-							.text(`#${app.state.activeFeatureIndex+1}`)
-						app.ui.map
-							.setPaintProperty('spans', 'line-color',
-								[
-									'match',
-									['get', 'id'],
-									app.state.activeFeatureIndex, 'steelblue',
-									'#ccc'
-								]
-							)
-					},
-
-					stretchH:'all',
-					licenseKey: 'non-commercial-and-evaluation'
-				}
-			);
-		
-			var regulationsList = new Handsontable(
-
-				document.getElementById('regulationsList'), 
-				{
-					minRows:100,
-					rowHeaders: true,
-					colHeaders: app.constants.ui.regulationParams.map(p=>p.param),
-					columns: [
-						{
-							type: 'dropdown',
-							source: app.constants.validate.activity.oneOf,
-							strict: true,
-							visibleRows: 15
-						},
-						{
-							type: 'dropdown',
-							source: app.constants.validate.maxStay.oneOf,
-							strict: true,
-							visibleRows: 15
-						},
-						{
-							type: 'checkbox',
-							width:60
-						},	
-						{},
-						{},					
-						{}
-					],
-
-					afterSelection: () => {
-						d3.select('#timespans')
-							.classed('hidden', false)
-
-						timeSpansList.render();
-
-					},
-					stretchH:'all',
-					licenseKey: 'non-commercial-and-evaluation'
-				}
-			)
-
-			timeSpansList = new Handsontable(
-
-				document.getElementById('timeSpansList'), 
-				{
-					minRows:100,
-					// data: new Array(50)
-					// 	.fill(new Array(13).fill(undefined)),
-					dataSchema: ()=>{
-						
-						var pattern = {}
-						app.constants.validate.daysOfWeek.oneOf
-							.forEach(key=>pattern[key] = null)
-
-						return pattern
-					},
-					rowHeaders: true,
-					colHeaders: true,
-					nestedHeaders:[
-						[
-							{label: 'daysOfWeek', colspan:7},
-							{label: 'timeOfDay', colspan:2},
-							{label: 'timeOfDay', colspan:2},
-							{label: 'timeOfDay', colspan:2}
-						],
-						
-						app.constants.validate.daysOfWeek.oneOf
-							.concat(['start', 'end'])
-							.concat(['start', 'end'])
-							.concat(['start', 'end'])
-						
-					],
-					columns: app.constants.validate.daysOfWeek.oneOf
-						.map(day=>{
-							return {
-								data: day,
-								type: 'checkbox',
-								width:30
-							}
-						})
-						.concat(new Array(6).fill({
-							type: 'time',
-							timeFormat:'HH:mm',
-							correctFormat: true
-						})),
-					stretchH:'all',
-					licenseKey: 'non-commercial-and-evaluation'
-				}
-			)
-		}
-	},
-
-	utils: {
-
-		autocomplete: {
-
-			// return the last item in a comma-delimited list, for autocomplete input
-			lastListItem: (listString)=>{
-
-				var lastItemStart = listString.lastIndexOf(', ')
-				if (lastItemStart ===-1) return listString
-
-				var arrayed = listString.split(', ')
-				var lastItem = arrayed[arrayed.length-1] 
-
-				return lastItem
-			},
-
-			// returns a transformed value from an autocomplete selection
-
-			returnFullListString: (listString, matchedItem) =>{
-
-				var lastItemStart = listString.lastIndexOf(', ')
-				if (lastItemStart ===-1) return matchedItem
-
-				var arrayed = listString.split(', ')
-				arrayed[arrayed.length-1] = matchedItem
-
-				return arrayed.join(', ')
-			},
-
-			// empty function to keep typing stringed arrays when pressing enter button 
-
-			keepTyping: (input) =>{
-				// input.value += ', '
-			}
-
-		}
-	}
 }
 
 

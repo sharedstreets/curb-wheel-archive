@@ -10,20 +10,36 @@
 		<link href='static/mapbox-gl.css' rel='stylesheet' />
 		<style>
 
+			html {
+				overscroll-behavior-x: contain;
+			}
+
 			body {
 				font-family: Verdana, Helvetica, Arial, sans-serif;
 				font-weight: 400
 			}
 
+			#dataPanel {
+				border-left:1px solid #ccc;
+			}
 			.section {
 				width:90%;
 				margin:0 auto;
 			}
 
+			.image {
+				max-height:500px;
+			}
+
+			.image:active {
+				max-height: 9999999px
+			}
+
 			.sheet {
 				background:#ccc;
 				width:100%;
-				height:500px;
+				min-height: 300px;
+				max-height:500px;
 				overflow:hidden;
 			    border-bottom: 1px solid #ccc;
 			}
@@ -34,6 +50,10 @@
 			}
 
 			/*custom style overrides*/
+			.htUIMultipleSelectHot,
+			.htUISelectionControls {
+				display:non;
+			}
 			.HandsontableCopyPaste {
 				display:none;
 			}
@@ -67,6 +87,18 @@
 			  vertical-align: bottom;
 			}
 
+
+
+			.handsontable.listbox tr:hover td, 
+			.handsontable.listbox tr td.current {
+				background:steelblue;
+				color:white;
+			}
+			.handsontable .htAutocompleteArrow {
+				color:steelblue;
+				opacity:0.5;
+				transform:scale(1.2);
+			}
 			.handsontable th > div.filterHeader {
 			  margin-bottom:10px;
 			}
@@ -139,20 +171,27 @@
 		</style>
 	</head>
 	<body>
-		<div class='col6 fullHeight' id='map'></div>
+		<div class='col6 fullHeight'>
+			<div class='halfHeight' id='map'></div>
+			<div class='halfHeight p10' id='images' style='overflow:scroll; white-space: nowrap; border-top:1px solid #ccc'>
+				<h3>Images</h3>
+			</div>		
+		</div>
+
 		<div class='col6 fullHeight scroll' id='dataPanel'>
 			<div class='section'>
+				<div class='fr' id='featureFilter'></div>
 				<h3>Features</h3>
 				<div id='featuresList' class='sheet'>
 				</div>
 			</div>
-			<div class='section hidden' id='regulations'>
-				<h3>☝ Regulations of feature <span id='featureIndex'></span></h3>
+			<div class='section invisible' id='regulations'>
+				<h3>☝ Regulations of template "<span id='featureIndex'></span>"</h3>
 				<div id='regulationsList' class='sheet'>
 				</div>
 			</div>
-			<div class='section hidden' id='timespans'>
-				<h3>☝ Timespans of regulation <span id='timeSpansIndex'></span>
+			<div class='section' id='timespans'>
+				<h3>☝ Timespans of template "<span id='timeSpanTemplate'></span>"
 				</h3>
 				<div id='timeSpansList' class='sheet'>
 				</div>
