@@ -5,7 +5,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build-js": "webpack",
+    "local-android": "npm run build-js && cordova run android",
+    "build-android": "npm run build-js && cordova build android",
+    "local-ios": "npm run build-js && cordova run ios",
+    "build-ios": "npm run build-js && cordova build ios"
   },
   "keywords": [
     "ecosystem:cordova"
@@ -31,7 +35,12 @@
     "cordova-ios": "^6.1.0",
     "cordova-plugin-ble-central": "^1.2.5",
     "cordova-plugin-whitelist": "^1.3.4",
-    "cordova-sqlite-storage": "^5.0.1"
+    "cordova-sqlite-storage": "^5.0.1",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "babel-loader": "^8.1.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "cordova": {
     "plugins": {

@@ -39,9 +39,19 @@ Rasbian image with BLE [here](https://curblr-www.s3.amazonaws.com/wheel/images/c
 
 #### Android
 
-* ```cordova build android```
+_Note: If you have a device connected to your computer via USB Cordova _should_ auto-detect it a deploy to the device, otherwise it will default to the Android emulator_
 
-If you have a device connected to your computer via USB Cordova _should_ auto-detect it a deploy to the device, otherwise it will default to the Android emulator
+* Local Development
+
+    * ```npm run local-android```
+
+    If you have a device connected to your computer via USB Cordova _should_ auto-detect it a deploy to the device, otherwise it will default to the Android emulator
+
+* Production Build
+
+    * ```npm run build-android```
+
+    * The APK will be available in the project directory under ```./platforms/android/build/outputs/apk/debug/app-debug.apk
 
 
 #### iOS
