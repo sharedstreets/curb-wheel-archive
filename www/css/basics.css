@@ -1,0 +1,208 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin:0;
+	font-size: 16px;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    min-width: 300px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    text-rendering: optimizeLegibility; 
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    box-sizing: inherit;
+    font-weight: 400;
+    line-height: 1.5;
+    color:#4a4a4a;
+	font-family:BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+
+/*remove arrows on number inputs*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+::-webkit-scrollbar{
+	width:0;
+	height:0;
+	/*-webkit-appearance: none;*/
+}
+
+.scroll {
+	overflow:scroll;
+}
+
+.hidden {
+	display:none;
+}
+
+.button {
+	background:steelblue;
+	color:white;
+	cursor:pointer;	
+	border-radius:2px;
+}
+/*utility classes*/
+.big {
+	font-size: 1.25em;
+}
+.small {
+	font-size:0.8em;
+}
+
+.blue {
+	color:steelblue;
+}
+
+.quiet {
+	opacity:0.5;
+}
+
+.strong {
+	font-weight:bold;
+}
+
+.fl {
+	float:left;
+}
+
+.fr {
+	float:right;
+}
+
+.text-center {
+	text-align: center
+}
+
+.pin-bottom {
+	position: absolute;
+	bottom:0;
+}
+
+/*paddings*/
+.p10 {
+	padding:10px;
+}
+/*margins*/
+
+.m10 {
+	margin:10px;
+}
+
+.m20 {
+	margin:20px;
+}
+.mt5 {
+	margin-top:5px;
+}
+
+.mt10 {
+	margin-top:10px;
+}
+
+.mt20 {
+	margin-top:20px;
+}
+
+.mt30 {
+	margin-top:30px;
+}
+
+.mt40 {
+	margin-top:40px;
+}
+
+.mt50 {
+	margin-top:50px;
+}
+
+.mt100 {
+	margin-top:100px;
+}
+
+.mt200 {
+	margin-top:200px;
+}
+
+.mb10 {
+	margin-bottom: 10px
+}
+
+.mb30 {
+	margin-bottom: 30px
+}
+
+.mb200 {
+	margin-bottom:200px;
+}
+
+.mr10 {
+	margin-right: 10px
+}
+
+.mr20 {
+	margin-right: 20px
+}
+
+.inlineBlock {
+	display: inline-block;
+}
+
+/* columns */
+
+.col3{
+	width:25%;
+	flex:none;
+}
+
+.col4{
+	width:33.333333333%;
+	flex:none;
+}
+
+.col6{
+	width:50%;
+	flex:none;
+	float:left;
+}
+.col9{
+	width:75%;
+	flex:none;
+	float:left;
+}
+
+/*anchoring*/
+
+.pin-tl {
+	left:0;
+	top: 0;
+	position:absolute;
+}
+
+.pin-bl {
+	left:0;
+	bottom: 0;
+	position:absolute;
+}
+
+.z100 {
+	z-index: 100
+}
+/*heights*/
+
+.fullHeight {
+	height:100%;
+}

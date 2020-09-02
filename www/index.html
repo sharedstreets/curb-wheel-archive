@@ -1,23 +1,98 @@
 <!DOCTYPE html>
-<!--
-    Licensed to the Apache Software Foundation (ASF) under one
-    or more contributor license agreements.  See the NOTICE file
-    distributed with this work for additional information
-    regarding copyright ownership.  The ASF licenses this file
-    to you under the Apache License, Version 2.0 (the
-    "License"); you may not use this file except in compliance
-    with the License.  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-    Unless required by applicable law or agreed to in writing,
-    software distributed under the License is distributed on an
-    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-     KIND, either express or implied.  See the License for the
-    specific language governing permissions and limitations
-    under the License.
--->
 <html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>CurbWheel</title>
+		<link rel="stylesheet" href="css/basics.css">
+		<link rel="stylesheet" href="css/style.css">
+		<script src='static/mapbox-gl.js'></script>
+
+		<link href='static/mapbox-gl.css' rel='stylesheet' />
+	</head>
+	<body class='is-mobile'>
+		<script>
+			bounds = {{bounds}}
+		</script>
+		<section class="" id='topBar'>
+			<span class="icon fl m20" onclick='app.ui.back()'>
+				<img src='img/back.svg' class='icon' style='fill:white'/>
+			</span>
+
+			<div class='big' id='title'>Select a Street</div>
+		</section>
+		<div id='modes'>
+			<div class='mode'>
+				<div id='map'></div>
+				<div id='mapModal'>
+					<div>
+						<div class='inlineBlock halfButton' onclick='app.ui.map.switch.side()'>Other side</div><div class='inlineBlock halfButton' onclick='app.ui.map.switch.direction()'>Other direction</div>
+					</div>
+					<div class='bottomButton' onclick='app.survey.init()'>
+						Start Survey
+					</div>
+				</div>
+			</div>
+			<div id='rolling' class='mode'>
+				<div id='master'>
+					<div class='entry'>
+						<div>Surveying 
+							<span id='streetName'></span>
+							<span id='rollDelta' class='fr blue'>foo</span>
+						</div>
+						<div class='progressBar mt10 mb10'>
+							<div class='track'></div>
+							<div class='span'></div>
+							<div class='wheel'>
+								<div class='spoke'></div>                     
+							</div>
+						</div>
+
+
+						<span class='small quiet'>
+							<span id='blockProgress'>0</span>m of ~<span id='curbLength'></span>m
+						</span>
+					</div>
+				</div>
+				<div class='scroll-drawer'>
+					<div id='scrollBar'>
+						<div id='scrollThumb'></div>
+					</div>
+					<div class='scroll-inner' onresize='alert("sdfsdf")'>
+						<div id='features'></div>
+
+						<div class='text-center mt20 mb200'>
+							<p class='big' onclick='app.ui.mode.set("addFeature")'>
+								<span class="blue mr10 inlineBlock" style='transform: scale(1.5)'>
+									<img src='img/plus.svg' class='icon'/>
+								</span>
+								Add a curb feature
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class='pin-bottom bottomButton'>
+					<div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
+					<div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
+				</div>
+			</div>
+			<div id='addFeature' class='scroll mode'></div>
+		</div>
+
+		<form ref='uploadForm' id='uploadForm' class='hidden' action='/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
+		<input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
+		<input type='submit' id ='imageSubmit' value='Upload!' />
+		</form>
+		<iframe name="hiddenIframe" id='hidden-iframe' class='hidden'></iframe>
+    </body>
+    <script src="cordova.js"></script>
+    <script src="js/bundle.js"></script>
+	<script>
+		// add iframe listener after app.js has loaded
+		var hiddenIframe = document.getElementById('hidden-iframe');
+		hiddenIframe.addEventListener('load', app.io.iframeOnload);
+	</script>
+</html>
     <head>
         <meta charset="utf-8">
 
@@ -40,8 +115,6 @@
             <div class="js-ble-connection-info"></div>
             <h1 class="js-ble-data ble-data"></h1>
         </div>
-        <script src="cordova.js"></script>
-        <script src="js/vendor/idb-keyval.min.js"></script>
-        <script src="js/bundle.js"></script>
+
     </body>
 </html>

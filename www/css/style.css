@@ -1,0 +1,341 @@
+:root{
+	--completeColor: #666;
+	--defaultColor: steelblue;
+	--activeColor: orangered;
+}
+
+body, html {
+	overflow:hidden;
+	width:100%;
+	height:100%;
+	position:fixed;
+	font-family: BlinkMacSystemFont,-apple-system,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+	/*font-size:18px;*/
+}
+
+#topBar {
+	height:60px;
+	background:var(--defaultColor);
+	color:white;
+	position:fixed;
+	width:100%;
+}
+
+#title {
+	position: absolute;
+	text-align: center;
+	width: 100%;
+	line-height: 3em;
+	pointer-events: none
+}
+
+.scroll-drawer {
+	position: absolute;
+	width: 100%;
+	bottom:80px;
+}
+
+.scroll-inner {
+	overflow-y: scroll;
+	height:100%;
+}
+.scroll-drawer::-webkit-scrollbar{
+	-webkit-appearance: none;
+}
+
+.scroll-drawer::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background-color: rgba(0, 0, 0, 0.5);
+	border:2px solid white;
+}
+
+.scroll-drawer::-webkit-scrollbar:vertical {
+	background:none;
+	width:10px;
+}
+
+#scrollBar {
+	position:absolute;
+	right:0;
+	height:100%;
+	width: 0vw;
+	z-index: 99
+}
+
+#scrollThumb {
+	width:100%;
+	height:100%;
+	background:purple;
+}
+.bottomButton {
+	height:80px;
+	text-align:center;
+	width:100%;
+	background:#333;
+	color:white;
+	font-size: 1.25em;
+	line-height: 4em;
+}
+
+/*mode slider functionality*/
+
+#modes[currentMode='selectStreet'],
+#modes[currentMode='selectDirection'] {
+	transform:none;
+}
+
+#modes[currentMode='rolling'] {
+	transform: translateX(-25%);
+}
+
+#modes[currentMode='addFeature'] {
+	transform: translateX(-50%);
+}
+
+#modes {
+	top:60px;
+	bottom:0;
+	position:absolute;
+	width:400%;
+	transition:transform 0.2s;
+	overflow:hidden;
+	bottom:0px;
+}
+
+.mode {
+	width:25%;
+	float:left;
+	height:100%;
+	display:inline;
+	position:relative;
+	background:#f6f6f6;
+}
+
+/* curb side/direction selection view*/
+#modes[currentMode='selectDirection'] #mapModal {
+	transform:translateY(0%);
+}
+
+/*map view*/
+#map {
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+}
+
+#mapModal {
+	width: 100%;
+	bottom: 0px;
+	position:absolute;
+	z-index: 99;
+	transform:translateY(100%);
+	transition:transform 0.5s;
+}
+
+/*surveying view*/
+
+#features {
+	overflow: scroll;
+}
+
+#backArrow {
+	font-size:10vh;
+}
+
+.entry {
+	padding:4vw 5vw;
+	border-bottom:1px solid #ddd;
+	transition: transform 0.2s;
+	background:white;
+	overflow:hidden;
+}
+
+#rollDelta {
+	display:none;
+}
+
+#master .entry{
+	border-bottom:3px solid var(--defaultColor);
+}
+
+.hidden {
+	display:none !important;
+}
+
+.halfButton {	
+	text-align:center;
+	margin: 5vw;
+	background: #fff;
+	padding: 5vw;
+	width:40%;
+	white-space: nowrap;
+	border-radius:5px;
+}
+
+.featureAction {
+	text-align:center;
+	text-transform: capitalize;
+	/*color:#999;*/
+}
+
+.featureActions {
+	overflow:hidden;
+	display:none !important;
+}
+
+.active .featureActions {
+	display:flex !important;
+}
+
+/*rolling state*/
+
+.isRolling .wheel {
+	transform: translate(-50%, -50%);
+}
+
+.isRolling #rollDelta {
+	display:inline-block;
+}
+
+/*progress bar*/
+
+.progressBar {
+	height:12px;
+	position:relative;
+}
+
+.track {
+	background:#e9e9e9;
+	height:4px;
+	width:100%;
+	margin-top:6px;
+	transform:translateY(-50%);
+	border-radius: 2px;	
+	position: absolute;
+}
+
+@keyframes spin {
+  0%   {transform:rotate(0deg)}
+  100%   {transform:rotate(360deg)}
+}
+
+.wheel {
+	position: absolute;
+	border: 2px solid var(--defaultColor);
+	border-radius: 50%;
+	margin-top: 6px;
+	transform: translate(-50%, -50%) scale(0);
+	background:white;
+	transition:transform 0.5s;
+}
+
+.spoke {
+	height: 2px;
+	width: 6.5px;
+	margin:5px 5.5px 5px 0px;
+	background: var(--defaultColor);
+	animation: spin;
+	animation-duration: 1s;
+	animation-iteration-count: infinite;
+	animation-timing-function: linear;
+	transform-origin: right;
+}
+
+.span {
+	width:0%;
+	transform-origin:left;
+	position:absolute;
+	top:0;
+	border-radius:6px;
+	border:6px solid var(--defaultColor);
+	transform:translateX(-6px);
+}
+
+#master .span {
+	padding:2px;
+	border-radius:2px;
+	margin-top:6px;
+	transform:translateY(-50%);
+	border: none;
+	background: var(--defaultColor);
+}
+
+.position {
+	transform: translateX(-70.7%) rotateZ(45deg);
+	width: 12px;
+	height: 12px;
+	position: absolute;
+	border: 3px solid var(--completeColor);
+	background: white;
+	border-radius:2px;
+}
+
+.entry.complete .span {
+	border: 6px solid var(--completeColor);
+	border-radius:2px;
+}
+
+.dot {
+	width:10px;
+	height:10px;
+	background:white;
+	border-radius:50%;
+	z-index:99;
+	margin-top:6px;
+	position:absolute;
+	transform: translate(-50%, -50%);
+	border: 2px solid var(--defaultColor);
+}
+
+
+/*gear icon*/
+
+.icon {
+	width: 1em;
+	overflow: visible;
+	vertical-align: -.125em;
+}
+
+.fa-cog {
+	transform-origin: center;
+	transition:transform 0.25s;
+	opacity:0.75;
+	filter:grayscale(1);
+}
+
+.active .fa-cog {
+	transform:rotate(90deg);
+	color:var(--defaultColor);
+	opacity:1;
+	filter:grayscale(0);
+}
+
+
+/*styling for completed entries*/
+
+.complete {
+	background: #f6f6f6;
+}
+
+.complete .dot {
+	border: 2px solid var(--completeColor);
+}
+
+.complete .featureName:after {
+	content: 'COMPLETE';
+	background: #ddd;
+	color: black;
+	margin-left: 10px;
+	padding: 1px 4px;
+	font-size: 0.75em;
+	opacity: 0.5;
+	border-radius: 2px;
+	display: inline-block;
+	transform:translateY(-10%);
+}
+
+.complete .spanLength {
+	color: var(--completeColor);
+}
+
