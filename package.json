@@ -9,7 +9,8 @@
     "local-android": "npm run build-js && cordova run android",
     "build-android": "npm run build-js && cordova build android",
     "local-ios": "npm run build-js && cordova run ios",
-    "build-ios": "npm run build-js && cordova build ios"
+    "build-ios": "npm run build-js && cordova build ios",
+    "test": "ava"
   },
   "keywords": [
     "ecosystem:cordova"
@@ -30,15 +31,24 @@
     }
   ],
   "license": "Apache-2.0",
+  "ava": {
+    "babel": true,
+    "require": [
+      "esm"
+    ]
+  },
   "devDependencies": {
+    "@ava/babel": "^1.0.1",
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "ava": "^3.12.1",
+    "babel-loader": "^8.1.0",
     "cordova-android": "^9.0.0",
     "cordova-ios": "^6.1.0",
     "cordova-plugin-ble-central": "^1.2.5",
     "cordova-plugin-whitelist": "^1.3.4",
     "cordova-sqlite-storage": "^5.0.1",
-    "@babel/core": "^7.9.0",
-    "@babel/preset-env": "^7.9.5",
-    "babel-loader": "^8.1.0",
+    "esm": "^3.2.25",
     "webpack": "^4.42.1",
     "webpack-cli": "^3.3.11"
   },
@@ -54,5 +64,15 @@
       "ios",
       "android"
     ]
+  },
+  "dependencies": {
+    "@mapbox/sphericalmercator": "^1.1.0",
+    "@turf/bbox": "^6.0.1",
+    "@turf/destination": "^6.0.1",
+    "@turf/helpers": "^6.1.4",
+    "isomorphic-fetch": "^2.2.1",
+    "rbush": "^3.0.1",
+    "sharedstreets-pbf": "^0.8.0",
+    "sharedstreets-types": "^1.3.1"
   }
 }
