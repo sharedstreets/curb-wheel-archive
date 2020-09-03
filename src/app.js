@@ -94,6 +94,7 @@ var app = {
     },
 
     "take photo": function (d, i) {
+		// TODO add camera call here
       var success = () => {
         document.querySelector("#uploadImg").click();
       };
@@ -503,31 +504,13 @@ var app = {
 
         survey.features.push(feature);
       }
-
-      var xhr = new XMLHttpRequest();
-      var url = "/surveys/" + app.state.street.ref;
-      xhr.open("POST", url, true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.onreadystatechange = function () {
-
-        if (xhr.readyState === 4 && xhr.status === 200) cb()
-        // else alert('Error uploading survey. Please try again.')
-      };
-
-      xhr.send(JSON.stringify(survey));
+	  // TODO fetch or equivalent to push survey to endpoint
+	  console.log("UPLOAD SURVEY")
     },
 
     loadJSON: (path, success, error) => {
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-          if (xhr.status === 200) {
-            if (success) success(JSON.parse(xhr.responseText));
-          } else if (error) error(xhr);
-        }
-      };
-      xhr.open("GET", path, true);
-      xhr.send();
+		// TODO poll BLE connection for counter data 
+		console.log("LOAD COUNTER")
     },
 
     getWheelTick: (cb) => {
@@ -681,6 +664,8 @@ constants: {
 				],
 			},
 		},
+
+		// TODO this should be pulled from Mapbox
 		fullStyle: {
 			"version": 8,
 			"name": "Basic preview",
