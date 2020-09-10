@@ -1,3 +1,6 @@
+# Status update
+We've uncovered a bug in the testing image that's preventing data downloads from working. Because of this and other issues, we decided to overhaul the software to turn it into an iOS and Android-native app. This will make initial set-up and usage much easier, and let us solve the networking issues. We hope to have a test version of the app out in the next couple of weeks - stay tuned for more updates!
+
 # SharedStreets Curb Wheel
 
 The curb wheel is an open source data collection tool that can be used to map a city's curb assets and regulations and create a standardized data ([CurbLR](https://www.curblr.org/)) feed. It combines the precision of a measuring wheel with the efficiency of a smartphone app.
