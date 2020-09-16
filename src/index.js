@@ -15,7 +15,7 @@ const emitter = mitt();
 function onDeviceReady() {
     const shst = new SharedStreets();
     const map = new CurbWheelMap(app.state, emitter);
-    emitter.on("mapload", ()=>{
+    emitter.on("mapload", () =>{
         app.ui.map = map;
         app.devMode.init();
     });
@@ -23,7 +23,11 @@ function onDeviceReady() {
         const poly = bboxPoly(data.toArray().flat());
         const streets = await shst.getPolygon(poly);
         emitter.emit('setStreets', streets);
-    })
+    });
+
+    emitter.on("selectDirection", () => {
+        app.ui.mode.set("selectDirection");
+    });
 
     /*
     const db = new Database();

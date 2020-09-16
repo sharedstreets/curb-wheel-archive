@@ -147,8 +147,8 @@ class CurbWheelMap {
 							type: "FeatureCollection",
 							features: [e.features[0]],
 						});
-
-						//app.ui.mode.set("selectDirection");
+						this.emitter.emit("selectDirection")
+						
 					}
 				})
 				.on("moveend", (e) => {
