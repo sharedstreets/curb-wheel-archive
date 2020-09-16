@@ -3,13 +3,15 @@ import Database from './database';
 
 
 document.addEventListener('deviceready', onDeviceReady, false);
-
-
-var currentDevice;
-
-var poll; 
+import app from './app';
+import CurbWheelMap from './map';
 
 function onDeviceReady() {
+
+    app.devMode.init();
+    const map = new CurbWheelMap();
+    app.ui.map = map;
+    /*
     const db = new Database();
 
     idbKeyval.get('connection').then(function(connection){
@@ -99,6 +101,7 @@ function onDeviceReady() {
         bleData.innerText = '';
 
     }
+    */
 }
 
 

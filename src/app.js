@@ -1,3 +1,5 @@
+
+
 var app = {
   state: {
     street: {
@@ -1631,4 +1633,6 @@ constants: {
 },
 };
 
-app.devMode.init();
+
+export default app;
+//app.devMode.init();
