@@ -5,7 +5,7 @@ import fetch from 'isomorphic-fetch'
 import * as turfHelpers from '@turf/helpers';
 import bbox from "@turf/bbox";
 import destination from '@turf/destination';
-import  RBush from 'rbush';
+import RBush from 'rbush';
 
 const SphericalMercator = require("@mapbox/sphericalmercator");
 const sphericalMercator = new SphericalMercator({

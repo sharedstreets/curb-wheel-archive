@@ -1,16 +1,30 @@
 
-import Database from './database';
-
-
-document.addEventListener('deviceready', onDeviceReady, false);
+//import Database from './database';
 import app from './app';
 import CurbWheelMap from './map';
+import SharedStreets from './sharedstreets';
+import bboxPoly from '@turf/bbox-polygon';
+
+import mitt from 'mitt';
+
+document.addEventListener('deviceready', onDeviceReady, false);
+
+
+const emitter = mitt();
 
 function onDeviceReady() {
+    const shst = new SharedStreets();
+    const map = new CurbWheelMap(app.state, emitter);
+    emitter.on("mapload", ()=>{
+        app.ui.map = map;
+        app.devMode.init();
+    });
+    emitter.on("fetchStreets", async (data)=> {
+        const poly = bboxPoly(data.toArray().flat());
+        const streets = await shst.getPolygon(poly);
+        emitter.emit('setStreets', streets);
+    })
 
-    app.devMode.init();
-    const map = new CurbWheelMap();
-    app.ui.map = map;
     /*
     const db = new Database();
 

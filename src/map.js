@@ -1,4 +1,5 @@
-import mapboxgl from 'mapbox-gl'
+import mapboxgl from 'mapbox-gl';
+import bbox from '@turf/bbox';
 
 
 const constants = {
@@ -27,14 +28,23 @@ const constants = {
 	} 
 } 
 
-
-
 class CurbWheelMap {
-	constructor() {
-		this.bounds = [];
+	constructor(state, emitter) {
+		this.bounds = [[-106.743143, 35.045344],[-106.498525, 35.149417]];
+		this.state = state;
+		this.emitter = emitter;
 		this.init = this.init.bind(this);
+		this.setListeners = this.setListeners.bind(this)
 
-		return this.init();
+		this.map = this.init();
+		this.setListeners()
+		return this.map
+	}
+
+	setListeners() {
+		this.emitter.on("setStreets", (streets)=> {
+			this.map.getSource("streets").setData(streets);
+		})
 	}
 
 
@@ -44,8 +54,9 @@ class CurbWheelMap {
 			container: 'map', // container id
 			style: 'mapbox://styles/mapbox/streets-v8', //stylesheet location
 		});
-		map.fitBounds([bounds.slice(0,2), bounds.slice(2,4)])
+		map.fitBounds(this.bounds)
 			.on("load", () => {
+
 				map.addLayer({
 					id: "streets",
 					type: "line",
@@ -118,31 +129,12 @@ class CurbWheelMap {
 						"circle-color": "steelblue",
 					},
 				})
-				.addLayer({
-					id: 'pois',
-					minzoom:16,
-					source: 'openmaptiles',
-					'source-layer': 'poi',
-					type: 'symbol',
-					layout: {
-						'text-field': '{name:latin}',
-						"text-font": ["Noto Sans Regular"],
-						'text-size': {
-							stops: [[16,12], [22,30]]
-						},
-						'text-max-width':6
-					},
-					paint: {
-						'text-color': 'steelblue'
-					}
-				})
 				.on("click", "streets", (e) => {
-					console.log(e.features)
-					if (app.state.mode === "selectStreet") {
+					if (this.state.mode === "selectStreet") {
 						var edge = e.features[0].geometry.coordinates;
-						app.state.street = e.features[0].properties;
+						this.state.street = e.features[0].properties;
 
-						app.ui.map.fitBounds(turf.bbox(e.features[0]), {
+						map.fitBounds(bbox(e.features[0]), {
 							padding: {
 								top: 30,
 								left: 30,
@@ -151,27 +143,29 @@ class CurbWheelMap {
 							},
 						});
 
-						app.ui.map.getSource("arrows").setData({
+						map.getSource("arrows").setData({
 							type: "FeatureCollection",
 							features: [e.features[0]],
 						});
 
-						app.ui.mode.set("selectDirection");
+						//app.ui.mode.set("selectDirection");
 					}
 				})
 				.on("moveend", (e) => {
-					let zoom = app.ui.map.getZoom();
+					let zoom = map.getZoom();
 
 					if (zoom >= 14) {
 						
 						let viewport = map.getBounds();
-
+					
 						let url = "/query?";
 						url += "minX=" + viewport._sw.lng;
 						url += "&minY=" + viewport._sw.lat;
 						url += "&maxX=" + viewport._ne.lng;
 						url += "&maxY=" + viewport._ne.lat;
 
+						this.emitter.emit('fetchStreets', viewport);
+						/*
 						fetch(url)
 							.then((response) => {
 								return response.json();
@@ -179,32 +173,36 @@ class CurbWheelMap {
 							.then((streets) => {
 								map.getSource("streets").setData(streets);
 							});
+						*/
 					} else
-						app.ui.map.getSource("streets").setData(constants.emptyGeojson);
+						map.getSource("streets").setData(constants.emptyGeojson);
 				});
-		});
+				this.emitter.emit('mapload');
+			});
 
 		map.switch = {
-			side: (state) => {
-				state.streetSide = state.streetSide === "right" ? "left" : "right";
+			side: () => {
+				this.state.streetSide = this.state.streetSide === "right" ? "left" : "right";
 
 				map.setLayoutProperty("arrows", "text-offset", {
 					base: 2,
-					stops: constants.mapStyle.arrows.side[state.streetSide],
+					stops: constants.mapStyle.arrows.side[this.state.streetSide],
 				});
 			},
 
-			direction: (state) => {
-				state.rollDirection =
-					state.rollDirection === "forward" ? "back" : "forward";
+			direction: () => {
+				this.state.rollDirection =
+					this.state.rollDirection === "forward" ? "back" : "forward";
 
 				map.setLayoutProperty(
 					"arrows",
 					"text-field",
-					constants.mapStyle.arrows.direction[app.state.rollDirection]
+					constants.mapStyle.arrows.direction[this.state.rollDirection]
 				);
 			},
 		};
+
+		return map;
 
 
 	}
