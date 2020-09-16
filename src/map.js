@@ -25,8 +25,8 @@ const constants = {
 				],
 			},
 		}
-	} 
-} 
+	}
+}
 
 class CurbWheelMap {
 	constructor(state, emitter) {
@@ -43,6 +43,7 @@ class CurbWheelMap {
 
 	setListeners() {
 		this.emitter.on("setStreets", (streets)=> {
+      console.log("got data")
 			this.map.getSource("streets").setData(streets);
 		})
 	}
@@ -92,7 +93,6 @@ class CurbWheelMap {
 					},
 					layout: {
 						"text-keep-upright": false,
-						"text-font": ["Noto Sans Regular"],
 						"text-field": constants.mapStyle.arrows.direction.forward,
 						"symbol-placement": "line",
 						"symbol-spacing": {
@@ -148,16 +148,16 @@ class CurbWheelMap {
 							features: [e.features[0]],
 						});
 						this.emitter.emit("selectDirection")
-						
+
 					}
 				})
 				.on("moveend", (e) => {
 					let zoom = map.getZoom();
 
 					if (zoom >= 14) {
-						
+
 						let viewport = map.getBounds();
-					
+
 						let url = "/query?";
 						url += "minX=" + viewport._sw.lng;
 						url += "&minY=" + viewport._sw.lat;
