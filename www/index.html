@@ -6,16 +6,14 @@
 		<title>CurbWheel</title>
 		<link rel="stylesheet" href="css/basics.css">
 		<link rel="stylesheet" href="css/style.css">
-		<script src='static/mapbox-gl.js'></script>
-
-		<link href='static/mapbox-gl.css' rel='stylesheet' />
+		<link href='css/mapbox-gl.css' rel='stylesheet' />
 	</head>
 	<body class='is-mobile'>
 		<script>
-			bounds = {{bounds}}
+
 		</script>
 		<section class="" id='topBar'>
-			<span class="icon fl m20" onclick='app.ui.back()'>
+			<span class="icon fl m20" onclick='//app.ui.back()'>
 				<img src='img/back.svg' class='icon' style='fill:white'/>
 			</span>
 
@@ -26,9 +24,9 @@
 				<div id='map'></div>
 				<div id='mapModal'>
 					<div>
-						<div class='inlineBlock halfButton' onclick='app.ui.map.switch.side()'>Other side</div><div class='inlineBlock halfButton' onclick='app.ui.map.switch.direction()'>Other direction</div>
+						<div class='inlineBlock halfButton' onclick='//app.ui.map.switch.side()'>Other side</div><div class='inlineBlock halfButton' onclick='//app.ui.map.switch.direction()'>Other direction</div>
 					</div>
-					<div class='bottomButton' onclick='app.survey.init()'>
+					<div class='bottomButton' onclick='//app.survey.init()'>
 						Start Survey
 					</div>
 				</div>
@@ -36,7 +34,7 @@
 			<div id='rolling' class='mode'>
 				<div id='master'>
 					<div class='entry'>
-						<div>Surveying 
+						<div>Surveying
 							<span id='streetName'></span>
 							<span id='rollDelta' class='fr blue'>foo</span>
 						</div>
@@ -44,7 +42,7 @@
 							<div class='track'></div>
 							<div class='span'></div>
 							<div class='wheel'>
-								<div class='spoke'></div>                     
+								<div class='spoke'></div>
 							</div>
 						</div>
 
@@ -72,8 +70,8 @@
 					</div>
 				</div>
 				<div class='pin-bottom bottomButton'>
-					<div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
-					<div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
+					<div id='reset' class=' col6' onclick='//app.survey.init()'>Reset</div>
+					<div id='complete' class=' col6' onclick='//app.survey.validate()'>Complete</div>
 				</div>
 			</div>
 			<div id='addFeature' class='scroll mode'></div>
@@ -90,31 +88,6 @@
 	<script>
 		// add iframe listener after app.js has loaded
 		var hiddenIframe = document.getElementById('hidden-iframe');
-		hiddenIframe.addEventListener('load', app.io.iframeOnload);
+		//hiddenIframe.addEventListener('load', app.io.iframeOnload);
 	</script>
-</html>
-    <head>
-        <meta charset="utf-8">
-
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-        <meta name="color-scheme" content="light dark">
-        <link rel="stylesheet" href="css/index.css">
-        <title>Curb Wheel</title>
-    </head>
-    <body>
-        <div class="app">
-            <div class="disconnect-btn js-disconnect-btn">Disconnect</div>
-            <div class="device-container js-device-container">
-                <h1>Nearby Devices</h1>
-                <ul class="js-device-list device-list">
-                </ul>
-            </div>
-            <div class="js-ble-connection-info"></div>
-            <h1 class="js-ble-data ble-data"></h1>
-        </div>
-
-    </body>
 </html>

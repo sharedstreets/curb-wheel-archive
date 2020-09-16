@@ -1,15 +1,35 @@
 
-import Database from './database';
+//import Database from './database';
+import app from './app';
+import CurbWheelMap from './map';
+import SharedStreets from './sharedstreets';
+import bboxPoly from '@turf/bbox-polygon';
 
+import mitt from 'mitt';
 
 document.addEventListener('deviceready', onDeviceReady, false);
 
 
-var currentDevice;
-
-var poll; 
+const emitter = mitt();
 
 function onDeviceReady() {
+    const shst = new SharedStreets();
+    const map = new CurbWheelMap(app.state, emitter);
+    emitter.on("mapload", () =>{
+        app.ui.map = map;
+        app.devMode.init();
+    });
+    emitter.on("fetchStreets", async (data)=> {
+        const poly = bboxPoly(data.toArray().flat());
+        const streets = await shst.getPolygon(poly);
+        emitter.emit('setStreets', streets);
+    });
+
+    emitter.on("selectDirection", () => {
+        app.ui.mode.set("selectDirection");
+    });
+
+    /*
     const db = new Database();
 
     idbKeyval.get('connection').then(function(connection){
@@ -99,6 +119,7 @@ function onDeviceReady() {
         bleData.innerText = '';
 
     }
+    */
 }
 
 

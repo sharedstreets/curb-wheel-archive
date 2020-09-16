@@ -1,6 +1,6 @@
 import * as sharedstreetsPbf from 'sharedstreets-pbf';
 
-import fetch from 'isomorphic-fetch'
+import fetch from 'cross-fetch';
 
 import * as turfHelpers from '@turf/helpers';
 import bbox from "@turf/bbox";
@@ -31,7 +31,7 @@ async function getPbf(url) {
     });
 
     checkStatus(data);
-    return new Uint8Array(await data.buffer());
+    return new Uint8Array(await data.arrayBuffer());
 }
 
 function lonlatsToCoords(lonlats) {
@@ -48,6 +48,8 @@ function bboxFromPolygon(polygon) {
 	var bboxCoords = bbox(polygon)
 	return {"minX": bboxCoords[0], "minY": bboxCoords[1], "maxX":bboxCoords[2], "maxY":bboxCoords[3]}
 }
+
+
 
 function createGeometry(data) {
 
@@ -117,6 +119,7 @@ async function getTile(tilePath) {
         try {
             arrayBuffer = await getPbf(SHST_TILE_URL + tilePath.toPathString());
         } catch(e)  {
+            // TODO: need to handle 404/403 errors correctly and return empty array but still throw exception on other issues
             return [];
         }
 
