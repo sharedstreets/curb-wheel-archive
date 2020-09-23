@@ -21,7 +21,9 @@ var app = {
   survey: {
     // sets up parameters of the selected street, preparing for survey
     init: () => {
+      console.log("init")
       app.io.getWheelTick((counterValue) => {
+        
         app.state.systemRollOffset = counterValue / 10;
         app.state.features = [];
         app.ui.features.update();

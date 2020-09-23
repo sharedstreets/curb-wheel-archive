@@ -25,7 +25,7 @@ function onDeviceReady() {
     const db = new Database();
 
     // setup counter value query
-    app.io.getCounter = () => {
+    app.io.getCounterValue = () => {
       return counterValue;
     };
 
@@ -63,8 +63,10 @@ function onDeviceReady() {
             console.log('found ' + device.name + ': ' +  device.id);
             // todo select wheel id
 
-            if(device.name == "raspberrypi")
-              this.connect(device.id);
+            if (device.name == "counter") {
+                connect(device.id);
+            }
+              
 
         }, ()=>{console.log('no devices found')});
     }
@@ -85,14 +87,13 @@ function onDeviceReady() {
     function readBleData() {
         ble.read(currentDevice, '0ee1', 'ec0e', function(data){
             var dv = new DataView(data, 0);
-            var counterValue = dv.getUint32(0);
+            counterValue = dv.getUint32(0);
             console.log('counter value: ' + counterValue)
         });
     }
 
     function disconnectCallback() {
         clearInterval(pollCounter);
-
     }
 
 }
