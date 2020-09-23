@@ -34,7 +34,8 @@ class CurbWheelMap {
 		this.state = state;
 		this.emitter = emitter;
 		this.init = this.init.bind(this);
-		this.setListeners = this.setListeners.bind(this)
+		this.setListeners = this.setListeners.bind(this);
+		this.setMapLocation = this.setMapLocation.bind(this);
 
 		this.map = this.init();
 		this.setListeners()
@@ -47,6 +48,13 @@ class CurbWheelMap {
 		})
 	}
 
+	setMapLocation(position) {
+        this.map.flyTo({
+            center: [position.coords.longitude,position.coords.latitude],
+            zoom: 16
+        });
+    }
+
 
 	init() {
 		mapboxgl.accessToken = 'pk.eyJ1IjoibWlrZXdpbGxpYW1zb24iLCJhIjoibzRCYUlGSSJ9.QGvlt6Opm5futGhE5i-1kw';
@@ -54,6 +62,7 @@ class CurbWheelMap {
 			container: 'map', // container id
 			style: 'mapbox://styles/mapbox/streets-v8', //stylesheet location
 		});
+		map.setMapLocation = this.setMapLocation
 		map.fitBounds(this.bounds)
 			.on("load", () => {
 
