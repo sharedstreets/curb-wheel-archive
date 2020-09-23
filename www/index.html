@@ -9,24 +9,23 @@
 		<link href='css/mapbox-gl.css' rel='stylesheet' />
 	</head>
 	<body class='is-mobile'>
-		<script>
-
-		</script>
 		<section class="" id='topBar'>
-			<span class="icon fl m20" onclick='//app.ui.back()'>
+			<span class="icon fl m20" onclick='app.ui.back()'>
 				<img src='img/back.svg' class='icon' style='fill:white'/>
 			</span>
-
 			<div class='big' id='title'>Select a Street</div>
+			<span class="icon fr m20">
+				<img src='img/bluetooth-grey.svg' class='icon ble-indicator'/>
+			</span>
 		</section>
 		<div id='modes'>
 			<div class='mode'>
 				<div id='map'></div>
 				<div id='mapModal'>
 					<div>
-						<div class='inlineBlock halfButton' onclick='//app.ui.map.switch.side()'>Other side</div><div class='inlineBlock halfButton' onclick='//app.ui.map.switch.direction()'>Other direction</div>
+						<div class='inlineBlock halfButton' id="switchSide">Other side</div><div class='inlineBlock halfButton' id="switchDirection">Other direction</div>
 					</div>
-					<div class='bottomButton' onclick='//app.survey.init()'>
+					<div class='bottomButton' id="startSurvey">
 						Start Survey
 					</div>
 				</div>
@@ -70,8 +69,8 @@
 					</div>
 				</div>
 				<div class='pin-bottom bottomButton'>
-					<div id='reset' class=' col6' onclick='//app.survey.init()'>Reset</div>
-					<div id='complete' class=' col6' onclick='//app.survey.validate()'>Complete</div>
+					<div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
+					<div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
 				</div>
 			</div>
 			<div id='addFeature' class='scroll mode'></div>

@@ -21,8 +21,10 @@ var app = {
   survey: {
     // sets up parameters of the selected street, preparing for survey
     init: () => {
-      app.io.getWheelTick((cb) => {
-        app.state.systemRollOffset = cb.counter / 10;
+      console.log("init")
+      app.io.getWheelTick((counterValue) => {
+        
+        app.state.systemRollOffset = counterValue / 10;
         app.state.features = [];
         app.ui.features.update();
 
@@ -60,25 +62,25 @@ var app = {
       //check for significant deviations in surveyed curb length. user can restart survey or ignore
       else if (surveyedLengthRatio < 0.8 || surveyedLengthRatio > 1.1) {
         app.constants.errors.curbLengthDeviation(surveyedLengthRatio);
-      } 
+      }
       else app.survey.complete();
     },
 
     complete: (skipConfirmation) => {
     	var confirm = function() {
 
-			var uploadSuccess = function(){
-				app.state.surveyedRefs.push(app.state.street.forward);
-				app.ui.map.setFilter('surveyedStreets', app.state.surveyedRefs)
-				app.ui.mode.set("selectStreet");
-        	}
+    		app.io.uploadSurvey();
 
-			app.io.uploadSurvey(uploadSuccess);
+        app.state.surveyedRefs.push(app.state.street.forward);
+        app.ui.map.setFilter('surveyedStreets', app.state.surveyedRefs)
+        app.ui.mode.set("selectStreet");
+        
+      };
 
-    	};
-
-      if (skipConfirmation) confirm();
-      else app.ui.confirm(app.constants.prompts.completeSurvey, confirm, null);
+      if (skipConfirmation)
+        confirm();
+      else
+        app.ui.confirm(app.constants.prompts.completeSurvey, confirm, null);
     },
   },
   // functionality to add/delete/modify features
@@ -387,7 +389,8 @@ var app = {
     // poll Pi
     setInterval(
       () => {
-        if (app.state.mode === "rolling") app.io.getWheelTick();
+        if (app.state.mode === "rolling")
+          app.io.getWheelTick();
         else if (
           app.state.mode === "selectStreet" ||
           app.state.mode === "selectDirection"
@@ -489,10 +492,10 @@ var app = {
           },
           images: ft.images,
         };
-        
+
         if (app.state.rollDirection === 'back') {
 
-        	feature.geometry.distances = 
+        	feature.geometry.distances =
         	feature.geometry.distances.reverse()
 				.map(meters => app.state.currentRollDistance - meters)
 
@@ -507,38 +510,21 @@ var app = {
         survey.features.push(feature);
       }
 
-      var xhr = new XMLHttpRequest();
-      var url = "/surveys/" + app.state.street.ref;
-      xhr.open("POST", url, true);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.onreadystatechange = function () {
+      // save survey -- await?
+      app.io.saveSurvey(app.state.street.ref + ':' + app.state.streetSide, JSON.stringify(survey))
 
-        if (xhr.readyState === 4 && xhr.status === 200) cb()
-        // else alert('Error uploading survey. Please try again.')
-      };
-
-      xhr.send(JSON.stringify(survey));
-    },
-
-    loadJSON: (path, success, error) => {
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-          if (xhr.status === 200) {
-            if (success) success(JSON.parse(xhr.responseText));
-          } else if (error) error(xhr);
-        }
-      };
-      xhr.open("GET", path, true);
-      xhr.send();
     },
 
     getWheelTick: (cb) => {
-      app.io.loadJSON("/counter", (data) => {
-        if (cb) cb(data);
-        app.state.systemRollDistance = data.counter / 10;
-        app.ui.roll();
-      });
+      var counterValue = app.io.getCounterValue();
+
+      // fire callback
+      if(cb)
+        cb(counterValue);
+
+      app.state.systemRollDistance = counterValue / 10;
+      app.ui.roll();
+
     },
 
     geolocate: (cb) => {
