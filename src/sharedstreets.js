@@ -2,6 +2,7 @@ import * as sharedstreetsPbf from 'sharedstreets-pbf';
 
 import * as turfHelpers from '@turf/helpers';
 import bbox from "@turf/bbox";
+import length from "@turf/length";
 import destination from '@turf/destination';
 import  RBush from 'rbush';
 
@@ -9,6 +10,8 @@ const SphericalMercator = require("@mapbox/sphericalmercator");
 const sphericalMercator = new SphericalMercator({
     size: 256
 });
+
+//import fetch from 'cross-fetch';
 
 const USE_LOCAL_CACHE = false; // need to figure out isomorphic implementation with cache?
 const DEFAULT_ZLEVEL = 12;
@@ -47,6 +50,15 @@ function bboxFromPolygon(polygon) {
 	return {"minX": bboxCoords[0], "minY": bboxCoords[1], "maxX":bboxCoords[2], "maxY":bboxCoords[3]}
 }
 
+
+export function getReferenceLength(ref) {
+    var refLength = 0;
+    for(var locationRef of ref.locationReferences) {
+        if(locationRef.distanceToNextRef)
+        refLength = refLength = locationRef.distanceToNextRef
+    }
+    return refLength / 100;
+}
 
 
 function createGeometry(data) {
@@ -357,7 +369,7 @@ class TileIndex {
         }
         else if(tilePath.tileType === 'reference') {
             for(var reference of data) {
-                this.objectIndex.set(reference.id, reference);
+              this.objectIndex.set(reference.id, reference);
             }
         }
         else if(tilePath.tileType === 'metadata') {
@@ -417,6 +429,7 @@ class TileIndex {
 
             for(var rbushMatch of rbushMatches) {
                 var matchedGeom = this.featureIndex.get(rbushMatch.id);
+                matchedGeom.properties.distance = length(matchedGeom, { units: "meters" });
                 data.features.push(matchedGeom);
             }
         }

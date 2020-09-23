@@ -74,6 +74,7 @@
     "@turf/bbox-polygon": "^6.0.1",
     "@turf/destination": "^6.0.1",
     "@turf/helpers": "^6.1.4",
+    "@turf/length": "^6.0.2",
     "@turf/turf": "^5.1.6",
     "cross-fetch": "^3.0.6",
     "d3": "^6.1.1",
