@@ -6,6 +6,7 @@ import SharedStreets from './sharedstreets';
 import bboxPoly from '@turf/bbox-polygon';
 
 import mitt from 'mitt';
+import Photo from './photo';
 
 document.addEventListener('deviceready', onDeviceReady, false);
 
@@ -13,6 +14,7 @@ document.addEventListener('deviceready', onDeviceReady, false);
 const emitter = mitt();
 
 function onDeviceReady() {
+    const photo = new Photo();
     const shst = new SharedStreets();
     const map = new CurbWheelMap(app.state, emitter);
     emitter.on("mapload", () =>{

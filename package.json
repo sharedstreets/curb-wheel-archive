@@ -59,7 +59,9 @@
         "BLUETOOTH_USAGE_DESCRIPTION": "Scan for active BLE Devices"
       },
       "cordova-sqlite-storage": {},
-      "cordova-plugin-geolocation": {}
+      "cordova-plugin-geolocation": {},
+      "cordova-plugin-file": {},
+      "cordova-plugin-camera": {}
     },
     "platforms": [
       "ios",
