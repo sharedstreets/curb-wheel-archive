@@ -10,6 +10,8 @@ import Photo from './photo';
 
 document.addEventListener('deviceready', onDeviceReady, false);
 
+const bleIndicator = document.querySelector(".ble-indicator")
+
 
 const emitter = mitt();
 
@@ -38,6 +40,10 @@ function onDeviceReady() {
         app.ui.map = map;
         app.devMode.init();
 
+        if (navigator.geolocation){
+            navigator.geolocation.getCurrentPosition(map.setMapLocation);
+        }
+
         // scan ble
         scan();
     });
@@ -45,6 +51,7 @@ function onDeviceReady() {
     emitter.on("fetchStreets", async (data)=> {
         const poly = bboxPoly(data.toArray().flat());
         const streets = await shst.getPolygon(poly);
+        console.log(streets)
         emitter.emit('setStreets', streets);
     });
 
@@ -79,6 +86,7 @@ function onDeviceReady() {
     }
 
     function connectCallback() {
+        bleIndicator.src = 'img/bluetooth.svg'
         pollCounter = setInterval(function(){
             readBleData();
         }, 1000);
@@ -93,6 +101,7 @@ function onDeviceReady() {
     }
 
     function disconnectCallback() {
+        bleIndicator.src = 'img/bluetooth-grey.svg'
         clearInterval(pollCounter);
     }
 
