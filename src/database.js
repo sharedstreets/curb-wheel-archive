@@ -1,7 +1,7 @@
 class Database {
 
     constructor(db) {
-        this.db = init(db);
+        this.db = this.init(db);
         this.insertBLEConnection = this.insertBLEConnection.bind(this);
     }
 

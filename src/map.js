@@ -43,7 +43,6 @@ class CurbWheelMap {
 
 	setListeners() {
 		this.emitter.on("setStreets", (streets)=> {
-      console.log("got data")
 			this.map.getSource("streets").setData(streets);
 		})
 	}
@@ -147,6 +146,7 @@ class CurbWheelMap {
 							type: "FeatureCollection",
 							features: [e.features[0]],
 						});
+            
 						this.emitter.emit("selectDirection")
 
 					}

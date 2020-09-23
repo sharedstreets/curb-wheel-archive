@@ -1,7 +1,5 @@
 import * as sharedstreetsPbf from 'sharedstreets-pbf';
 
-import fetch from 'cross-fetch';
-
 import * as turfHelpers from '@turf/helpers';
 import bbox from "@turf/bbox";
 import destination from '@turf/destination';
