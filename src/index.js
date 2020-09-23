@@ -10,14 +10,20 @@ import Photo from './photo';
 
 document.addEventListener('deviceready', onDeviceReady, false);
 
-const bleIndicator = document.querySelector(".ble-indicator")
-
+const bleIndicator = document.querySelector(".ble-indicator");
 
 const emitter = mitt();
 
 var currentDevice = null;
 var pollCounter = null;
 var counterValue = null;
+
+function bindClick(elementId, f) {
+  // First we check if you support touch, otherwise it's click:
+  let touchEvent = 'ontouchstart' in window ? 'touchstart' : 'click';
+  // Then we bind via thát event. This way we only bind one event, instead of the two as below
+  document.getElementById(elementId).addEventListener(touchEvent, f);
+}
 
 function onDeviceReady() {
     const photo = new Photo();
@@ -59,9 +65,10 @@ function onDeviceReady() {
         app.ui.mode.set("selectDirection");
 
         // set up UI event handlers
-        document.getElementById("switchSide").onclick = app.ui.map.switch.side;
-        document.getElementById("switchDirection").onclick = app.ui.map.switch.direction;
-        document.getElementById("startSurvey").onclick = app.survey.init;
+        bindClick("switchSide", app.ui.map.switch.side);
+        bindClick("switchDirection", app.ui.map.switch.direction);
+        bindClick("startSurvey", app.survey.init);
+        
     });
 
     function scan() {
@@ -73,7 +80,7 @@ function onDeviceReady() {
             if (device.name == "counter") {
                 connect(device.id);
             }
-              
+
 
         }, ()=>{console.log('no devices found')});
     }
