@@ -98,16 +98,11 @@ var app = {
       app.ui.confirm(app.constants.prompts.deleteFeature, success, null);
     },
 
+
+  
     "take photo": function (d, i) {
-      var success = () => {
-        document.querySelector("#uploadImg").click();
-      };
-
-      //stash feature index in iframe attribute to append to later
-      app.state.featureToAddPhoto = d.startTime;
-
-      app.ui.confirm(app.constants.prompts.takePhoto, success, null);
     },
+  
 
     complete: function (d, i) {
       var success = function () {
@@ -233,7 +228,8 @@ var app = {
           .attr("class", "fr blue spanLength")
           .text((d) => (d.type === "Position" ? "" : `0 m`));
 
-        newFeatures.on("mousedown", (d, i) => {
+        newFeatures.on("touchstart", (d, i) => {
+          console.log(d)
           var id = d.startTime;
           d3.selectAll("#features .entry").classed(
             "active",
@@ -265,7 +261,7 @@ var app = {
           .attr("href", (d) => `#entry${d.startTime}`)
           .append("img")
           .attr("class", "icon fa-cog")
-          .attr("src", "static/images/cog.svg");
+          .attr("src", "img/cog.svg");
 
         // build feature action buttons
 
@@ -278,7 +274,8 @@ var app = {
             .append("div")
             .attr("class", `col4 featureAction`)
             .text(action)
-            .on("mousedown", (d, i) => {
+            .on("touchstart", (d, i) => {
+              console.log(d)
               d3.event.stopPropagation();
               app.feature[action](d, i);
             });
@@ -415,30 +412,30 @@ var app = {
       document.querySelector("#master").offsetHeight + "px"
     );
 
-    // build Add Feature modal
+    //build Add Feature modal
 
-    // Object.keys(app.constants.curbFeatures).forEach((type) => {
-    //   d3.select(`#addFeature`)
-    //     .append("span")
-    //     .attr("id", type)
-    //     .selectAll(".halfButton")
-    //     .data(app.constants.curbFeatures[type])
-    //     .enter()
-    //     .append("div")
-    //     .attr("class", "halfButton inlineBlock")
-    //     .text((d) => d)
-    //     .on("mousedown", (d) => {
-    //       d = {
-    //         name: d,
-    //         type: type,
-    //       };
-    //
-    //       // add new feature to state, return to rolling mode, update ui
-    //       app.feature.add(d);
-    //       app.ui.features.update();
-    //       app.ui.mode.set("rolling");
-    //     });
-    // });
+    Object.keys(app.constants.curbFeatures).forEach((type) => {
+       d3.select(`#addFeature`)
+         .append("span")
+         .attr("id", type)
+         .selectAll(".halfButton")
+         .data(app.constants.curbFeatures[type])
+         .enter()
+         .append("div")
+         .attr("class", "halfButton inlineBlock")
+         .text((d) => d)
+         .on('ontouchstart' in window ? 'touchstart' : 'click', (d) => {
+           d = {
+             name: d,
+             type: type,
+           };
+    
+           // add new feature to state, return to rolling mode, update ui
+           app.feature.add(d);
+           app.ui.features.update();
+           app.ui.mode.set("rolling");
+         });
+     });
 
     app.ui.mode.set(app.state.mode);
 
@@ -473,10 +470,13 @@ var app = {
       }
     },
 
+    /*
+
     // uploads image via the form, and retrieves the filepath from the hidden iframe
     uploadImage: (e) => {
       document.querySelector("#imageSubmit").click();
     },
+    */
 
     uploadSurvey: (cb) => {
       let survey = {
