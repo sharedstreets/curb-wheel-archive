@@ -68,7 +68,10 @@ function onDeviceReady() {
         bindClick("switchSide", app.ui.map.switch.side);
         bindClick("switchDirection", app.ui.map.switch.direction);
         bindClick("startSurvey", app.survey.init);
-        
+        bindClick("backButton", app.ui.back);
+        bindClick("resetButton", app.survey.init);
+        bindClick("validateButton", app.survey.validate);
+        bindClick("addFeature", app.ui.addFeature);
     });
 
     function scan() {
@@ -77,7 +80,7 @@ function onDeviceReady() {
             console.log('found ' + device.name + ': ' +  device.id);
             // todo select wheel id
 
-            if (device.name == "counter") {
+            if (device.name == "raspberrypi") {
                 connect(device.id);
             }
 

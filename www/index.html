@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 		<title>CurbWheel</title>
 		<link rel="stylesheet" href="css/basics.css">
 		<link rel="stylesheet" href="css/style.css">
@@ -10,7 +10,7 @@
 	</head>
 	<body class='is-mobile'>
 		<section class="" id='topBar'>
-			<span class="icon fl m20" onclick='app.ui.back()'>
+			<span class="icon fl m20" id="backButton">
 				<img src='img/back.svg' class='icon' style='fill:white'/>
 			</span>
 			<div class='big' id='title'>Select a Street</div>
@@ -59,7 +59,7 @@
 						<div id='features'></div>
 
 						<div class='text-center mt20 mb200'>
-							<p class='big' onclick='app.ui.mode.set("addFeature")'>
+							<p class='big' id="addFeature">
 								<span class="blue mr10 inlineBlock" style='transform: scale(1.5)'>
 									<img src='img/plus.svg' class='icon'/>
 								</span>
@@ -69,8 +69,8 @@
 					</div>
 				</div>
 				<div class='pin-bottom bottomButton'>
-					<div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
-					<div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
+					<div id='reset' class=' col6' id="resetButton">Reset</div>
+					<div id='complete' class=' col6' id="validateButton">Complete</div>
 				</div>
 			</div>
 			<div id='addFeature' class='scroll mode'></div>

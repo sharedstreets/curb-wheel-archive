@@ -11,6 +11,7 @@ const sphericalMercator = new SphericalMercator({
     size: 256
 });
 
+// TODO build conditional isomorphic fetch for testing
 //import fetch from 'cross-fetch';
 
 const USE_LOCAL_CACHE = false; // need to figure out isomorphic implementation with cache?
@@ -64,7 +65,7 @@ export function getReferenceLength(ref) {
 function createGeometry(data) {
 
     var line = turfHelpers.lineString(lonlatsToCoords(data.lonlats));
-    var feature = turfHelpers.feature(line.geometry, {id: data.id});
+    var feature = turfHelpers.feature(line.geometry, {id: data.id, forward: data.forwardReferenceId, backward: data.backReferenceId});
     return feature;
 }
 
@@ -426,7 +427,6 @@ class TileIndex {
         if(searchType === 'geometry'){
             var bboxCoords = bboxFromPolygon(polygon);
             var rbushMatches = this.geometryIndex.search(bboxCoords);
-
             for(var rbushMatch of rbushMatches) {
                 var matchedGeom = this.featureIndex.get(rbushMatch.id);
                 matchedGeom.properties.distance = length(matchedGeom, { units: "meters" });

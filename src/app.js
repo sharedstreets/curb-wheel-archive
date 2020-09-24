@@ -23,7 +23,7 @@ var app = {
     init: () => {
       console.log("init")
       app.io.getWheelTick((counterValue) => {
-        
+
         app.state.systemRollOffset = counterValue / 10;
         app.state.features = [];
         app.ui.features.update();
@@ -74,7 +74,7 @@ var app = {
         app.state.surveyedRefs.push(app.state.street.forward);
         app.ui.map.setFilter('surveyedStreets', app.state.surveyedRefs)
         app.ui.mode.set("selectStreet");
-        
+
       };
 
       if (skipConfirmation)
@@ -178,6 +178,10 @@ var app = {
       }
 
       app.state.currentRollDistance = current;
+    },
+
+    addFeature : function() {
+      app.ui.mode.set("addFeature");
     },
 
     // builds progress bar
@@ -413,28 +417,28 @@ var app = {
 
     // build Add Feature modal
 
-    Object.keys(app.constants.curbFeatures).forEach((type) => {
-      d3.select(`#addFeature`)
-        .append("span")
-        .attr("id", type)
-        .selectAll(".halfButton")
-        .data(app.constants.curbFeatures[type])
-        .enter()
-        .append("div")
-        .attr("class", "halfButton inlineBlock")
-        .text((d) => d)
-        .on("mousedown", (d) => {
-          d = {
-            name: d,
-            type: type,
-          };
-
-          // add new feature to state, return to rolling mode, update ui
-          app.feature.add(d);
-          app.ui.features.update();
-          app.ui.mode.set("rolling");
-        });
-    });
+    // Object.keys(app.constants.curbFeatures).forEach((type) => {
+    //   d3.select(`#addFeature`)
+    //     .append("span")
+    //     .attr("id", type)
+    //     .selectAll(".halfButton")
+    //     .data(app.constants.curbFeatures[type])
+    //     .enter()
+    //     .append("div")
+    //     .attr("class", "halfButton inlineBlock")
+    //     .text((d) => d)
+    //     .on("mousedown", (d) => {
+    //       d = {
+    //         name: d,
+    //         type: type,
+    //       };
+    //
+    //       // add new feature to state, return to rolling mode, update ui
+    //       app.feature.add(d);
+    //       app.ui.features.update();
+    //       app.ui.mode.set("rolling");
+    //     });
+    // });
 
     app.ui.mode.set(app.state.mode);
 
