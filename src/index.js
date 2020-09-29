@@ -42,6 +42,18 @@ function onDeviceReady() {
         db.insertSurvey(surveyId, data);
     };
 
+    app.feature["take photo"] = function (d, i) {
+        var success = async() => {
+          const img = await photo.openCamera();
+          db.insertPhoto(img.nativeURL, "1234")
+        };
+  
+        //stash feature index in iframe attribute to append to later
+        app.state.featureToAddPhoto = d.startTime;
+  
+        app.ui.confirm(app.constants.prompts.takePhoto, success, null);
+      }
+
     emitter.on("mapload", () => {
         app.ui.map = map;
         app.devMode.init();
@@ -71,7 +83,7 @@ function onDeviceReady() {
         bindClick("backButton", app.ui.back);
         bindClick("resetButton", app.survey.init);
         bindClick("validateButton", app.survey.validate);
-        bindClick("addFeature", app.ui.addFeature);
+        bindClick("addFeatureButton", app.ui.addFeature);
     });
 
     function scan() {

@@ -39,8 +39,8 @@ class Database {
 
     insertSurvey(ref ,survey) {
         this.db.transaction(function(tx) {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS survey (ref STRING PRIMARY KEY, data STRING');
-            tx.executeSql('INSERT INTO survey VALUES (?1, ?2)', [ref, survey]);
+            tx.executeSql('CREATE TABLE IF NOT EXISTS survey (id INTEGER PRIMARY KEY, ref STRING, data STRING');
+            tx.executeSql('INSERT INTO survey (ref, data) VALUES (?1, ?2)', [ref, survey]);
         }, function(err) {
             console.log('Transaction ERROR: ' + err.message);
         }, function() {
@@ -68,6 +68,26 @@ class Database {
           });
     }
 
+    insertPhoto(key ,feature_ref) {
+        this.db.transaction(function(tx) {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS photo (id INTEGER PRIMARY KEY, key STRING, feature_ref STRING');
+            tx.executeSql('INSERT INTO survey (key, feature_ref) VALUES (?1, ?2)', [key, feature_ref]);
+        }, function(err) {
+            console.log('Transaction ERROR: ' + err.message);
+        }, function() {
+            console.log('Populated database OK');
+        });
+    }
+
+    getPhotosByFeature(feature_ref) {
+        this.db.transaction(function(tx) {
+            tx.executeSql('SELECT * FROM photo WHERE feature_ref = ?1', [feature_ref], function(tx, rs) {
+              console.log(rs.rows);
+            }, function(tx, error) {
+              console.log('SELECT error: ' + error.message);
+            });
+          });
+    }
 
 
 }
