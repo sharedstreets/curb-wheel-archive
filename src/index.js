@@ -80,10 +80,9 @@ function onDeviceReady() {
             console.log('found ' + device.name + ': ' +  device.id);
             // todo select wheel id
 
-            if (device.name == "raspberrypi") {
+            if (device.name == "curbwheel" || device.name == "counter" || device.name == "raspberrypi") {
                 connect(device.id);
             }
-
 
         }, ()=>{console.log('no devices found')});
     }
