@@ -11,6 +11,7 @@ import Photo from './photo';
 document.addEventListener('deviceready', onDeviceReady, false);
 
 let modalActive = false;
+let deviceId;
 const modal = document.querySelector('.modal');
 const modalBody = document.querySelector('.modal__body');
 const modalBackground = document.querySelector('.modal__background');
@@ -35,6 +36,7 @@ function bindClick(elementId, f) {
 
 
 function onDeviceReady() {
+
     const photo = new Photo();
     const shst = new SharedStreets();
     const map = new CurbWheelMap(app.state, emitter);
@@ -127,11 +129,15 @@ function onDeviceReady() {
     });
 
     function scan() {
+        console.log("SCAN")
+        let devices = [];
+        console.log(connectionsList)
         while (connectionsList.firstChild) {
-            connectionsList.remove(connectionsList.firstChild)
+            connectionsList.removeChild(connectionsList.firstChild)
         }
         ble.scan([], 10, function addToList(device) {
             if (device.name) {
+<<<<<<< HEAD
                 const li = document.createElement('li');
                 const elemId = `device-${device.id}`;
                 li.id = elemId
@@ -142,22 +148,49 @@ function onDeviceReady() {
                 bindClick(elemId, onClickConnect)
 
                 console.log('found ' + device.name + ': ' +  device.id);
+=======
+                if (devices.indexOf(device.id) == -1 ){
+                    devices.push(device.id);
+                    const li = document.createElement('li');
+                    const elemId = `device-${device.id}`;
+                    li.id = elemId
+                    li.classList.add("connection-item")
+                    li.setAttribute('data-mac-address', device.id);
+                    connectionsList.appendChild(li);
+                    li.innerText = `${device.name} - (${device.id})`
+                    bindClick(elemId, onClickConnect)
+                    console.log('found ' + device.name + ': ' +  device.id);
+                }
+
+>>>>>>> origin/ble-connection-option
             }
         }, ()=>{console.log('no devices found')});
     }
 
     bindClick('ble-indicator', () => {
+        console.log(modalActive)
         if (modalActive) {
             modal.classList.remove('modal--visible');
             modalBackground.classList.remove('modal__background--visible');
             modalBody.classList.remove('modal__body--visible');
             modalActive = false;
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/ble-connection-option
         } else {
-            scan();
             modal.classList.add('modal--visible');
             modalBackground.classList.add('modal__background--visible');
             modalBody.classList.add('modal__body--visible');
+            if (deviceId) {
+                ble.disconnect(deviceId, () => {
+                    bleStatus.classList.remove('ble-status--connected');
+                    scan();
+                }, () => console.log("cannot disconnect"));
+                deviceId = undefined;
+            } else {
+                scan()
+            }
             modalActive = true;
         }
     })
@@ -166,21 +199,24 @@ function onDeviceReady() {
         const target = e.target;
         const macAddress = target.getAttribute('data-mac-address');
         connect(macAddress);
-    }
 
+    }
 
     function connect(macAddress) {
         currentDevice = macAddress;
+        deviceId = macAddress;
         console.log('connecting to ' +  currentDevice);
         ble.connect(currentDevice, connectCallback, disconnectCallback);
     }
 
     function connectCallback() {
+        ble.stopScan(()=>console.log("stop scan"), ()=>console.log("cannot stop scan"))
+        modalActive = false;
         bleStatus.classList.add('ble-status--connected');
         modal.classList.remove('modal--visible');
         modalBackground.classList.remove('modal__background--visible');
         modalBody.classList.remove('modal__body--visible');
-        modalActive = false;
+        console.log(modalActive)
         pollCounter = setInterval(function(){
             readBleData();
         }, 1000);
@@ -195,7 +231,8 @@ function onDeviceReady() {
     }
 
     function disconnectCallback() {
-        bleIndicator.src = 'img/bluetooth-grey.svg'
+        modalActive = false;
+        bleStatus.classList.remove('ble-status--connected');
         clearInterval(pollCounter);
     }
 

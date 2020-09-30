@@ -406,10 +406,8 @@ body, html {
 	transform: translate(-50%, -50%);
 	box-shadow: 2px 2px 5px #444;
 	padding: 20px;
-	max-width: 50%;
+	width: 80vw;
 	z-index: 9999;
-	min-width: 150px;
-	min-height: 150px;
   }
   
   .modal__body--visible {
@@ -435,11 +433,14 @@ body, html {
   
   .bluetooth-connections {
 	list-style: none;
+	margin: 0;
+	padding: 0;
   }
 
   .connection-item{
 	display: inline-block;
 	padding: 10px;
+	margin:10px;
 	color:white;
 	background-color: var(--defaultColor);
   }
