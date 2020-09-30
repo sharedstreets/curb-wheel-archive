@@ -17,7 +17,7 @@ class Database {
 
     insertBLEConnection(macAddress) {
         this.db.transaction(function(tx) {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS BLEConnection (id INTEGER PRIMARY KEY, address STRING');
+            tx.executeSql('CREATE TABLE IF NOT EXISTS BLEConnection (id INTEGER PRIMARY KEY, address STRING)');
             tx.executeSql('INSERT INTO BLEConnection VALUES (?1)', [macAddress]);
         }, function(err) {
             console.log('Transaction ERROR: ' + err.message);
@@ -37,10 +37,10 @@ class Database {
           });
     }
 
-    insertSurvey(ref ,survey) {
+    insertSurvey(ref, streetSide, survey) {
         this.db.transaction(function(tx) {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS survey (id INTEGER PRIMARY KEY, ref STRING, data STRING');
-            tx.executeSql('INSERT INTO survey (ref, data) VALUES (?1, ?2)', [ref, survey]);
+            tx.executeSql('CREATE TABLE IF NOT EXISTS survey (id INTEGER PRIMARY KEY, ref STRING, data STRING)');
+            tx.executeSql('INSERT INTO survey (ref, data) VALUES (?1, ?2, ?3)', [ref, streetSide, survey]);
         }, function(err) {
             console.log('Transaction ERROR: ' + err.message);
         }, function() {
@@ -68,14 +68,14 @@ class Database {
           });
     }
 
-    insertPhoto(key ,feature_ref) {
+    insertPhoto(key ,feature_ref, data) {
         this.db.transaction(function(tx) {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS photo (id INTEGER PRIMARY KEY, key STRING, feature_ref STRING');
-            tx.executeSql('INSERT INTO survey (key, feature_ref) VALUES (?1, ?2)', [key, feature_ref]);
+            tx.executeSql('CREATE TABLE IF NOT EXISTS photo (id INTEGER PRIMARY KEY, key STRING, feature_ref STRING, data STRING)');
+            tx.executeSql('INSERT INTO photo (key, feature_ref, data) VALUES (?1, ?2, ?3)', [key, feature_ref, data]);
         }, function(err) {
             console.log('Transaction ERROR: ' + err.message);
         }, function() {
-            console.log('Populated database OK');
+            console.log('Populated database OK: ' +  key);
         });
     }
 

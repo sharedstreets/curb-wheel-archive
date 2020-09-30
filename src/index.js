@@ -17,6 +17,8 @@ const modalBackground = document.querySelector('.modal__background');
 const connectionsList = document.querySelector('.bluetooth-connections');
 const bleStatus = document.getElementById('ble-status');
 
+const SIGNED_UPLOAD_URL = "https://zzkcv3z5xd.execute-api.us-east-1.amazonaws.com/dev"
+
 const emitter = mitt();
 
 var currentDevice = null;
@@ -44,24 +46,55 @@ function onDeviceReady() {
       return counterValue;
     };
 
-    app.io.saveSurvey = async (surveyId, data) => {
+    // setup counter value query
+    app.io.getGeom = (refId, p1, p2) => {
+      return shst.getGeom(refId, p1, p2);
+    };
+
+    // setup counter value query
+    app.io.uploadJson = async (uploadPath, data) => {
+      var uploadUrlResponse = await fetch(SIGNED_UPLOAD_URL, {
+            method: 'POST', // or 'PUT'
+            body: JSON.stringify({key:uploadPath})
+      });
+
+      var urlData = await uploadUrlResponse.json();
+      fetch(urlData.url, {
+            method: 'PUT', // or 'PUT'
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            body: JSON.stringify(data),
+      });
+    };
+
+    app.io.saveSurvey = async (surveyId, streetSide, data) => {
         // await?
-        db.insertSurvey(surveyId, data);
+        db.insertSurvey(surveyId, streetSide, data);
     };
 
     app.feature["take photo"] = function (d, i) {
         var success = async() => {
           const img = await photo.openCamera();
-          db.insertPhoto(img.nativeURL, "1234")
+
+          const data = { shsh_ref_id: app.state.street.ref,
+                         side_of_street: app.state.streetSide,
+                         distance: app.state.currentRollDistance };
+
+          console.log("saving photo: " + img.nativeURL + JSON.stringify(data));
+
+          db.insertPhoto(img.nativeURL, app.state.street.ref, data);
+
+          app.io.addPhoto(d, img.nativeURL)
         };
-  
-        //stash feature index in iframe attribute to append to later
-        app.state.featureToAddPhoto = d.startTime;
-  
+
         app.ui.confirm(app.constants.prompts.takePhoto, success, null);
       }
 
     emitter.on("mapload", () => {
+
+        console.log("map loaded...")
+
         app.ui.map = map;
         app.devMode.init();
 
@@ -107,7 +140,7 @@ function onDeviceReady() {
                 connectionsList.appendChild(li);
                 li.innerText = device.name
                 bindClick(elemId, onClickConnect)
-    
+
                 console.log('found ' + device.name + ': ' +  device.id);
             }
         }, ()=>{console.log('no devices found')});
@@ -119,7 +152,7 @@ function onDeviceReady() {
             modalBackground.classList.remove('modal__background--visible');
             modalBody.classList.remove('modal__body--visible');
             modalActive = false;
-            
+
         } else {
             scan();
             modal.classList.add('modal--visible');

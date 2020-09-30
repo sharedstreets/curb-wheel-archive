@@ -4,6 +4,10 @@ import * as turfHelpers from '@turf/helpers';
 import bbox from "@turf/bbox";
 import length from "@turf/length";
 import destination from '@turf/destination';
+import along from '@turf/along';
+import lineSliceAlong from '@turf/line-slice-along';
+import lineOffset from '@turf/line-offset';
+
 import  RBush from 'rbush';
 
 const SphericalMercator = require("@mapbox/sphericalmercator");
@@ -407,8 +411,10 @@ class TileIndex {
 
         var tilePaths = TilePathGroup.fromPolygon(polygon, buffer, params);
 
-        if(searchType === 'geometry')
+        if(searchType === 'geometry') {
             tilePaths.addType('geometry');
+            tilePaths.addType('reference');
+        }
         else if(searchType === 'intersection')
             tilePaths.addType('intersection');
         else
@@ -444,6 +450,47 @@ class TileIndex {
 
         return data;
     }
+
+    getGeom(referenceId, p1, p2, offset) {
+        // todo add side of street flag
+        if(this.objectIndex.has(referenceId)) {
+            var ref = this.objectIndex.get(referenceId);
+            var geom = this.objectIndex.get(ref.geometryId);
+
+            var geomFeature = JSON.parse(JSON.stringify(this.featureIndex.get(ref.geometryId)));
+
+            if(geom.backReferenceId && geom.backReferenceId === referenceId) {
+                geomFeature.geometry.coordinates = geomFeature.geometry.coordinates.reverse()
+            }
+
+            if(offset) {
+                geomFeature = lineOffset(geomFeature, offset, {units: 'meters'});
+            }
+
+            if(p1 < 0)
+                p1 = 0;
+            if(p2 < 0)
+                p2 = 0;
+
+            if(p1 == null && p2 == null) {
+                return geomFeature;
+            }
+            else if(p1 && p2 == null) {
+                return along(geomFeature, p1, {"units":"meters"});
+            }
+            else if(p1 != null && p2 != null) {
+                try {
+                    return lineSliceAlong(geomFeature, p1, p2, {"units":"meters"});
+                }
+                catch(e) {
+                    //console.log(p1, p2)
+                }
+            }
+        }
+
+        // TODO find missing IDs via look up
+        return null;
+    }
 }
 
 
@@ -459,6 +506,10 @@ class SharedStreets {
     params.source = 'osm/planet-181224';
     params.tileHierarchy = 6;
     return this.index.intersects(polygon, 'geometry', 0, params);
+  }
+
+  getGeom(refId, p1, p2, offset=0){
+    return this.index.getGeom(refId, p1, p2, offset)
   }
 
   clear() {

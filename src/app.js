@@ -69,7 +69,7 @@ var app = {
     complete: (skipConfirmation) => {
     	var confirm = function() {
 
-    		app.io.uploadSurvey();
+    		app.io.completeSurvey();
 
         app.state.surveyedRefs.push(app.state.street.forward);
         app.ui.map.setFilter('surveyedStreets', app.state.surveyedRefs)
@@ -99,10 +99,13 @@ var app = {
     },
 
 
-  
+
     "take photo": function (d, i) {
+
+      // place holder function -- overriden in index.js
+
     },
-  
+
 
     complete: function (d, i) {
       var success = function () {
@@ -417,11 +420,11 @@ var app = {
     Object.keys(app.constants.curbFeatures).forEach((type) => {
        d3.select(`#addFeature`)
          .append("span")
-         .attr("id", type)
          .selectAll(".halfButton")
          .data(app.constants.curbFeatures[type])
          .enter()
          .append("div")
+         .attr("id", type)
          .attr("class", "halfButton inlineBlock")
          .text((d) => d)
          .on('ontouchstart' in window ? 'touchstart' : 'click', (d) => {
@@ -429,7 +432,7 @@ var app = {
              name: d,
              type: type,
            };
-    
+
            // add new feature to state, return to rolling mode, update ui
            app.feature.add(d);
            app.ui.features.update();
@@ -448,15 +451,10 @@ var app = {
   },
 
   io: {
-    iframe: () => {
-      return document.querySelector("iframe");
-    },
 
-    iframeOnload: () => {
-      var filename = app.io.iframe().contentDocument.querySelector("body")
-        .innerText;
+    addPhoto: (d, filename) => {
       var ft = app.state.features.filter(
-        (ft) => ft.startTime === app.state.featureToAddPhoto
+        (ft) => ft.startTime === d.startTime
       )[0];
 
       if (ft) {
@@ -468,19 +466,12 @@ var app = {
           },
         });
 
+
         app.ui.features.update();
       }
     },
 
-    /*
-
-    // uploads image via the form, and retrieves the filepath from the hidden iframe
-    uploadImage: (e) => {
-      document.querySelector("#imageSubmit").click();
-    },
-    */
-
-    uploadSurvey: (cb) => {
+    completeSurvey: (cb) => {
       let survey = {
         created_at: Date.now(),
         shst_ref_id: app.state.street.ref,
@@ -500,24 +491,31 @@ var app = {
         };
 
         if (app.state.rollDirection === 'back') {
-
-        	feature.geometry.distances =
+          feature.geometry.distances =
         	feature.geometry.distances.reverse()
-				.map(meters => app.state.currentRollDistance - meters)
+				      .map(meters => app.state.currentRollDistance - meters)
 
         	feature.images = feature.images
         		.map(image=>{
-        			image.geometry.distance = app.state.currentRollDistance - image.geometry.distance
-        			return image
+        			image.geometry.distance = app.state.currentRollDistance - image.geometry.distance;
+        			return image;
         		})
-
         }
+
+        // todo error handling for out of bounds offsets
+
+        feature.geometry.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0], feature.geometry.distances[1]);
+
+        feature.images = feature.images.map(image=>{
+          image.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0]);
+        });
 
         survey.features.push(feature);
       }
 
+      app.io.uploadJson("test_survey.json", survey);
       // save survey -- await?
-      app.io.saveSurvey(app.state.street.ref + ':' + app.state.streetSide, JSON.stringify(survey))
+      app.io.saveSurvey(app.state.street.ref, app.state.streetSide, JSON.stringify(survey))
 
     },
 
