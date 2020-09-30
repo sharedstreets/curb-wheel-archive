@@ -137,18 +137,6 @@ function onDeviceReady() {
         }
         ble.scan([], 10, function addToList(device) {
             if (device.name) {
-<<<<<<< HEAD
-                const li = document.createElement('li');
-                const elemId = `device-${device.id}`;
-                li.id = elemId
-                li.classList.add("connection-item")
-                li.setAttribute('data-mac-address', device.id);
-                connectionsList.appendChild(li);
-                li.innerText = device.name
-                bindClick(elemId, onClickConnect)
-
-                console.log('found ' + device.name + ': ' +  device.id);
-=======
                 if (devices.indexOf(device.id) == -1 ){
                     devices.push(device.id);
                     const li = document.createElement('li');
@@ -162,7 +150,6 @@ function onDeviceReady() {
                     console.log('found ' + device.name + ': ' +  device.id);
                 }
 
->>>>>>> origin/ble-connection-option
             }
         }, ()=>{console.log('no devices found')});
     }
@@ -174,10 +161,6 @@ function onDeviceReady() {
             modalBackground.classList.remove('modal__background--visible');
             modalBody.classList.remove('modal__body--visible');
             modalActive = false;
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/ble-connection-option
         } else {
             modal.classList.add('modal--visible');
             modalBackground.classList.add('modal__background--visible');
