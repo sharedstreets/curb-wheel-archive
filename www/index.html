@@ -14,9 +14,15 @@
 				<img src='img/back.svg' class='icon' style='fill:white'/>
 			</span>
 			<div class='big' id='title'>Select a Street</div>
-			<span class="icon fr m20">
-				<img src='img/bluetooth-grey.svg' class='icon ble-indicator'/>
-			</span>
+			<div class="fr ble-section">
+				<span class="icon ble-status-icon">
+					<div class="ble-status" id="ble-status"></div>
+				</span>
+				<span class="icon m20">
+					<img src='img/bluetooth.svg' class='icon ble-indicator' id="ble-indicator"/>
+				</span>
+			</div>
+
 		</section>
 		<div id='modes'>
 			<div class='mode'>
@@ -44,8 +50,6 @@
 								<div class='spoke'></div>
 							</div>
 						</div>
-
-
 						<span class='small quiet'>
 							<span id='blockProgress'>0</span>m of ~<span id='curbLength'></span>m
 						</span>
@@ -74,6 +78,14 @@
 				</div>
 			</div>
 			<div id='addFeature' class='scroll mode'></div>
+		</div>
+		<div class="js-modal modal">
+			<div class="js-modal__body modal__body">
+			  <h2 class="modal-title">Bluetooth Connections Available</h2>
+			  <ul class="bluetooth-connections"></ul>
+			  <span style="color:grey">Click an item to connect to bluetooth device</span>
+			</div>
+			<div class="js-modal__background modal__background"></div>
 		</div>
     </body>
     <script src="cordova.js"></script>

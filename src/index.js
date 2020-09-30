@@ -10,7 +10,12 @@ import Photo from './photo';
 
 document.addEventListener('deviceready', onDeviceReady, false);
 
-const bleIndicator = document.querySelector(".ble-indicator");
+let modalActive = false;
+const modal = document.querySelector('.modal');
+const modalBody = document.querySelector('.modal__body');
+const modalBackground = document.querySelector('.modal__background');
+const connectionsList = document.querySelector('.bluetooth-connections');
+const bleStatus = document.getElementById('ble-status');
 
 const emitter = mitt();
 
@@ -24,6 +29,8 @@ function bindClick(elementId, f) {
   // Then we bind via thát event. This way we only bind one event, instead of the two as below
   document.getElementById(elementId).addEventListener(touchEvent, f);
 }
+
+
 
 function onDeviceReady() {
     const photo = new Photo();
@@ -63,7 +70,7 @@ function onDeviceReady() {
         }
 
         // scan ble
-        scan();
+        //scan();
     });
 
     emitter.on("fetchStreets", async (data)=> {
@@ -87,16 +94,45 @@ function onDeviceReady() {
     });
 
     function scan() {
+        while (connectionsList.firstChild) {
+            connectionsList.remove(connectionsList.firstChild)
+        }
         ble.scan([], 10, function addToList(device) {
-
-            console.log('found ' + device.name + ': ' +  device.id);
-            // todo select wheel id
-
-            if (device.name == "curbwheel" || device.name == "counter" || device.name == "raspberrypi") {
-                connect(device.id);
+            if (device.name) {
+                const li = document.createElement('li');
+                const elemId = `device-${device.id}`;
+                li.id = elemId
+                li.classList.add("connection-item")
+                li.setAttribute('data-mac-address', device.id);
+                connectionsList.appendChild(li);
+                li.innerText = device.name
+                bindClick(elemId, onClickConnect)
+    
+                console.log('found ' + device.name + ': ' +  device.id);
             }
-
         }, ()=>{console.log('no devices found')});
+    }
+
+    bindClick('ble-indicator', () => {
+        if (modalActive) {
+            modal.classList.remove('modal--visible');
+            modalBackground.classList.remove('modal__background--visible');
+            modalBody.classList.remove('modal__body--visible');
+            modalActive = false;
+            
+        } else {
+            scan();
+            modal.classList.add('modal--visible');
+            modalBackground.classList.add('modal__background--visible');
+            modalBody.classList.add('modal__body--visible');
+            modalActive = true;
+        }
+    })
+
+    function onClickConnect(e) {
+        const target = e.target;
+        const macAddress = target.getAttribute('data-mac-address');
+        connect(macAddress);
     }
 
 
@@ -107,7 +143,11 @@ function onDeviceReady() {
     }
 
     function connectCallback() {
-        bleIndicator.src = 'img/bluetooth.svg'
+        bleStatus.classList.add('ble-status--connected');
+        modal.classList.remove('modal--visible');
+        modalBackground.classList.remove('modal__background--visible');
+        modalBody.classList.remove('modal__body--visible');
+        modalActive = false;
         pollCounter = setInterval(function(){
             readBleData();
         }, 1000);

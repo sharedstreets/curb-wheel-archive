@@ -440,9 +440,11 @@ var app = {
     app.ui.mode.set(app.state.mode);
 
     // set upload functionality
+    /*
     document
       .getElementById("uploadImg")
       .addEventListener("change", app.io.uploadImage, false);
+      */
   },
 
   io: {
