@@ -6,17 +6,22 @@ class Photo {
             destinationType: Camera.DestinationType.FILE_URI,
             encodingType: Camera.EncodingType.JPEG,
             mediaType: Camera.MediaType.PICTURE,
-            correctOrientation: true  
+            correctOrientation: true
         }
 
         this.openCamera = this.openCamera.bind(this);
     }
 
     async openCamera() {
+
         const imageUri = await getPicture(this.options);
         const fileEntry = await resolveLocalFileSystemURL(imageUri);
         const filename = `${uuidv4()}.jpg`
-        const dirEntry = await resolveLocalFileSystemURL(cordova.file.externalDataDirectory);
+        var dirEntry;
+        if(device.platform == "iOS")
+          dirEntry = await resolveLocalFileSystemURL(cordova.file.dataDirectory);
+        else
+          dirEntry = await resolveLocalFileSystemURL(cordova.file.externalDataDirectory);
         const nativeURL = await moveFile(fileEntry, dirEntry, filename);
         console.log(nativeURL)
         return nativeURL
