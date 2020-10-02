@@ -33,7 +33,40 @@ function bindClick(elementId, f) {
   document.getElementById(elementId).addEventListener(touchEvent, f);
 }
 
+async function getSignedUrl(uploadPath) {
+  var uploadUrlResponse = await fetch(SIGNED_UPLOAD_URL, {
+        method: 'POST', // or 'PUT'
+        body: JSON.stringify({key:uploadPath})
+  });
 
+  var urlData = await uploadUrlResponse.json();
+
+  return urlData.url;
+}
+
+function resolveLocalFileSystemURL(path) {
+    return new Promise((resolve, reject) => {
+        window.resolveLocalFileSystemURL(path, resolve, reject)
+    });
+}
+
+function getFile(fileEntry) {
+    return new Promise((resolve, reject) => {
+      fileEntry.file(resolve, reject);
+    });
+}
+
+function readBinaryFile(file) {
+  return new Promise((resolve, reject) => {
+    var reader = new FileReader();
+    reader.onloadend = function() {
+        console.log("Successful file write: " + this.result);
+        //var blob = new Blob([new Uint8Array(this.result)], { type: "image/png" });
+        resolve(this.result);
+    };
+    reader.readAsArrayBuffer(file);
+  });
+}
 
 function onDeviceReady() {
 
@@ -49,19 +82,26 @@ function onDeviceReady() {
     };
 
     // setup counter value query
+    app.io.getSurveys = async () => {
+      return await db.getSurveys();
+    };
+
+    // setup counter value query
+    app.io.getSurveyCount = async () => {
+      var surveys = await db.getSurveys();
+      return surveys.length;
+    };
+
+    // setup counter value query
     app.io.getGeom = (refId, p1, p2) => {
       return shst.getGeom(refId, p1, p2);
     };
 
-    // setup counter value query
     app.io.uploadJson = async (uploadPath, data) => {
-      var uploadUrlResponse = await fetch(SIGNED_UPLOAD_URL, {
-            method: 'POST', // or 'PUT'
-            body: JSON.stringify({key:uploadPath})
-      });
 
-      var urlData = await uploadUrlResponse.json();
-      fetch(urlData.url, {
+      const uploadUrl = await getSignedUrl(uploadPath);
+
+      fetch(uploadUrl, {
             method: 'PUT', // or 'PUT'
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -70,8 +110,22 @@ function onDeviceReady() {
       });
     };
 
+    app.io.uploadImage = async (uploadPath, localImagePath) => {
+      const uploadUrl = await getSignedUrl(uploadPath);
+      let fileEntry = await resolveLocalFileSystemURL(localImagePath);
+      var file = await getFile(fileEntry);
+      var imageBuffer = await readBinaryFile(file);
+
+      fetch(uploadUrl, {
+            method: 'PUT', // or 'PUT'
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            body: imageBuffer,
+      });
+    };
+
     app.io.saveSurvey = async (surveyId, streetSide, data) => {
-        // await?
         db.insertSurvey(surveyId, streetSide, data);
     };
 
@@ -100,6 +154,8 @@ function onDeviceReady() {
         app.ui.map = map;
         app.devMode.init();
 
+        app.ui.updateSurveyCount();
+
         if (navigator.geolocation){
             navigator.geolocation.getCurrentPosition(map.setMapLocation);
         }
@@ -126,6 +182,9 @@ function onDeviceReady() {
         bindClick("resetButton", app.survey.init);
         bindClick("validateButton", app.survey.validate);
         bindClick("addFeatureButton", app.ui.addFeature);
+        bindClick("addFeatureButton", app.ui.addFeature);
+
+        uploadData
     });
 
     function scan() {
@@ -136,7 +195,7 @@ function onDeviceReady() {
             connectionsList.removeChild(connectionsList.firstChild)
         }
         ble.scan([], 10, function addToList(device) {
-            if (device.name) {
+            if (device.name && (device.name === "curbwheel" ||device.name === "counter" || device.name === "raspberrypi" ) ) {
                 if (devices.indexOf(device.id) == -1 ){
                     devices.push(device.id);
                     const li = document.createElement('li');
@@ -153,6 +212,8 @@ function onDeviceReady() {
             }
         }, ()=>{console.log('no devices found')});
     }
+
+    bindClick("upload-indicator", app.io.uploadData);
 
     bindClick('ble-indicator', () => {
         console.log(modalActive)

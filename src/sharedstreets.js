@@ -472,13 +472,13 @@ class TileIndex {
             if(p2 < 0)
                 p2 = 0;
 
-            if(p1 == null && p2 == null) {
+            if(p1 === null && p2 === null) {
                 return geomFeature;
             }
-            else if(p1 && p2 == null) {
+            else if((p1 != null && p2 === null) || p1 === p2) {
                 return along(geomFeature, p1, {"units":"meters"});
             }
-            else if(p1 != null && p2 != null) {
+            else if(p1 !== null && p2 !== null) {
                 try {
                     return lineSliceAlong(geomFeature, p1, p2, {"units":"meters"});
                 }
@@ -508,7 +508,7 @@ class SharedStreets {
     return this.index.intersects(polygon, 'geometry', 0, params);
   }
 
-  getGeom(refId, p1, p2, offset=0){
+  getGeom(refId, p1, p2=null, offset=0){
     return this.index.getGeom(refId, p1, p2, offset)
   }
 

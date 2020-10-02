@@ -52,7 +52,7 @@ var app = {
     // checks current survey before submission
     validate: () => {
       var survey = app.state.features;
-      var incompleteSpans = survey.filter((d) => !d.end).length;
+      var incompleteSpans = 0; //survey.filter((d) => !d.end).length;
       var surveyedLengthRatio =
         app.state.currentRollDistance / app.state.street.distance;
 
@@ -74,6 +74,8 @@ var app = {
         app.state.surveyedRefs.push(app.state.street.forward);
         app.ui.map.setFilter('surveyedStreets', app.state.surveyedRefs)
         app.ui.mode.set("selectStreet");
+
+        app.ui.updateSurveyCount();
 
       };
 
@@ -176,6 +178,11 @@ var app = {
       }
 
       app.state.currentRollDistance = current;
+    },
+
+    updateSurveyCount : async function () {
+      var count = await app.io.getSurveyCount();
+      d3.select("#pendingUploadCount").text(count);
     },
 
     addFeature : function() {
@@ -441,13 +448,6 @@ var app = {
      });
 
     app.ui.mode.set(app.state.mode);
-
-    // set upload functionality
-    /*
-    document
-      .getElementById("uploadImg")
-      .addEventListener("change", app.io.uploadImage, false);
-      */
   },
 
   io: {
@@ -458,13 +458,14 @@ var app = {
       )[0];
 
       if (ft) {
-        ft.images.push({
+        var imageData = {
           url: filename,
           geometry: {
             type: "Position",
             distance: app.state.currentRollDistance,
           },
-        });
+        };
+        ft.images.push(imageData);
 
 
         app.ui.features.update();
@@ -496,7 +497,7 @@ var app = {
 				      .map(meters => app.state.currentRollDistance - meters)
 
         	feature.images = feature.images
-        		.map(image=>{
+        		.map(image => {
         			image.geometry.distance = app.state.currentRollDistance - image.geometry.distance;
         			return image;
         		})
@@ -506,17 +507,44 @@ var app = {
 
         feature.geometry.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0], feature.geometry.distances[1]);
 
-        feature.images = feature.images.map(image=>{
-          image.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0]);
-        });
+        feature.images = feature.images.map(image => {
+            image.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0]);
+            return image;
+          });
 
         survey.features.push(feature);
       }
 
-      app.io.uploadJson("test_survey.json", survey);
-      // save survey -- await?
-      app.io.saveSurvey(app.state.street.ref, app.state.streetSide, JSON.stringify(survey))
+      app.io.saveSurvey(app.state.street.ref, app.state.streetSide, JSON.stringify(survey));
 
+    },
+
+    uploadData: async () => {
+
+      var surveyRows = await app.io.getSurveys();
+
+      var surveyData = [];
+      for (var i=0; i<surveyRows.length; i++){
+        var data = JSON.parse(surveyRows.item(i).data);
+        surveyData.push(data);
+      }
+
+      const d = new Date();
+      const now = d.toISOString();
+
+      const uploadPrefix = now + "/";
+
+      app.io.uploadJson(uploadPrefix + "surveys.json", surveyData);
+      //app.io.uploadJson(uploadPrefix + "assets.json", assetData);
+      for (let survey of surveyData) {
+        for (let feature of survey.features) {
+          for (let image of feature.images) {
+            let splitPath = image.url.split("/");
+            let uploadPath = uploadPrefix + "images/" + splitPath[splitPath.length-1];
+            app.io.uploadImage(uploadPath, image.url);
+          }
+        }
+      }
     },
 
     getWheelTick: (cb) => {

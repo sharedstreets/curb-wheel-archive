@@ -51,6 +51,7 @@ class CurbWheelMap {
 	setMapLocation(position) {
         this.map.flyTo({
             center: [position.coords.longitude,position.coords.latitude],
+						speed: 10,
             zoom: 16
         });
     }
@@ -155,7 +156,7 @@ class CurbWheelMap {
 							type: "FeatureCollection",
 							features: [e.features[0]],
 						});
-            
+
 						this.emitter.emit("selectDirection")
 
 					}
