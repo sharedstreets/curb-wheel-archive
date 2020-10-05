@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import {point} from '@turf/helpers';
+import {point, lineString} from '@turf/helpers';
 
 var app = {
   state: {
@@ -477,6 +477,7 @@ var app = {
         created_at: Date.now(),
         shst_ref_id: app.state.street.ref,
         side_of_street: app.state.streetSide,
+        ref_len: app.state.street.distance,
         surveyed_distance: app.state.currentRollDistance,
         features: [],
       };
@@ -521,29 +522,130 @@ var app = {
 
     uploadData: async () => {
 
-      var surveyRows = await app.io.getSurveys();
+      try {
 
-      var surveyData = [];
-      for (var i=0; i<surveyRows.length; i++){
-        var data = JSON.parse(surveyRows.item(i).data);
-        surveyData.push(data);
-      }
+        const d = new Date();
+        const now = d.toISOString();
 
-      const d = new Date();
-      const now = d.toISOString();
+        const uploadPrefix = now + "/";
 
-      const uploadPrefix = now + "/";
+        console.log("Starting upload...")
 
-      app.io.uploadJson(uploadPrefix + "surveys.json", surveyData);
-      //app.io.uploadJson(uploadPrefix + "assets.json", assetData);
-      for (let survey of surveyData) {
-        for (let feature of survey.features) {
-          for (let image of feature.images) {
-            let splitPath = image.url.split("/");
-            let uploadPath = uploadPrefix + "images/" + splitPath[splitPath.length-1];
-            app.io.uploadImage(uploadPath, image.url);
+        var surveyRows = await app.io.getSurveys();
+
+        console.log("Surveys to upload: " + surveyRows.length)
+
+        var spanData = {type:"FeatureCollection", features:[]};
+        for (var i=0; i<surveyRows.length; i++){
+          var survey = JSON.parse(surveyRows.item(i).data);
+          for (let feature of survey.features) {
+
+            var imageUrls = [];
+            for (let image of feature.images) {
+
+              let splitPath = image.url.split("/");
+              let uploadPath = uploadPrefix + "images/" + splitPath[splitPath.length-1];
+
+              imageUrls.push(uploadPath);
+            }
+
+            let span = {
+              type: "Feature",
+              geometry: feature.geometry.geom.geometry,
+              properties: {
+                created_at: survey.created_at,
+                cwheelid: "", // todo: figure out where to find this
+                shst_ref_id: survey.shst_ref_id,
+                ref_side: survey.side_of_street,
+                ref_len: survey.ref_len,
+                srv_dist: survey.surveyed_distance,
+                srv_id: survey.id,
+                feat_id: feature.id,
+                label: feature.label,
+                dst_st: feature.geometry.distances[0],
+                dst_end: feature.geometry.distances[1],
+                images: imageUrls,
+              },
+            };
+
+            spanData.features.push(span);
           }
         }
+
+        console.log("pushing data: " + uploadPrefix + "spans.json")
+        var jsonResponse = await app.io.uploadJson(uploadPrefix + "spans.json", spanData);
+
+        if(jsonResponse.status === 200) {
+
+          // upload points
+
+          var pointData = {type:"FeatureCollection", features:[]};
+
+          for (var i=0; i<surveyRows.length; i++){
+            var survey = JSON.parse(surveyRows.item(i).data);
+            for (let feature of survey.features) {
+              for (let image of feature.images) {
+
+                let splitPath = image.url.split("/");
+                let uploadPath = uploadPrefix + "images/" + splitPath[splitPath.length-1];
+
+                let point = {
+                  type: "Feature",
+                  geometry: image.geom.geometry,
+                  properties: {
+                    created_at: survey.created_at,
+                    cwheelid: "", // todo: figure out where to find this
+                    shst_ref_id: survey.shst_ref_id,
+                    ref_side: survey.side_of_street,
+                    ref_len: survey.ref_len,
+                    srv_dist: survey.surveyed_distance,
+                    srv_id: survey.id,
+                    feat_id: feature.id,
+                    label: feature.label,
+                    dst_st: feature.geometry.distances[0],
+                    url: uploadPath
+                }};
+
+                pointData.features.push(point);
+
+
+                console.log("pushing data: " + uploadPath)
+                var imgResponse = await app.io.uploadImage(uploadPath, image.url);
+                if(imgResponse.status !== 200) {
+                  console.log(JSON.stringify(imgResponse))
+                  alert("Upload failed, check your internet connection and try again.")
+                  return;
+                }
+              }
+            }
+          }
+
+          console.log("pushing data: " + uploadPrefix + "points.json")
+          var jsonResponse = await app.io.uploadJson(uploadPrefix + "points.json", pointData);
+
+          for (var i=0; i<surveyRows.length; i++){
+            var survey = JSON.parse(surveyRows.item(i).data);
+            for (let feature of survey.features) {
+              for (let image of feature.images) {
+                app.io.deleteFile(image.url);
+              }
+            }
+          }
+
+          await app.io.wipeSurveyData();
+
+          alert("Upload finished.");
+
+          app.ui.updateSurveyCount();
+
+        }
+        else {
+          alert("Upload failed, check your internet connection and try again.");
+        }
+      }
+      catch(e) {
+        console.log(e);
+        alert("error occured during upload...");
       }
     },
 

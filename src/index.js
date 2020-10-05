@@ -50,6 +50,12 @@ function resolveLocalFileSystemURL(path) {
     });
 }
 
+function deleteFile(fileEntry) {
+    return new Promise((resolve, reject) => {
+      fileEntry.remove(resolve, reject);
+    });
+}
+
 function getFile(fileEntry) {
     return new Promise((resolve, reject) => {
       fileEntry.file(resolve, reject);
@@ -97,32 +103,56 @@ function onDeviceReady() {
       return shst.getGeom(refId, p1, p2);
     };
 
+    app.io.deleteFile = async(imageFile) => {
+      var fileEntry = await resolveLocalFileSystemURL(imageFile)
+      await deleteFile(fileEntry);
+    }
+
+    app.io.wipeSurveyData = async() => {
+      await db.deleteSurveys();
+      await db.deletePhotos();
+    }
+
+
     app.io.uploadJson = async (uploadPath, data) => {
 
       const uploadUrl = await getSignedUrl(uploadPath);
 
-      fetch(uploadUrl, {
+      var response = await fetch(uploadUrl, {
             method: 'PUT', // or 'PUT'
             headers: {
               'Content-Type': 'multipart/form-data',
             },
             body: JSON.stringify(data),
       });
+
+      return response;
+
     };
 
     app.io.uploadImage = async (uploadPath, localImagePath) => {
+      console.log("uploadPath:" +  uploadPath);
       const uploadUrl = await getSignedUrl(uploadPath);
+      console.log("localImagePath:" +  localImagePath);
       let fileEntry = await resolveLocalFileSystemURL(localImagePath);
+      console.log("fileEntry");
       var file = await getFile(fileEntry);
+      console.log("file");
       var imageBuffer = await readBinaryFile(file);
 
-      fetch(uploadUrl, {
+      console.log("buffer prepared...");
+      var response  = await fetch(uploadUrl, {
             method: 'PUT', // or 'PUT'
             headers: {
               'Content-Type': 'multipart/form-data',
             },
             body: imageBuffer,
       });
+
+      console.log("file upload completed...");
+
+      // remove file -- todo atomic uploads
+      return response;
     };
 
     app.io.saveSurvey = async (surveyId, streetSide, data) => {
@@ -160,8 +190,6 @@ function onDeviceReady() {
             navigator.geolocation.getCurrentPosition(map.setMapLocation);
         }
 
-        // scan ble
-        //scan();
     });
 
     emitter.on("fetchStreets", async (data)=> {

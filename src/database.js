@@ -82,6 +82,18 @@ class Database {
       });
     }
 
+    deleteSurveys() {
+      return new Promise((resolve, reject) => {
+        this.db.transaction(function(tx) {
+        tx.executeSql('DELETE FROM survey', function(tx, error) {
+            reject(error);
+          }, function(tx, rs) {
+            resolve(rs.rows);
+          });
+        });
+      });
+    }
+
     insertPhoto(key ,feature_ref, data) {
         this.db.transaction(function(tx) {
             tx.executeSql('CREATE TABLE IF NOT EXISTS photo (id INTEGER PRIMARY KEY, key STRING, feature_ref STRING, data STRING)');
@@ -91,6 +103,30 @@ class Database {
         }, function() {
             console.log('Populated database OK: ' +  key);
         });
+    }
+
+    deletePhotos() {
+      return new Promise((resolve, reject) => {
+        this.db.transaction(function(tx) {
+        tx.executeSql('DELETE FROM photo', function(tx, error) {
+            reject(error);
+          }, function(tx, rs) {
+            resolve(rs.rows);
+          });
+        });
+      });
+    }
+
+    getPhotos(ref) {
+      return new Promise((resolve, reject) => {
+        this.db.transaction(function(tx) {
+        tx.executeSql('SELECT * FROM photo', function(tx, error) {
+            reject(error);
+          }, function(tx, rs) {
+            resolve(rs.rows);
+          });
+        });
+      });
     }
 
     getPhotosByFeature(feature_ref) {
