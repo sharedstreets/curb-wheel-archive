@@ -344,6 +344,7 @@ body, html {
 
 .ble-section {
 	display: flex;
+	align-items: center;
 }
 
 .ble-status-icon {
@@ -354,6 +355,7 @@ body, html {
 	width: 14px;
 	border-radius: 50%;
 	background-color: red;
+	margin: 10px;
 }
 
 .ble-status--connected {
