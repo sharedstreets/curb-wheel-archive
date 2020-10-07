@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
 		<title>CurbWheel</title>
 		<link rel="stylesheet" href="css/basics.css">
 		<link rel="stylesheet" href="css/style.css">
@@ -10,13 +10,18 @@
 	</head>
 	<body class='is-mobile'>
 		<section class="" id='topBar'>
-			<span class="icon fl m20" onclick='app.ui.back()'>
+			<span class="icon fl m20" id="backButton">
 				<img src='img/back.svg' class='icon' style='fill:white'/>
 			</span>
 			<div class='big' id='title'>Select a Street</div>
-			<span class="icon fr m20">
-				<img src='img/bluetooth-grey.svg' class='icon ble-indicator'/>
-			</span>
+			<div class="fr ble-section">
+					<div class="ble-status" id="ble-status"></div>
+					<img src='img/bluetooth.svg' class='icon ble-indicator' id="ble-indicator"/>
+				<span class="icon m20 survey-upload" style="width: 40px">
+					<img src='img/upload.svg' class='icon upload-indicator' id="upload-indicator"/>&nbsp;<span id="pendingUploadCount" style="font-weight: bold;"></span>
+				</span>
+			</div>
+
 		</section>
 		<div id='modes'>
 			<div class='mode'>
@@ -44,8 +49,6 @@
 								<div class='spoke'></div>
 							</div>
 						</div>
-
-
 						<span class='small quiet'>
 							<span id='blockProgress'>0</span>m of ~<span id='curbLength'></span>m
 						</span>
@@ -59,7 +62,7 @@
 						<div id='features'></div>
 
 						<div class='text-center mt20 mb200'>
-							<p class='big' onclick='app.ui.mode.set("addFeature")'>
+							<p class='big' id="addFeatureButton">
 								<span class="blue mr10 inlineBlock" style='transform: scale(1.5)'>
 									<img src='img/plus.svg' class='icon'/>
 								</span>
@@ -69,18 +72,20 @@
 					</div>
 				</div>
 				<div class='pin-bottom bottomButton'>
-					<div id='reset' class=' col6' onclick='app.survey.init()'>Reset</div>
-					<div id='complete' class=' col6' onclick='app.survey.validate()'>Complete</div>
+					<div class='col6' id="resetButton">Reset</div>
+					<div class='col6' id="validateButton">Complete</div>
 				</div>
 			</div>
 			<div id='addFeature' class='scroll mode'></div>
 		</div>
-
-		<form ref='uploadForm' id='uploadForm' class='hidden' action='/photo' method='post' target="hiddenIframe" encType="multipart/form-data">
-		<input id='uploadImg' name='image' type="file" accept="image/*" capture="environment">
-		<input type='submit' id ='imageSubmit' value='Upload!' />
-		</form>
-		<iframe name="hiddenIframe" id='hidden-iframe' class='hidden'></iframe>
+		<div class="js-modal modal">
+			<div class="js-modal__body modal__body">
+			  <h2 class="modal-title">Bluetooth Connections Available</h2>
+			  <ul class="bluetooth-connections"></ul>
+			  <span style="color:grey">Click an item to connect to bluetooth device</span>
+			</div>
+			<div class="js-modal__background modal__background"></div>
+		</div>
     </body>
     <script src="cordova.js"></script>
     <script src="js/bundle.js"></script>

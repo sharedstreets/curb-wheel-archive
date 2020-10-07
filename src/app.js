@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import {point} from '@turf/helpers';
+import {point, lineString} from '@turf/helpers';
 
 var app = {
   state: {
@@ -23,7 +23,7 @@ var app = {
     init: () => {
       console.log("init")
       app.io.getWheelTick((counterValue) => {
-        
+
         app.state.systemRollOffset = counterValue / 10;
         app.state.features = [];
         app.ui.features.update();
@@ -52,7 +52,7 @@ var app = {
     // checks current survey before submission
     validate: () => {
       var survey = app.state.features;
-      var incompleteSpans = survey.filter((d) => !d.end).length;
+      var incompleteSpans = 0; //survey.filter((d) => !d.end).length;
       var surveyedLengthRatio =
         app.state.currentRollDistance / app.state.street.distance;
 
@@ -69,12 +69,14 @@ var app = {
     complete: (skipConfirmation) => {
     	var confirm = function() {
 
-    		app.io.uploadSurvey();
+    		app.io.completeSurvey();
 
         app.state.surveyedRefs.push(app.state.street.forward);
         app.ui.map.setFilter('surveyedStreets', app.state.surveyedRefs)
         app.ui.mode.set("selectStreet");
-        
+
+        app.ui.updateSurveyCount();
+
       };
 
       if (skipConfirmation)
@@ -98,16 +100,14 @@ var app = {
       app.ui.confirm(app.constants.prompts.deleteFeature, success, null);
     },
 
+
+
     "take photo": function (d, i) {
-      var success = () => {
-        document.querySelector("#uploadImg").click();
-      };
 
-      //stash feature index in iframe attribute to append to later
-      app.state.featureToAddPhoto = d.startTime;
+      // place holder function -- overriden in index.js
 
-      app.ui.confirm(app.constants.prompts.takePhoto, success, null);
     },
+
 
     complete: function (d, i) {
       var success = function () {
@@ -180,6 +180,15 @@ var app = {
       app.state.currentRollDistance = current;
     },
 
+    updateSurveyCount : async function () {
+      var count = await app.io.getSurveyCount();
+      d3.select("#pendingUploadCount").text(count);
+    },
+
+    addFeature : function() {
+      app.ui.mode.set("addFeature");
+    },
+
     // builds progress bar
     progressBar: {
       build: function (parent) {
@@ -229,7 +238,8 @@ var app = {
           .attr("class", "fr blue spanLength")
           .text((d) => (d.type === "Position" ? "" : `0 m`));
 
-        newFeatures.on("mousedown", (d, i) => {
+        newFeatures.on("touchstart", (d, i) => {
+          console.log(d)
           var id = d.startTime;
           d3.selectAll("#features .entry").classed(
             "active",
@@ -261,7 +271,7 @@ var app = {
           .attr("href", (d) => `#entry${d.startTime}`)
           .append("img")
           .attr("class", "icon fa-cog")
-          .attr("src", "static/images/cog.svg");
+          .attr("src", "img/cog.svg");
 
         // build feature action buttons
 
@@ -274,7 +284,8 @@ var app = {
             .append("div")
             .attr("class", `col4 featureAction`)
             .text(action)
-            .on("mousedown", (d, i) => {
+            .on("touchstart", (d, i) => {
+              console.log(d)
               d3.event.stopPropagation();
               app.feature[action](d, i);
             });
@@ -411,74 +422,62 @@ var app = {
       document.querySelector("#master").offsetHeight + "px"
     );
 
-    // build Add Feature modal
+    //build Add Feature modal
 
     Object.keys(app.constants.curbFeatures).forEach((type) => {
-      d3.select(`#addFeature`)
-        .append("span")
-        .attr("id", type)
-        .selectAll(".halfButton")
-        .data(app.constants.curbFeatures[type])
-        .enter()
-        .append("div")
-        .attr("class", "halfButton inlineBlock")
-        .text((d) => d)
-        .on("mousedown", (d) => {
-          d = {
-            name: d,
-            type: type,
-          };
+       d3.select(`#addFeature`)
+         .append("span")
+         .selectAll(".halfButton")
+         .data(app.constants.curbFeatures[type])
+         .enter()
+         .append("div")
+         .attr("id", type)
+         .attr("class", "halfButton inlineBlock")
+         .text((d) => d)
+         .on('ontouchstart' in window ? 'touchstart' : 'click', (d) => {
+           d = {
+             name: d,
+             type: type,
+           };
 
-          // add new feature to state, return to rolling mode, update ui
-          app.feature.add(d);
-          app.ui.features.update();
-          app.ui.mode.set("rolling");
-        });
-    });
+           // add new feature to state, return to rolling mode, update ui
+           app.feature.add(d);
+           app.ui.features.update();
+           app.ui.mode.set("rolling");
+         });
+     });
 
     app.ui.mode.set(app.state.mode);
-
-    // set upload functionality
-    document
-      .getElementById("uploadImg")
-      .addEventListener("change", app.io.uploadImage, false);
   },
 
   io: {
-    iframe: () => {
-      return document.querySelector("iframe");
-    },
 
-    iframeOnload: () => {
-      var filename = app.io.iframe().contentDocument.querySelector("body")
-        .innerText;
+    addPhoto: (d, filename) => {
       var ft = app.state.features.filter(
-        (ft) => ft.startTime === app.state.featureToAddPhoto
+        (ft) => ft.startTime === d.startTime
       )[0];
 
       if (ft) {
-        ft.images.push({
+        var imageData = {
           url: filename,
           geometry: {
             type: "Position",
             distance: app.state.currentRollDistance,
           },
-        });
+        };
+        ft.images.push(imageData);
+
 
         app.ui.features.update();
       }
     },
 
-    // uploads image via the form, and retrieves the filepath from the hidden iframe
-    uploadImage: (e) => {
-      document.querySelector("#imageSubmit").click();
-    },
-
-    uploadSurvey: (cb) => {
+    completeSurvey: (cb) => {
       let survey = {
         created_at: Date.now(),
         shst_ref_id: app.state.street.ref,
         side_of_street: app.state.streetSide,
+        ref_len: app.state.street.distance,
         surveyed_distance: app.state.currentRollDistance,
         features: [],
       };
@@ -494,25 +493,160 @@ var app = {
         };
 
         if (app.state.rollDirection === 'back') {
-
-        	feature.geometry.distances =
+          feature.geometry.distances =
         	feature.geometry.distances.reverse()
-				.map(meters => app.state.currentRollDistance - meters)
+				      .map(meters => app.state.currentRollDistance - meters)
 
         	feature.images = feature.images
-        		.map(image=>{
-        			image.geometry.distance = app.state.currentRollDistance - image.geometry.distance
-        			return image
+        		.map(image => {
+        			image.geometry.distance = app.state.currentRollDistance - image.geometry.distance;
+        			return image;
         		})
-
         }
+
+        // todo error handling for out of bounds offsets
+
+        feature.geometry.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0], feature.geometry.distances[1]);
+
+        feature.images = feature.images.map(image => {
+            image.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0]);
+            return image;
+          });
 
         survey.features.push(feature);
       }
 
-      // save survey -- await?
-      app.io.saveSurvey(app.state.street.ref + ':' + app.state.streetSide, JSON.stringify(survey))
+      app.io.saveSurvey(app.state.street.ref, app.state.streetSide, JSON.stringify(survey));
 
+    },
+
+    uploadData: async () => {
+
+      try {
+
+        const d = new Date();
+        const now = d.toISOString();
+
+        const uploadPrefix = now + "/";
+
+        console.log("Starting upload...")
+
+        var surveyRows = await app.io.getSurveys();
+
+        console.log("Surveys to upload: " + surveyRows.length)
+
+        var spanData = {type:"FeatureCollection", features:[]};
+        for (var i=0; i<surveyRows.length; i++){
+          var survey = JSON.parse(surveyRows.item(i).data);
+          for (let feature of survey.features) {
+
+            var imageUrls = [];
+            for (let image of feature.images) {
+
+              let splitPath = image.url.split("/");
+              let uploadPath = uploadPrefix + "images/" + splitPath[splitPath.length-1];
+
+              imageUrls.push(uploadPath);
+            }
+
+            let span = {
+              type: "Feature",
+              geometry: feature.geometry.geom.geometry,
+              properties: {
+                created_at: survey.created_at,
+                cwheelid: "", // todo: figure out where to find this
+                shst_ref_id: survey.shst_ref_id,
+                ref_side: survey.side_of_street,
+                ref_len: survey.ref_len,
+                srv_dist: survey.surveyed_distance,
+                srv_id: survey.id,
+                feat_id: feature.id,
+                label: feature.label,
+                dst_st: feature.geometry.distances[0],
+                dst_end: feature.geometry.distances[1],
+                images: imageUrls,
+              },
+            };
+
+            spanData.features.push(span);
+          }
+        }
+
+        console.log("pushing data: " + uploadPrefix + "spans.json")
+        var jsonResponse = await app.io.uploadJson(uploadPrefix + "spans.json", spanData);
+
+        if(jsonResponse.status === 200) {
+
+          // upload points
+
+          var pointData = {type:"FeatureCollection", features:[]};
+
+          for (var i=0; i<surveyRows.length; i++){
+            var survey = JSON.parse(surveyRows.item(i).data);
+            for (let feature of survey.features) {
+              for (let image of feature.images) {
+
+                let splitPath = image.url.split("/");
+                let uploadPath = uploadPrefix + "images/" + splitPath[splitPath.length-1];
+
+                let point = {
+                  type: "Feature",
+                  geometry: image.geom.geometry,
+                  properties: {
+                    created_at: survey.created_at,
+                    cwheelid: "", // todo: figure out where to find this
+                    shst_ref_id: survey.shst_ref_id,
+                    ref_side: survey.side_of_street,
+                    ref_len: survey.ref_len,
+                    srv_dist: survey.surveyed_distance,
+                    srv_id: survey.id,
+                    feat_id: feature.id,
+                    label: feature.label,
+                    dst_st: feature.geometry.distances[0],
+                    url: uploadPath
+                }};
+
+                pointData.features.push(point);
+
+
+                console.log("pushing data: " + uploadPath)
+                var imgResponse = await app.io.uploadImage(uploadPath, image.url);
+                if(imgResponse.status !== 200) {
+                  console.log(JSON.stringify(imgResponse))
+                  alert("Upload failed, check your internet connection and try again.")
+                  return;
+                }
+              }
+            }
+          }
+
+          console.log("pushing data: " + uploadPrefix + "points.json")
+          var jsonResponse = await app.io.uploadJson(uploadPrefix + "points.json", pointData);
+
+          for (var i=0; i<surveyRows.length; i++){
+            var survey = JSON.parse(surveyRows.item(i).data);
+            for (let feature of survey.features) {
+              for (let image of feature.images) {
+                app.io.deleteFile(image.url);
+              }
+            }
+          }
+
+          await app.io.wipeSurveyData();
+
+          alert("Upload finished.");
+
+          app.ui.updateSurveyCount();
+
+        }
+        else {
+          alert("Upload failed, check your internet connection and try again.");
+        }
+      }
+      catch(e) {
+        console.log(e);
+        alert("error occured during upload...");
+      }
     },
 
     getWheelTick: (cb) => {
