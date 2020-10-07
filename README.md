@@ -56,7 +56,7 @@ _Note: If you have a device connected to your computer via USB Cordova _should_ 
 
     * ```npm run build-android```
 
-    * The APK will be available in the project directory under ```./platforms/android/build/outputs/apk/debug/app-debug.apk
+    * The APK will be available in the project directory under ```./platforms/android/build/outputs/apk/debug/app-debug.apk```
 
 
 #### iOS
