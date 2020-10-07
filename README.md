@@ -15,10 +15,15 @@ Rasbian image with BLE [here](https://curblr-www.s3.amazonaws.com/wheel/images/c
 
     * Android
 
+        * ```cordova add platform android```
         * Android Studio _or_ Android SDK, installing Android Studio will include Android SDK and is likely a more straightforward process
+        * be sure to install Android SDK command line tools through android studio and accept the license agreement:
+            * ![image](https://user-images.githubusercontent.com/8487728/95365792-d6adec00-088f-11eb-9987-2efc85be73df.png)
+
 
     * iOS
 
+        * ```cordova add platform ios```
         * OS X operating system
         * XCode 
             * ```xcode-select --install ```
@@ -41,13 +46,13 @@ Rasbian image with BLE [here](https://curblr-www.s3.amazonaws.com/wheel/images/c
 
 _Note: If you have a device connected to your computer via USB Cordova _should_ auto-detect it a deploy to the device, otherwise it will default to the Android emulator_
 
-* Local Development
+* Local Development - i.e. run on emulator or USB connected device
 
     * ```npm run local-android```
 
     If you have a device connected to your computer via USB Cordova _should_ auto-detect it a deploy to the device, otherwise it will default to the Android emulator
 
-* Production Build
+*  Build APK
 
     * ```npm run build-android```
 
