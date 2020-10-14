@@ -544,7 +544,7 @@ var app = {
             for (let image of feature.images) {
 
               let splitPath = image.url.split("/");
-              let uploadPath = uploadPrefix + "images/" + splitPath[splitPath.length-1];
+              let uploadPath = "images/" + splitPath[splitPath.length-1];
 
               imageUrls.push(uploadPath);
             }
@@ -613,7 +613,7 @@ var app = {
                 var imgResponse = await app.io.uploadImage(uploadPath, image.url);
                 if(imgResponse.status !== 200) {
                   console.log(JSON.stringify(imgResponse))
-                  alert("Upload failed, check your internet connection and try again.")
+                  alert("Image upload failed, check your internet connection and try again.")
                   return;
                 }
               }
@@ -622,6 +622,12 @@ var app = {
 
           console.log("pushing data: " + uploadPrefix + "points.json")
           var jsonResponse = await app.io.uploadJson(uploadPrefix + "points.json", pointData);
+
+          if(jsonResponse.status !== 200) {
+            console.log(JSON.stringify(imgResponse))
+            alert("points.json upload failed, check your internet connection and try again.")
+            return;
+          }
 
           for (var i=0; i<surveyRows.length; i++){
             var survey = JSON.parse(surveyRows.item(i).data);
@@ -640,12 +646,12 @@ var app = {
 
         }
         else {
-          alert("Upload failed, check your internet connection and try again.");
+          alert("spans.json upload failed, check your internet connection and try again.");
         }
       }
       catch(e) {
         console.log(e);
-        alert("error occured during upload...");
+        alert("error occured during upload..." + e + ": " + e.stack);
       }
     },
 
