@@ -540,35 +540,38 @@ var app = {
           var survey = JSON.parse(surveyRows.item(i).data);
           for (let feature of survey.features) {
 
-            var imageUrls = [];
-            for (let image of feature.images) {
+            if( feature.geometry && feature.geometry.geom && feature.geometry.geom.geometry) {
 
-              let splitPath = image.url.split("/");
-              let uploadPath = "images/" + splitPath[splitPath.length-1];
+              var imageUrls = [];
+              for (let image of feature.images) {
 
-              imageUrls.push(uploadPath);
+                let splitPath = image.url.split("/");
+                let uploadPath = "images/" + splitPath[splitPath.length-1];
+
+                imageUrls.push(uploadPath);
+              }
+
+              let span = {
+                type: "Feature",
+                geometry: feature.geometry.geom.geometry,
+                properties: {
+                  created_at: survey.created_at,
+                  cwheelid: "", // todo: figure out where to find this
+                  shst_ref_id: survey.shst_ref_id,
+                  ref_side: survey.side_of_street,
+                  ref_len: survey.ref_len,
+                  srv_dist: survey.surveyed_distance,
+                  srv_id: survey.id,
+                  feat_id: feature.id,
+                  label: feature.label,
+                  dst_st: feature.geometry.distances[0],
+                  dst_end: feature.geometry.distances[1],
+                  images: imageUrls,
+                },
+              };
+
+              spanData.features.push(span);
             }
-
-            let span = {
-              type: "Feature",
-              geometry: feature.geometry.geom.geometry,
-              properties: {
-                created_at: survey.created_at,
-                cwheelid: "", // todo: figure out where to find this
-                shst_ref_id: survey.shst_ref_id,
-                ref_side: survey.side_of_street,
-                ref_len: survey.ref_len,
-                srv_dist: survey.surveyed_distance,
-                srv_id: survey.id,
-                feat_id: feature.id,
-                label: feature.label,
-                dst_st: feature.geometry.distances[0],
-                dst_end: feature.geometry.distances[1],
-                images: imageUrls,
-              },
-            };
-
-            spanData.features.push(span);
           }
         }
 
@@ -614,7 +617,6 @@ var app = {
                 if(imgResponse.status !== 200) {
                   console.log(JSON.stringify(imgResponse))
                   alert("Image upload failed, check your internet connection and try again.")
-                  return;
                 }
               }
             }
