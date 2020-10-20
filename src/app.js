@@ -546,9 +546,9 @@ var app = {
               for (let image of feature.images) {
 
                 let splitPath = image.url.split("/");
-                let uploadPath = "images/" + splitPath[splitPath.length-1];
+                let imagePath = "images/" + splitPath[splitPath.length-1];
 
-                imageUrls.push(uploadPath);
+                imageUrls.push(imagePath);
               }
 
               let span = {
@@ -589,10 +589,12 @@ var app = {
             for (let feature of survey.features) {
               for (let image of feature.images) {
 
-                if( image && image.geom && image.geom.geometry) {
+                let splitPath = image.url.split("/");
+                let imagePath = "images/" + splitPath[splitPath.length-1];
 
-                  let splitPath = image.url.split("/");
-                  let uploadPath = "images/" + splitPath[splitPath.length-1];
+                let uploadPath = uploadPrefix + imagePath;
+
+                if( image && image.geom && image.geom.geometry) {
 
                   let point = {
                     type: "Feature",
@@ -608,9 +610,11 @@ var app = {
                       feat_id: feature.id,
                       label: feature.label,
                       dst_st: feature.geometry.distances[0],
-                      url: uploadPath
+                      url: imagePath
                   }};
+
                   pointData.features.push(point);
+
                 }
 
                 console.log("pushing data: " + uploadPath)
@@ -624,7 +628,7 @@ var app = {
           }
 
           console.log("pushing data: " + uploadPrefix + "points.json")
-          var jsonResponse = await app.io.uploadJson(uploadPrefix + "points.json", pointData);
+          var jsonResponse = await app.io.uploadJson(uploadPrefix + "points.json", imag);
 
           if(jsonResponse.status !== 200) {
             console.log(JSON.stringify(imgResponse))
