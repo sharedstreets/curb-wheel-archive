@@ -114,7 +114,7 @@ function onDeviceReady() {
     }
 
 
-    app.io.uploadJson = async (uploadPath, data) => {
+    app.io.uploadJson = async (uploadPath, data, retries=0) => {
 
       const uploadUrl = await getSignedUrl(uploadPath);
 
@@ -126,21 +126,21 @@ function onDeviceReady() {
             body: JSON.stringify(data),
       });
 
+      // handle failed upload
+      if(response.status !== 200 && retries < 2) {
+        retries++;
+        response = app.io.uploadImage(uploadPath, localImagePath, retries);
+      }
+
       return response;
 
     };
 
-    app.io.uploadImage = async (uploadPath, localImagePath) => {
-      console.log("uploadPath:" +  uploadPath);
+    app.io.uploadImage = async (uploadPath, localImagePath, retries=0) => {
       const uploadUrl = await getSignedUrl(uploadPath);
-      console.log("localImagePath:" +  localImagePath);
       let fileEntry = await resolveLocalFileSystemURL(localImagePath);
-      console.log("fileEntry");
       var file = await getFile(fileEntry);
-      console.log("file");
       var imageBuffer = await readBinaryFile(file);
-
-      console.log("buffer prepared...");
       var response  = await fetch(uploadUrl, {
             method: 'PUT', // or 'PUT'
             headers: {
@@ -149,7 +149,11 @@ function onDeviceReady() {
             body: imageBuffer,
       });
 
-      console.log("file upload completed...");
+      // handle failed upload
+      if(response.status !== 200 && retries < 2) {
+        retries++;
+        response = app.io.uploadImage(uploadPath, localImagePath, retries);
+      }
 
       // remove file -- todo atomic uploads
       return response;

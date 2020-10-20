@@ -589,28 +589,29 @@ var app = {
             for (let feature of survey.features) {
               for (let image of feature.images) {
 
-                let splitPath = image.url.split("/");
-                let uploadPath = uploadPrefix + "images/" + splitPath[splitPath.length-1];
+                if( image && image.geom && image.geom.geometry) {
 
-                let point = {
-                  type: "Feature",
-                  geometry: image.geom.geometry,
-                  properties: {
-                    created_at: survey.created_at,
-                    cwheelid: "", // todo: figure out where to find this
-                    shst_ref_id: survey.shst_ref_id,
-                    ref_side: survey.side_of_street,
-                    ref_len: survey.ref_len,
-                    srv_dist: survey.surveyed_distance,
-                    srv_id: survey.id,
-                    feat_id: feature.id,
-                    label: feature.label,
-                    dst_st: feature.geometry.distances[0],
-                    url: uploadPath
-                }};
+                  let splitPath = image.url.split("/");
+                  let uploadPath = "images/" + splitPath[splitPath.length-1];
 
-                pointData.features.push(point);
-
+                  let point = {
+                    type: "Feature",
+                    geometry: image.geom.geometry,
+                    properties: {
+                      created_at: survey.created_at,
+                      cwheelid: "", // todo: figure out where to find this
+                      shst_ref_id: survey.shst_ref_id,
+                      ref_side: survey.side_of_street,
+                      ref_len: survey.ref_len,
+                      srv_dist: survey.surveyed_distance,
+                      srv_id: survey.id,
+                      feat_id: feature.id,
+                      label: feature.label,
+                      dst_st: feature.geometry.distances[0],
+                      url: uploadPath
+                  }};
+                  pointData.features.push(point);
+                }
 
                 console.log("pushing data: " + uploadPath)
                 var imgResponse = await app.io.uploadImage(uploadPath, image.url);
