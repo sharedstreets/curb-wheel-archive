@@ -628,7 +628,7 @@ var app = {
           }
 
           console.log("pushing data: " + uploadPrefix + "points.json")
-          var jsonResponse = await app.io.uploadJson(uploadPrefix + "points.json", imag);
+          var jsonResponse = await app.io.uploadJson(uploadPrefix + "points.json", pointData);
 
           if(jsonResponse.status !== 200) {
             console.log(JSON.stringify(imgResponse))
