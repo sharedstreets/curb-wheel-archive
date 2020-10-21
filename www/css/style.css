@@ -432,6 +432,12 @@ body, html {
 	margin-top: 0;
 	text-align: center;
   }
+
+  .modal-close {
+	  position: absolute;
+	  top:15px;
+	  right:15px;
+  }
   
   .bluetooth-connections {
 	list-style: none;

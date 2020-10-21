@@ -30,7 +30,7 @@ const constants = {
 
 class CurbWheelMap {
 	constructor(state, emitter) {
-		this.bounds = [[-106.743143, 35.045344],[-106.498525, 35.149417]];
+		this.bounds = [[-130.321884,25.672164],[-67.699814,49.175195]];
 		this.state = state;
 		this.emitter = emitter;
 		this.init = this.init.bind(this);
