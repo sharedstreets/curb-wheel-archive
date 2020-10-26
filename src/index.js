@@ -255,9 +255,9 @@ function onDeviceReady() {
         }, ()=>{console.log('no devices found')});
     }
 
-    bindClick("upload-indicator", app.io.uploadData);
+    bindClick("upload-btn", app.io.uploadData);
 
-    bindClick('ble-indicator', () => {
+    bindClick('ble-indicator-btn', () => {
         if (modalActive) {
             modal.classList.remove('modal--visible');
             modalBackground.classList.remove('modal__background--visible');

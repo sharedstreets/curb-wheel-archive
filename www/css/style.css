@@ -14,17 +14,17 @@ body, html {
 }
 
 #topBar {
+	display: flex;
 	height:60px;
 	background:var(--defaultColor);
 	color:white;
 	position:fixed;
 	width:100%;
+	justify-content: space-between;
 }
 
 #title {
-	position: absolute;
 	text-align: center;
-	width: 100%;
 	line-height: 3em;
 	pointer-events: none
 }
@@ -339,23 +339,79 @@ body, html {
 	color: var(--completeColor);
 }
 
+.btn-section {
+    display: flex;
+	align-items: center;
+	margin-right:15px;
+}
+
 /* bluetooth components */
 
+.btn {
+    display: inline-block;
+    border: none;
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+    background: none;
+    color: #ffffff;
+    font-family: sans-serif;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    text-align: center;
+    transition: background 250ms ease-in-out, transform 150ms ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.btn:hover,
+.btn:focus {
+    background:none;
+}
+
+.btn:focus {
+    outline: 1px solid #fff;
+    outline-offset: -4px;
+}
+
+.btn:active {
+    transform: scale(0.99);
+}
+
+#backButton {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	margin: 0 0 0 15px;
+}
+
+
+#ble-indicator-btn {
+	width:24px;
+	height:24px;
+}
+
+#upload-btn{
+	width:24px;
+	height:24px;
+}
 
 .ble-section {
 	display: flex;
-	align-items: center;
+	align-items: center; 
+	margin-right:8px;
 }
 
 .ble-status-icon {
-	margin: 24px 5px 20px 5px;
+	/*margin: 24px 5px 20px 5px;*/
 }
 .ble-status {
 	height: 14px;
 	width: 14px;
 	border-radius: 50%;
 	background-color: red;
-	margin: 10px;
+	margin: 5px;
 }
 
 .ble-status--connected {
@@ -435,8 +491,8 @@ body, html {
 
   .modal-close {
 	  position: absolute;
-	  top:15px;
-	  right:15px;
+	  top:5px;
+	  right:5px;
   }
   
   .bluetooth-connections {

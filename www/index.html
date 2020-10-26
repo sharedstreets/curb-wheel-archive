@@ -10,18 +10,23 @@
 	</head>
 	<body class='is-mobile'>
 		<section class="" id='topBar'>
-			<span class="icon fl m20" id="backButton">
+			<span class="icon" id="backButton">
 				<img src='img/back.svg' class='icon' style='fill:white'/>
 			</span>
 			<div class='big' id='title'>Select a Street</div>
-			<div class="fr ble-section">
-					<div class="ble-status" id="ble-status"></div>
-					<img src='img/bluetooth.svg' class='icon ble-indicator' id="ble-indicator"/>
-				<span class="icon m20 survey-upload" style="width: 40px">
-					<img src='img/upload.svg' class='icon upload-indicator' id="upload-indicator"/>&nbsp;<span id="pendingUploadCount" style="font-weight: bold;"></span>
-				</span>
+			<div class="btn-section">
+				<div class="fr ble-section" id="ble-section">
+						<div class="ble-status" id="ble-status"></div>
+						<button class="btn" id="ble-indicator-btn">
+							<img src='img/bluetooth.svg' class='icon ble-indicator' id="ble-indicator"/>
+						</button>
+				</div>
+				<button class="btn" id="upload-btn">
+					<span class="icon survey-upload">
+						<img src='img/upload.svg' class='icon upload-indicator' id="upload-indicator"/>&nbsp;<span id="pendingUploadCount" style="font-weight: bold;"></span>
+					</span>
+				</button>
 			</div>
-
 		</section>
 		<div id='modes'>
 			<div class='mode'>
