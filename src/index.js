@@ -15,6 +15,8 @@ let deviceId;
 const modal = document.querySelector('.modal');
 const modalBody = document.querySelector('.modal__body');
 const modalBackground = document.querySelector('.modal__background');
+const modalCloseBtn = document.querySelector('.modal-close');
+
 const connectionsList = document.querySelector('.bluetooth-connections');
 const bleStatus = document.getElementById('ble-status');
 
@@ -32,6 +34,18 @@ function bindClick(elementId, f) {
   // Then we bind via thát event. This way we only bind one event, instead of the two as below
   document.getElementById(elementId).addEventListener(touchEvent, f);
 }
+
+function unbindClick(elementId, f) {
+  let touchEvent = 'ontouchstart' in window ? 'touchstart' : 'click';
+  document.getElementById(elementId).removeEventListener(touchEvent, f);
+}
+
+bindClick("modal-close", ()=> {
+  modal.classList.remove('modal--visible');
+  modalBackground.classList.remove('modal__background--visible');
+  modalBody.classList.remove('modal__body--visible');
+  modalActive = false;
+});
 
 async function getSignedUrl(uploadPath) {
   var uploadUrlResponse = await fetch(SIGNED_UPLOAD_URL, {
@@ -245,10 +259,9 @@ function onDeviceReady() {
         }, ()=>{console.log('no devices found')});
     }
 
-    bindClick("upload-indicator", app.io.uploadData);
+    bindClick("upload-btn", app.io.uploadData);
 
-    bindClick('ble-indicator', () => {
-        console.log(modalActive)
+    bindClick('ble-indicator-btn', () => {
         if (modalActive) {
             modal.classList.remove('modal--visible');
             modalBackground.classList.remove('modal__background--visible');
@@ -275,7 +288,6 @@ function onDeviceReady() {
         const target = e.target;
         const macAddress = target.getAttribute('data-mac-address');
         connect(macAddress);
-
     }
 
     function connect(macAddress) {
@@ -292,7 +304,6 @@ function onDeviceReady() {
         modal.classList.remove('modal--visible');
         modalBackground.classList.remove('modal__background--visible');
         modalBody.classList.remove('modal__body--visible');
-        console.log(modalActive)
         pollCounter = setInterval(function(){
             readBleData();
         }, 1000);
