@@ -21,10 +21,11 @@
 							<img src='img/bluetooth.svg' class='icon ble-indicator' id="ble-indicator"/>
 						</button>
 				</div>
-				<button class="btn" id="upload-btn">
+				<button class="btn" id="upload-btn" style="width: 50px;">
 					<span class="icon survey-upload">
-						<img src='img/upload.svg' class='icon upload-indicator' id="upload-indicator"/>&nbsp;<span id="pendingUploadCount" style="font-weight: bold;"></span>
+						<img src='img/upload.svg' class='icon upload-indicator' id="upload-indicator"/>
 					</span>
+					<span id="pendingUploadCount" style="font-weight: bold;"></span>
 				</button>
 			</div>
 		</section>
@@ -92,6 +93,16 @@
 			</div>
 			<div class="js-modal__background modal__background"></div>
 		</div>
+
+		<div class="js-modal upload_modal">
+			<div class="js-modal__body upload_modal__body">
+				<div class="upload_modal-close" id="modal-close"><img src="img/x.svg" alt=""></div>
+				<h2 class="upload_modal-title">Uploading data</h2>
+				<span style="color:grey">Please wait...</span>
+			</div>
+			<div class="js-modal__background upload_modal__background"></div>
+		</div>
+
     </body>
     <script src="cordova.js"></script>
     <script src="js/bundle.js"></script>

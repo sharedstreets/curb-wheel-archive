@@ -1,6 +1,16 @@
 import * as d3 from 'd3';
 import {point, lineString} from '@turf/helpers';
 
+
+const HYDRANT_BUFFER = 4.5; // hydrant buffer in meters
+
+function uuid4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 var app = {
   state: {
     street: {
@@ -134,7 +144,9 @@ var app = {
         images: [],
       };
 
-      if (feature.type === "Position") newFeature.end = newFeature.start;
+      if (feature.type === "Position")
+        newFeature.end = newFeature.start;
+
       app.state.features.push(newFeature);
     },
   },
@@ -474,6 +486,7 @@ var app = {
 
     completeSurvey: (cb) => {
       let survey = {
+        survey_id: uuid4(),
         created_at: Date.now(),
         shst_ref_id: app.state.street.ref,
         side_of_street: app.state.streetSide,
@@ -506,7 +519,23 @@ var app = {
 
         // todo error handling for out of bounds offsets
 
-        feature.geometry.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0], feature.geometry.distances[1]);
+        if(feature.label == "Fire hydrant") {
+          var hydrantStart = 0;
+          if( feature.geometry.distances[0] > HYDRANT_BUFFER / 2)
+            hydrantStart = feature.geometry.distances[0] - (HYDRANT_BUFFER / 2);
+
+          var hydrantEnd = survey.ref_len
+          if( feature.geometry.distances[1] + (HYDRANT_BUFFER / 2) < survey.ref_len)
+            hydrantStart = feature.geometry.distances[1] + (HYDRANT_BUFFER / 2);
+
+          feature.geometry.geom = app.io.getGeom(app.state.street.ref, hydrantStart, hydrantEnd);
+
+        }
+        else if(feature.label == "Payment device" || feature.label ==  "Misc. Point" || feature.geometry.distances[0] == feature.geometry.distances[1]){
+          feature.geometry.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0]);
+        }
+        else
+          feature.geometry.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0], feature.geometry.distances[1]);
 
         feature.images = feature.images.map(image => {
             image.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0]);
@@ -536,11 +565,15 @@ var app = {
         console.log("Surveys to upload: " + surveyRows.length)
 
         var spanData = {type:"FeatureCollection", features:[]};
+        var pointData = {type:"FeatureCollection", features:[]};
+
         for (var i=0; i<surveyRows.length; i++){
           var survey = JSON.parse(surveyRows.item(i).data);
           for (let feature of survey.features) {
 
             if( feature.geometry && feature.geometry.geom && feature.geometry.geom.geometry) {
+
+              feature.id = uuid4();
 
               var imageUrls = [];
               for (let image of feature.images) {
@@ -555,14 +588,14 @@ var app = {
                 type: "Feature",
                 geometry: feature.geometry.geom.geometry,
                 properties: {
+                  wheel_id: "", // todo: figure out where to find this
+                  srv_id: survey.survey_id,
+                  feat_id: feature.id,
                   created_at: survey.created_at,
-                  cwheelid: "", // todo: figure out where to find this
                   shst_ref_id: survey.shst_ref_id,
                   ref_side: survey.side_of_street,
                   ref_len: survey.ref_len,
                   srv_dist: survey.surveyed_distance,
-                  srv_id: survey.id,
-                  feat_id: feature.id,
                   label: feature.label,
                   dst_st: feature.geometry.distances[0],
                   dst_end: feature.geometry.distances[1],
@@ -570,7 +603,10 @@ var app = {
                 },
               };
 
-              spanData.features.push(span);
+              if(span.geometry.type == "LineString")
+                spanData.features.push(span);
+              else if(span.geometry.type == "Point")
+                pointData.features.push(span);
             }
           }
         }
@@ -579,10 +615,6 @@ var app = {
         var jsonResponse = await app.io.uploadJson(uploadPrefix + "spans.json", spanData);
 
         if(jsonResponse.status === 200) {
-
-          // upload points
-
-          var pointData = {type:"FeatureCollection", features:[]};
 
           for (var i=0; i<surveyRows.length; i++){
             var survey = JSON.parse(surveyRows.item(i).data);
@@ -600,14 +632,15 @@ var app = {
                     type: "Feature",
                     geometry: image.geom.geometry,
                     properties: {
+                      wheel_id: "",
+                      srv_id: survey.id,
+                      img_id: uuid4(),
+                      feat_id: feature.id,
                       created_at: survey.created_at,
-                      cwheelid: "", // todo: figure out where to find this
                       shst_ref_id: survey.shst_ref_id,
                       ref_side: survey.side_of_street,
                       ref_len: survey.ref_len,
                       srv_dist: survey.surveyed_distance,
-                      srv_id: survey.id,
-                      feat_id: feature.id,
                       label: feature.label,
                       dst_st: feature.geometry.distances[0],
                       url: imagePath

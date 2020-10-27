@@ -11,11 +11,17 @@ import Photo from './photo';
 document.addEventListener('deviceready', onDeviceReady, false);
 
 let modalActive = false;
+let uploadModalActive = false;
 let deviceId;
 const modal = document.querySelector('.modal');
 const modalBody = document.querySelector('.modal__body');
 const modalBackground = document.querySelector('.modal__background');
 const modalCloseBtn = document.querySelector('.modal-close');
+
+const uploadModal = document.querySelector('.upload_modal');
+const uploadModalBody = document.querySelector('.upload_modal__body');
+const uploadModalBackground = document.querySelector('.upload_modal__background');
+const uploadModalCloseBtn = document.querySelector('.upload_modal-close');
 
 const connectionsList = document.querySelector('.bluetooth-connections');
 const bleStatus = document.getElementById('ble-status');
@@ -259,7 +265,26 @@ function onDeviceReady() {
         }, ()=>{console.log('no devices found')});
     }
 
-    bindClick("upload-btn", app.io.uploadData);
+    bindClick("upload-btn", async () => {
+        if (uploadModalActive) {
+            uploadModal.classList.remove('upload_modal--visible');
+            uploadModalBackground.classList.remove('upload_modal__background--visible');
+            uploadModalBody.classList.remove('upload_modal__body--visible');
+            uploadModalActive = false;
+        } else {
+            uploadModal.classList.add('upload_modal--visible');
+            uploadModalBackground.classList.add('upload_modal__background--visible');
+            uploadModalBody.classList.add('upload_modal__body--visible');
+            uploadModalActive = true;
+
+            await app.io.uploadData()
+
+            uploadModal.classList.remove('upload_modal--visible');
+            uploadModalBackground.classList.remove('upload_modal__background--visible');
+            uploadModalBody.classList.remove('upload_modal__body--visible');
+            uploadModalActive = false;
+        }
+    });
 
     bindClick('ble-indicator-btn', () => {
         if (modalActive) {
