@@ -86,7 +86,7 @@ class CurbWheelMap {
 					filter:['in', 'forward', 'none'],
 					source: 'streets',
 					paint: {
-						"line-width": 16,
+						"line-width": 4,
 						"line-color": "steelblue",
 					},
 					layout: {
