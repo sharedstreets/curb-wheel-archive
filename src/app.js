@@ -154,6 +154,16 @@ var app = {
   // functionality to update the UI, typically after feature changes and new rolling
 
   ui: {
+
+    resetSurvey: () => {
+      var success = () => {
+        app.survey.init();
+      };
+
+      app.ui.confirm(app.constants.prompts.resetSurvey, success);
+
+      return true;
+    },
     // Updates all active progress bars and status texts
     roll: () => {
       var current = app.state.systemRollDistance - app.state.systemRollOffset;
@@ -673,7 +683,12 @@ var app = {
             var survey = JSON.parse(surveyRows.item(i).data);
             for (let feature of survey.features) {
               for (let image of feature.images) {
-                app.io.deleteFile(image.url);
+                try {
+                  app.io.deleteFile(image.url);
+                }
+                catch(e) {
+                  console.log(e);
+                }
               }
             }
           }
@@ -824,17 +839,7 @@ constants: {
           app.ui.confirm(app.constants.prompts.exitSurvey, success);
 
           return true;
-        },
-
-        reset: () => {
-          var success = () => {
-            app.survey.init();
-          };
-
-          app.ui.confirm(app.constants.prompts.resetSurvey, success);
-
-          return true;
-        },
+        }
       },
 
       addFeature: {

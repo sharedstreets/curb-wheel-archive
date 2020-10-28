@@ -233,7 +233,7 @@ function onDeviceReady() {
         bindClick("switchDirection", app.ui.map.switch.direction);
         bindClick("startSurvey", app.survey.init);
         bindClick("backButton", app.ui.back);
-        bindClick("resetButton", app.ui.reset);
+        bindClick("resetButton", app.ui.resetSurvey);
         bindClick("validateButton", app.survey.validate);
         bindClick("addFeatureButton", app.ui.addFeature);
         bindClick("addFeatureButton", app.ui.addFeature);
