@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import {point, lineString} from '@turf/helpers';
 
 
-const HYDRANT_BUFFER = 4.5; // hydrant buffer in meters
+const HYDRANT_BUFFER = 9.2; // hydrant buffer in meters
 
 function uuid4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -764,6 +764,7 @@ constants: {
       beginSurvey:
         "Head toward the starting edge of the curb. When you're ready, press OK to start surveying",
       exitSurvey: "This abandons the current survey. Are you sure?",
+      resetSurvey: "Are you sure you want to reset the current  survey and clear all ddata for this street?",
       deleteFeature: "This will delete the curb feature. Are you sure?",
       takePhoto:
         "Roll the wheel right up to what you're snapping. Once it's securely parked, feel free get in a good position to get the object in the frame.",
@@ -821,6 +822,16 @@ constants: {
           };
 
           app.ui.confirm(app.constants.prompts.exitSurvey, success);
+
+          return true;
+        },
+
+        reset: () => {
+          var success = () => {
+            app.survey.init();
+          };
+
+          app.ui.confirm(app.constants.prompts.resetSurvey, success);
 
           return true;
         },
