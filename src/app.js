@@ -525,8 +525,8 @@ var app = {
             hydrantStart = feature.geometry.distances[0] - (HYDRANT_BUFFER / 2);
 
           var hydrantEnd = survey.ref_len
-          if( feature.geometry.distances[1] + (HYDRANT_BUFFER / 2) < survey.ref_len)
-            hydrantStart = feature.geometry.distances[1] + (HYDRANT_BUFFER / 2);
+          if( feature.geometry.distances[0] + (HYDRANT_BUFFER / 2) < survey.ref_len)
+            hydrantEnd = feature.geometry.distances[0] + (HYDRANT_BUFFER / 2);
 
           feature.geometry.geom = app.io.getGeom(app.state.street.ref, hydrantStart, hydrantEnd);
 
@@ -588,7 +588,7 @@ var app = {
                 type: "Feature",
                 geometry: feature.geometry.geom.geometry,
                 properties: {
-                  wheel_id: "", // todo: figure out where to find this
+                  wheel_id: app.wheel_id, // todo: figure out where to find this
                   srv_id: survey.survey_id,
                   feat_id: feature.id,
                   created_at: survey.created_at,
@@ -632,7 +632,7 @@ var app = {
                     type: "Feature",
                     geometry: image.geom.geometry,
                     properties: {
-                      wheel_id: "",
+                      wheel_id: app.wheel_id,
                       srv_id: survey.id,
                       img_id: uuid4(),
                       feat_id: feature.id,

@@ -102,6 +102,8 @@ function onDeviceReady() {
 
     const db = new Database();
 
+    app.wheel_id = "wheel"
+
     // setup counter value query
     app.io.getCounterValue = () => {
       return counterValue;
@@ -318,6 +320,7 @@ function onDeviceReady() {
     function connect(macAddress) {
         currentDevice = macAddress;
         deviceId = macAddress;
+        app.wheel_id = macAddress;
         console.log('connecting to ' +  currentDevice);
         ble.connect(currentDevice, connectCallback, disconnectCallback);
     }
