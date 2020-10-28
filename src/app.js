@@ -550,7 +550,7 @@ var app = {
           feature.geometry.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0], feature.geometry.distances[1]);
 
         feature.images = feature.images.map(image => {
-            image.geom = app.io.getGeom(app.state.street.ref, feature.geometry.distances[0]);
+            image.geom = app.io.getGeom(app.state.street.ref, image.geometry.distance);
             return image;
           });
 
@@ -652,7 +652,7 @@ var app = {
                       ref_len: survey.ref_len,
                       srv_dist: survey.surveyed_distance,
                       label: feature.label,
-                      dst_st: feature.geometry.distances[0],
+                      dst_st: image.geometry.distance,
                       url: imagePath
                   }};
 
