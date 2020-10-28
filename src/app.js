@@ -137,6 +137,7 @@ var app = {
 
     add: function (feature) {
       var newFeature = {
+        feat_id: uuid4(),
         name: feature.name,
         type: feature.type,
         start: app.state.currentRollDistance,
@@ -507,6 +508,7 @@ var app = {
 
       for (let ft of app.state.features) {
         let feature = {
+          feat_id: ft.feat_id,
           label: ft.name,
           geometry: {
             type: ft.type,
@@ -583,8 +585,6 @@ var app = {
 
             if( feature.geometry && feature.geometry.geom && feature.geometry.geom.geometry) {
 
-              feature.id = uuid4();
-
               var imageUrls = [];
               for (let image of feature.images) {
 
@@ -600,7 +600,7 @@ var app = {
                 properties: {
                   wheel_id: app.wheel_id, // todo: figure out where to find this
                   srv_id: survey.survey_id,
-                  feat_id: feature.id,
+                  feat_id: feature.feat_id,
                   created_at: survey.created_at,
                   shst_ref_id: survey.shst_ref_id,
                   ref_side: survey.side_of_street,
@@ -645,7 +645,7 @@ var app = {
                       wheel_id: app.wheel_id,
                       srv_id: survey.id,
                       img_id: uuid4(),
-                      feat_id: feature.id,
+                      feat_id: feature.feat_id,
                       created_at: survey.created_at,
                       shst_ref_id: survey.shst_ref_id,
                       ref_side: survey.side_of_street,
