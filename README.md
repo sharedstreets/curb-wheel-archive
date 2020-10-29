@@ -52,6 +52,8 @@ _Note: If you have a device connected to your computer via USB Cordova _should_ 
     * ```npm run build-android```
 
     * The APK will be available in the project directory under ```./platforms/android/build/outputs/apk/debug/app-debug.apk
+    
+    * If you already have a build and want to create a new one with updated code, run `cordova clean` and then `npm run build-android`. The clean command clears out the previous version to ensure that the updates are included.
 
 
 #### iOS
