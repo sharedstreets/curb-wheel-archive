@@ -20,15 +20,15 @@ Afterwards, back at the office, the user uploads the field data from the curb wh
 
 The curb wheel provides an efficient and accurate pathway for city governments or others looking to collect curb inventory data and share it in a standardized (CurbLR) format.
 
-## Hardware and software set-up
+## Using the CurbWheel
 
-See the [parts list](/PARTS.md) and [set up page](/SETUP.md) for instructions on how to build your own CurbWheel and load it with the necessary software. Reach out to [SharedStreets](mailto:info@sharedstreets.io) if you work for a government agency and you may need some help with this.
+1. Build the wheel. See the [parts list](/PARTS.md) and [set up page](/SETUP.md) for instructions on how to build your own CurbWheel and load it with the necessary software. Reach out to [SharedStreets](mailto:info@sharedstreets.io) if you work for a government agency and you may need some help with this.
 
-Once the wheel is ready, you will download an Android or iOS app onto your phone and then go forth and survey your streets.
+2. Download the app. Once the wheel is ready, you will download an Android or iOS app onto your phone and then go forth and survey your streets.
 
-## Instructions for mapping curbs
+3. Use the CurbWheel to survey streets. Instructions, tips, and tricks for how to use the app are [here](HOWTOMAP.md).
 
-Instructions for how to use the app and the digitizer are [here](HOWTOMAP.md).
+4. Create a CurbLR feed from your survey data. To do this, we've created a lightweight data entry interface. Instructions and tips for using it are [here](HOWTODIGITIZE.md).
 
 ### Current software versions
 
