@@ -61,24 +61,21 @@ When plugged in, the connector should look like this:
 
 ## Prepare the Micro SD card
 
-1. Download the <a href="https://www.balena.io/etcher/" target="_blank">Etcher software app</a> for your computer and install it. You will use this to set up the microSD card.'
+1. Download the <a href="https://www.balena.io/etcher/" target="_blank">Etcher software app</a> for your computer and install it. You will use this to set up the microSD card.
 
-2. Download the <a href="https://curblr-www.s3.amazonaws.com/wheel/images/curbwheel_image_r8.img.gz
-" target="_blank">latest version of the software (currently version 8)</a> to install on your microSD. Unzip the file if it does not automatically unzip once downloaded.
+2. Download the <a href="https://curblr-www.s3.amazonaws.com/wheel/images/curbwheel_image_bleno_r1.img.gz" target="_blank">latest version of the software</a> to install on your microSD. Unzip the file if it does not automatically unzip once downloaded. (For developers: The software used to create this image lives [here](https://github.com/sharedstreets/curb-wheel-ble).)
 
 3. Insert your microSD into your card reader and open Etcher.  Select the unzipped file as the image. Select your microSD card as the target. <i> It is important to point this at the microSD card as this could rewrite your hard drive if the wrong location is selected. </i>
 
 <img src="images/etcher_example.png" width="600">
 
-Once this is set up properly, write the file to the microSD by selecting 'Flash!'. This step may prompt you to enter a password, this is your computer account password.
+Once this is set up properly, write the file to the microSD by selecting 'Flash!'. This step may prompt you to enter a password; this is your computer account password.
 
 4. Eject and remove the microSD card. Insert your microSD card into the reader on your Raspberry Pi.
 <img src="images/insertSD.jpg" width="600">
 
-5. Plug your Pi into a power source (such as a power bank that you would use to recharge your phone, or a charging cable plugged into the wall) using the microUSB port labelled "PWR in". If you're using a power bank, make sure it's turned on. You should then see a green blinking light on your Pi. When the light stops blinking, you're ready to move to the next step.
+5. Plug your Pi into a power source (such as a power bank that you would use to recharge your phone, or a charging cable plugged into the wall) using the microUSB port labelled "PWR in". If you're using a power bank, make sure it's turned on. You should then see a green blinking light on your Pi in a heartbeat pattern to indicate that it is working.
 
-6. Check to make sure the CurbWheel booted up correctly and is broadcasting a wifi signal. It should appear as CurbWheel-AP. The password is `curbwheel`.
+## Protect the Pi
 
-7. Open your preferred browser and type in the url `raspberrypi.local:8081/admin`. (`http://127.0.0.1:8081/admin` will also work). You should see an admin interface.
-
-8. Follow the [rest of the instructions](https://docs.google.com/presentation/d/17yf7CXPp_n2dldiCTWfH6H_lpq4mqzZ6kTNyTk-0-zw/edit#slide=id.g8c69025b57_0_7) for adding local map data and surveying streets with the CurbWheel.
+The Raspberry Pi should be protected from damage. If you're able to 3D-print a [protective case (files are included here)](https://www.thingiverse.com/thing:4286063), this can be screwed into place with a cover that snaps on. This will protect it if you drop your wheel. If you don't have access to a 3D printer, you could improvise a case with bubble wrap, duct tape, and a bit of cardboard or similar. You could also print an addition or tape your battery pack to the shaft of the wheel, but be careful that this doens't make it too top-heavy and unstable to use the kickstand.
